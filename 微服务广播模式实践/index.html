@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha256-CTSx/A06dm1B063156EVh15m6Y67pAjZZaQc89LLSrU=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"shoothzj.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.18.2","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"style":null,"show_result":false},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="微服务广播模式，指的是在微服务多实例部署的场景下，将消息广播到多个微服务实例的一种模式。  广播模式，一般用来维护微服务的内存数据，根据数据类型的不同，有助于解决两类问题。通常广播模式会使用支持发布订阅的消息中间件实现（如Redis、Kafka、Pulsar等），本文也基于消息中间件进行讨论。 利用广播模式维护一致的缓存#这应该是广播模式利用最多的一种场景，假想一个拥有海量用户的电商网站、或是一个">
+<meta property="og:type" content="article">
+<meta property="og:title" content="微服务广播模式实践">
+<meta property="og:url" content="https://shoothzj.github.io/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E5%B9%BF%E6%92%AD%E6%A8%A1%E5%BC%8F%E5%AE%9E%E8%B7%B5/index.html">
+<meta property="og:site_name" content="张俭的博客">
+<meta property="og:description" content="微服务广播模式，指的是在微服务多实例部署的场景下，将消息广播到多个微服务实例的一种模式。  广播模式，一般用来维护微服务的内存数据，根据数据类型的不同，有助于解决两类问题。通常广播模式会使用支持发布订阅的消息中间件实现（如Redis、Kafka、Pulsar等），本文也基于消息中间件进行讨论。 利用广播模式维护一致的缓存#这应该是广播模式利用最多的一种场景，假想一个拥有海量用户的电商网站、或是一个">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://shoothzj.github.io/images/20230601/p1.png">
+<meta property="og:image" content="https://shoothzj.github.io/images/20230601/p2.png">
+<meta property="og:image" content="https://shoothzj.github.io/images/20230601/p3.png">
+<meta property="article:published_time" content="2023-06-01T23:19:45.000Z">
+<meta property="article:modified_time" content="2023-11-12T14:11:15.880Z">
+<meta property="article:author" content="shoothzj">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://shoothzj.github.io/images/20230601/p1.png">
+
+
+<link rel="canonical" href="https://shoothzj.github.io/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E5%B9%BF%E6%92%AD%E6%A8%A1%E5%BC%8F%E5%AE%9E%E8%B7%B5/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://shoothzj.github.io/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E5%B9%BF%E6%92%AD%E6%A8%A1%E5%BC%8F%E5%AE%9E%E8%B7%B5/","path":"微服务广播模式实践/","title":"微服务广播模式实践"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>微服务广播模式实践 | 张俭的博客</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">张俭的博客</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">1.</span> <span class="nav-text">利用广播模式维护一致的缓存</span></a></li><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">2.</span> <span class="nav-text">利用广播模式维护内存中的数据</span></a></li><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">3.</span> <span class="nav-text">为什么需要消费组老化作为保底手段</span></a></li><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">4.</span> <span class="nav-text">Kafka消费组老化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">5.</span> <span class="nav-text">Pulsar消费组老化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">shoothzj</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">25</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/shoothzj" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;shoothzj" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/shoothzj" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;shoothzj" rel="noopener me" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E5%B9%BF%E6%92%AD%E6%A8%A1%E5%BC%8F%E5%AE%9E%E8%B7%B5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="shoothzj">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="微服务广播模式实践 | 张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          微服务广播模式实践
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-06-01 23:19:45" itemprop="dateCreated datePublished" datetime="2023-06-01T23:19:45+00:00">2023-06-01</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-11-12 14:11:15" itemprop="dateModified" datetime="2023-11-12T14:11:15+00:00">2023-11-12</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>微服务广播模式，指的是在微服务多实例部署的场景下，将消息广播到多个微服务实例的一种模式。</p>
+<p><img src="/images/20230601/p1.png" alt="Untitled"></p>
+<p>广播模式，一般用来维护微服务的内存数据，根据数据类型的不同，有助于解决两类问题。通常广播模式会使用支持发布订阅的消息中间件实现（如Redis、Kafka、Pulsar等），本文也基于消息中间件进行讨论。</p>
+<h2><span id="li-yong-guang-bo-mo-shi-wei-hu-yi-zhi-de-huan-cun">利用广播模式维护一致的缓存</span><a href="#li-yong-guang-bo-mo-shi-wei-hu-yi-zhi-de-huan-cun" class="header-anchor">#</a></h2><p>这应该是广播模式利用最多的一种场景，假想一个拥有海量用户的电商网站、或是一个亿级设备连接的IoT平台。势必会存在一些缓存数据，像是用户的购物车信息，或是设备的密钥缓存。如果没有广播模式，可能会存在这样的问题</p>
+<p><img src="/images/20230601/p2.png" alt="Untitled"></p>
+<p>当用户更新了它的购物车之后，微服务实例1的数据发生了更新，数据库的数据也成功更新。但是微服务实例2中的缓存数据未能更新，那么如果用户的请求均衡到了实例2，就会发生意想不到的后果。</p>
+<p>这种情况下我们可以让微服务1在广播通道中发送一个缓存的invalidate消息，将微服务实例2中该用户的缓存清零，使得微服务实例2在下一次处理该用户的请求时，从数据库中读取最新的消息。</p>
+<p>使用该模式需要注意的点：</p>
+<ul>
+<li>每个微服务实例应该使用不同的消费组，可以通过微服务的IP、主机名、UUID等拼装成订阅组名称，这才称得上广播之名</li>
+<li>微服务消费消息的时候，应从Latest开始消费，避免从Earliest开始消费无用的缓存清理消息</li>
+<li>由于每一次微服务重启都会产生一个新的消费组，需要注意消费组的老化，可以通过消息中间件自带的不活跃消费组老化能力兜底，建议通过gracefulExit、监听kill信号等机制来主动删除消费组信息</li>
+</ul>
+<p>为什么说消费组老化比较重要呢，因为很多监控系统都会根据消费组的积压来做告警，很容易产生误告警。</p>
+<h2><span id="li-yong-guang-bo-mo-shi-wei-hu-nei-cun-zhong-de-shu-ju">利用广播模式维护内存中的数据</span><a href="#li-yong-guang-bo-mo-shi-wei-hu-nei-cun-zhong-de-shu-ju" class="header-anchor">#</a></h2><p>这种模式相对比较少见，常见于key的基数不是很大，能够将数据完整地存储在内存中，比如电商平台的企业卖家个数、物联网平台的用户个数等，并且对数据的一致性要求不是很高（因为广播模式情况下，对于两个微服务实例来说没有一致性保障）。像Apache Pulsar设计的TableView，在我看来，就是做这个事的一个最佳实践。Pulsar内部大量使用了topic存储数据，就是采用这个方式。</p>
+<p>使用该模式需要注意的点：</p>
+<ul>
+<li>同上，需要使用不同的消费组名称</li>
+<li>微服务消费消息的时候，应该从Earliest开始消费，保证所有微服务内存中的消息视图一致</li>
+<li>同上，需要注意消费组的老化</li>
+</ul>
+<h2><span id="wei-shi-me-xu-yao-xiao-fei-zu-lao-hua-zuo-wei-bao-di-shou-duan">为什么需要消费组老化作为保底手段</span><a href="#wei-shi-me-xu-yao-xiao-fei-zu-lao-hua-zuo-wei-bao-di-shou-duan" class="header-anchor">#</a></h2><p>因为在极端场景下，无论是graceful的代码，还是监听kill信号的代码，都不能保证代码百分百地被执行。需要兜底。</p>
+<h2><span id="kafka-xiao-fei-zu-lao-hua">Kafka消费组老化</span><a href="#kafka-xiao-fei-zu-lao-hua" class="header-anchor">#</a></h2><p>Kafka通过<strong>offsets.retention.minutes</strong>参数控制消费组中offsets保留时间，在此时间内如果没有提交offset，offsets将会被删除。Kafka判定消息组中没有在线的消费者（如empty状态），且没有offsets时，将会删除此消费组。</p>
+<h2><span id="pulsar-xiao-fei-zu-lao-hua">Pulsar消费组老化</span><a href="#pulsar-xiao-fei-zu-lao-hua" class="header-anchor">#</a></h2><p>pulsar的消费组老化策略更加灵活，可以配置到namespace级别。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">bin/pulsar-admin namespaces | grep expiration</span><br><span class="line">    get-subscription-expiration-time      Get subscription expiration time for </span><br><span class="line">      Usage: get-subscription-expiration-time [options] tenant/namespace</span><br><span class="line">    set-subscription-expiration-time      Set subscription expiration time for </span><br><span class="line">      Usage: set-subscription-expiration-time [options] tenant/namespace</span><br><span class="line">            Subscription expiration time in minutes</span><br><span class="line">    remove-subscription-expiration-time      Remove subscription expiration </span><br><span class="line">      Usage: remove-subscription-expiration-time [options] tenant/namespace</span><br></pre></td></tr></table></figure>
+
+<p>这里注意要合理地配置消费组的老化时间，在pulsar的当前版本（2.11版本）下，catch up读，也就是说消费组平时积压量不大。如果将消费组的老化时间配置大于等于消息的老化时间，会出现消费组老化不了的现象。</p>
+<p>当然，由于消费组和消息老化都是定时任务，预估时间时，要考虑一定的buffer。</p>
+<p>这里让我们稍稍dive一下原理，消费组的老化是通过判断Cursor游标的LastActive time来判断能否老化的。如果该消费组的游标位置到达了消息老化区域，被老化掉了，消费组的游标位置就会强制更新到一个可用的位置，这个时候会更新游标的LastActive time到当前时间，周而复始，导致消费组无法老化。举个🌰</p>
+<p>假设消费组的老化时间为4h，消息的老化时间为3h，就可能会发生这样的事情</p>
+<p><img src="/images/20230601/p3.png" alt="Untitled"></p>
+<h2><span id="zong-jie">总结</span><a href="#zong-jie" class="header-anchor">#</a></h2><p>广播模式在微服务架构中起到了重要的角色，尤其是在需要在微服务实例之间同步数据的场景中，它具有显著的优势。它能够帮助维护内存数据的缓存一致性。希望本篇文章能提供您全面的广播模式的知识。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E6%8F%90%E5%8D%87%E7%BD%91%E7%BB%9C%E5%8D%8F%E8%AE%AE%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%AE%9A%E4%BD%8D%E8%83%BD%E5%8A%9B/" rel="prev" title="提升网络协议服务器的定位能力">
+                  <i class="fa fa-angle-left"></i> 提升网络协议服务器的定位能力
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/java-servlet-encoding-charset/" rel="next" title="jetty servlet的编码字符集选择">
+                  jetty servlet的编码字符集选择 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    
+  
+  <div class="comments giscus-container">
+  </div>
+  
+  
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2023</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">shoothzj</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+
+
+
+
+<script class="next-config" data-name="giscus" type="application/json">{"enable":true,"repo":"shoothzj/shoothzj.github.io","repo_id":"R_kgDOIuCX3w","category":"Announcements","category_id":"DIC_kwDOIuCX384Ca5FJ","mapping":"title","reactions_enabled":1,"emit_metadata":1,"theme":"light","lang":"en","crossorigin":"anonymous","input_position":"bottom","loading":"lazy"}</script>
+
+<script>
+document.addEventListener('page:loaded', () => {
+  if (!CONFIG.page.comments) return;
+
+  NexT.utils.loadComments('.giscus-container')
+    .then(() => NexT.utils.getScript('https://giscus.app/client.js', {
+      attributes: {
+        async                   : true,
+        crossOrigin             : 'anonymous',
+        'data-repo'             : CONFIG.giscus.repo,
+        'data-repo-id'          : CONFIG.giscus.repo_id,
+        'data-category'         : CONFIG.giscus.category,
+        'data-category-id'      : CONFIG.giscus.category_id,
+        'data-mapping'          : CONFIG.giscus.mapping,
+        'data-reactions-enabled': CONFIG.giscus.reactions_enabled,
+        'data-emit-metadata'    : CONFIG.giscus.emit_metadata,
+        'data-theme'            : CONFIG.giscus.theme,
+        'data-lang'             : CONFIG.giscus.lang,
+        'data-input-position'   : CONFIG.giscus.input_position,
+        'data-loading'          : CONFIG.giscus.loading
+      },
+      parentNode: document.querySelector('.giscus-container')
+    }));
+});
+</script>
+
+</body>
+</html>

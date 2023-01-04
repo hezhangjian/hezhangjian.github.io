@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha256-CTSx/A06dm1B063156EVh15m6Y67pAjZZaQc89LLSrU=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"shoothzj.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.18.2","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"style":null,"show_result":false},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="为什么需要自解压的可执行文件#大部分软件的安装包是一个压缩包，用户需要自己解压，然后再执行安装脚本。常见的两种格式是tar.gz和zip。常见的解压执行脚本如下 tar.gz#12345#!&#x2F;bin&#x2F;bashtar -zxvf xxx.tar.gzcd xxx.&#x2F;install.sh  zip#12345#!&#x2F;bin&#x2F;bashunzip xxx.zipcd xxx.&#x2F;install.sh  在有些">
+<meta property="og:type" content="article">
+<meta property="og:title" content="创建自解压的可执行文件">
+<meta property="og:url" content="https://shoothzj.github.io/self-extracting-executable-file/index.html">
+<meta property="og:site_name" content="张俭的博客">
+<meta property="og:description" content="为什么需要自解压的可执行文件#大部分软件的安装包是一个压缩包，用户需要自己解压，然后再执行安装脚本。常见的两种格式是tar.gz和zip。常见的解压执行脚本如下 tar.gz#12345#!&#x2F;bin&#x2F;bashtar -zxvf xxx.tar.gzcd xxx.&#x2F;install.sh  zip#12345#!&#x2F;bin&#x2F;bashunzip xxx.zipcd xxx.&#x2F;install.sh  在有些">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-10-23T20:18:50.000Z">
+<meta property="article:modified_time" content="2023-11-12T14:11:15.880Z">
+<meta property="article:author" content="shoothzj">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://shoothzj.github.io/self-extracting-executable-file/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://shoothzj.github.io/self-extracting-executable-file/","path":"self-extracting-executable-file/","title":"创建自解压的可执行文件"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>创建自解压的可执行文件 | 张俭的博客</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">张俭的博客</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">1.</span> <span class="nav-text">为什么需要自解压的可执行文件</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">1.1.</span> <span class="nav-text">tar.gz</span></a></li><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">1.2.</span> <span class="nav-text">zip</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">2.</span> <span class="nav-text">创建包含zip压缩包的自解压可执行文件</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">2.1.</span> <span class="nav-text">构造一个zip压缩包</span></a></li><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">2.2.</span> <span class="nav-text">构造可执行文件 self_extracting.sh</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">3.</span> <span class="nav-text">创建包含tar.gz压缩包的自解压可执行文件</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">3.1.</span> <span class="nav-text">构造一个tar.gz压缩包</span></a></li><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">3.2.</span> <span class="nav-text">构造可执行文件 self_extracting.sh</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">shoothzj</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">25</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/shoothzj" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;shoothzj" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/shoothzj" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;shoothzj" rel="noopener me" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/self-extracting-executable-file/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="shoothzj">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="创建自解压的可执行文件 | 张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          创建自解压的可执行文件
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-10-23 20:18:50" itemprop="dateCreated datePublished" datetime="2023-10-23T20:18:50+00:00">2023-10-23</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-11-12 14:11:15" itemprop="dateModified" datetime="2023-11-12T14:11:15+00:00">2023-11-12</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h1><span id="wei-shi-me-xu-yao-zi-jie-ya-de-ke-zhi-xing-wen-jian">为什么需要自解压的可执行文件</span><a href="#wei-shi-me-xu-yao-zi-jie-ya-de-ke-zhi-xing-wen-jian" class="header-anchor">#</a></h1><p>大部分软件的安装包是一个压缩包，用户需要自己解压，然后再执行安装脚本。常见的两种格式是<code>tar.gz</code>和<code>zip</code>。常见的解压执行脚本如下</p>
+<h2><span id="tar-gz">tar.gz</span><a href="#tar-gz" class="header-anchor">#</a></h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"></span><br><span class="line">tar -zxvf xxx.tar.gz</span><br><span class="line"><span class="built_in">cd</span> xxx</span><br><span class="line">./install.sh</span><br></pre></td></tr></table></figure>
+
+<h2><span id="zip">zip</span><a href="#zip" class="header-anchor">#</a></h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"></span><br><span class="line">unzip xxx.zip</span><br><span class="line"><span class="built_in">cd</span> xxx</span><br><span class="line">./install.sh</span><br></pre></td></tr></table></figure>
+
+<p>在有些场景下，为了方便分发、安装，我们需要将多个文件和目录打包并与一个启动脚本结合。这样子就可以实现一键安装，而不需要用户自己解压文件，然后再执行启动脚本。</p>
+<p>核心原理是，通过固定分隔符分隔脚本和压缩包部分，脚本通过分隔符将压缩包部分提取出来，然后解压，执行安装脚本，脚本不会超过固定分隔符。解压可以通过临时文件(zip)或流式解压(tar.gz)的方式实现。</p>
+<h1><span id="chuang-jian-bao-han-zip-ya-suo-bao-de-zi-jie-ya-ke-zhi-xing-wen-jian">创建包含zip压缩包的自解压可执行文件</span><a href="#chuang-jian-bao-han-zip-ya-suo-bao-de-zi-jie-ya-ke-zhi-xing-wen-jian" class="header-anchor">#</a></h1><h2><span id="gou-zao-yi-ge-zip-ya-suo-bao">构造一个zip压缩包</span><a href="#gou-zao-yi-ge-zip-ya-suo-bao" class="header-anchor">#</a></h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">&quot;hello zip&quot;</span> &gt; temp.txt</span><br><span class="line">zip -r temp.zip temp.txt</span><br><span class="line"><span class="built_in">rm</span> -f temp.txt</span><br></pre></td></tr></table></figure>
+
+<h2><span id="gou-zao-ke-zhi-xing-wen-jian-self-extracting-sh">构造可执行文件 <code>self_extracting.sh</code></span><a href="#gou-zao-ke-zhi-xing-wen-jian-self-extracting-sh" class="header-anchor">#</a></h2><p>以使用<code>__ARCHIVE_BELOW__</code>做分隔符为例，<code>self_extracting.sh</code>里面内容:</p>
+<p>推荐把临时文件放在内存文件路径下，这样子可以避免磁盘IO</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line">CURRENT_DIR=<span class="string">&quot;<span class="subst">$(dirname <span class="string">&quot;<span class="variable">$0</span>&quot;</span>)</span>&quot;</span></span><br><span class="line"></span><br><span class="line">ARCHIVE_START_LINE=$(awk <span class="string">&#x27;/^__ARCHIVE_BELOW__/ &#123;print NR + 1; exit 0; &#125;&#x27;</span> <span class="variable">$0</span>)</span><br><span class="line"></span><br><span class="line"><span class="built_in">tail</span> -n+<span class="variable">$ARCHIVE_START_LINE</span> <span class="variable">$0</span> &gt; /tmp/temp.zip</span><br><span class="line">unzip /tmp/temp.zip<span class="string">&quot; -d &quot;</span><span class="variable">$CURRENT_DIR</span><span class="string">&quot;</span></span><br><span class="line"><span class="string">rm &quot;</span><span class="variable">$CURRENT_DIR</span>/temp.zip<span class="string">&quot;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string"># replace the following line with your own code</span></span><br><span class="line"><span class="string">cat temp.txt</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">exit 0</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">__ARCHIVE_BELOW__</span></span><br></pre></td></tr></table></figure>
+
+<p>将zip文件追加到<code>self_extracting.sh</code>文件的尾部</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cat temp.zip &gt;&gt; self_extracting.sh</span><br><span class="line">chmod +x self_extracting.sh</span><br></pre></td></tr></table></figure>
+
+<h1><span id="chuang-jian-bao-han-tar-gz-ya-suo-bao-de-zi-jie-ya-ke-zhi-xing-wen-jian">创建包含tar.gz压缩包的自解压可执行文件</span><a href="#chuang-jian-bao-han-tar-gz-ya-suo-bao-de-zi-jie-ya-ke-zhi-xing-wen-jian" class="header-anchor">#</a></h1><h2><span id="gou-zao-yi-ge-tar-gz-ya-suo-bao">构造一个tar.gz压缩包</span><a href="#gou-zao-yi-ge-tar-gz-ya-suo-bao" class="header-anchor">#</a></h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">&quot;hello tar.gz&quot;</span> &gt; temp.txt</span><br><span class="line">tar -czf temp.tar.gz temp.txt</span><br><span class="line"><span class="built_in">rm</span> -f temp.txt</span><br></pre></td></tr></table></figure>
+
+<h2><span id="gou-zao-ke-zhi-xing-wen-jian-self-extracting-sh">构造可执行文件 <code>self_extracting.sh</code></span><a href="#gou-zao-ke-zhi-xing-wen-jian-self-extracting-sh" class="header-anchor">#</a></h2><p>以使用<code>__ARCHIVE_BELOW__</code>做分隔符为例，<code>self_extracting.sh</code>里面内容:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line">CURRENT_DIR=<span class="string">&quot;<span class="subst">$(dirname <span class="string">&quot;<span class="variable">$0</span>&quot;</span>)</span>&quot;</span></span><br><span class="line"></span><br><span class="line">ARCHIVE_START_LINE=$(awk <span class="string">&#x27;/^__ARCHIVE_BELOW__/ &#123;print NR + 1; exit 0; &#125;&#x27;</span> <span class="variable">$0</span>)</span><br><span class="line"><span class="built_in">tail</span> -n+<span class="variable">$ARCHIVE_START_LINE</span> <span class="variable">$0</span> | tar xz -C <span class="string">&quot;<span class="variable">$CURRENT_DIR</span>&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># replace the following line with your own code</span></span><br><span class="line"><span class="built_in">cat</span> temp.txt</span><br><span class="line"></span><br><span class="line"><span class="built_in">exit</span> 0</span><br><span class="line"></span><br><span class="line">__ARCHIVE_BELOW__</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/code/java/ignite/ignite-java-client-best-practice/" rel="prev" title="Ignite Java客户端最佳实践">
+                  <i class="fa fa-angle-left"></i> Ignite Java客户端最佳实践
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/springcloud-zookeeper/" rel="next" title="SpringCloud ZooKeeper 详解，以及与Go、Rust等非Java服务的集成">
+                  SpringCloud ZooKeeper 详解，以及与Go、Rust等非Java服务的集成 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    
+  
+  <div class="comments giscus-container">
+  </div>
+  
+  
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2023</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">shoothzj</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+
+
+
+
+<script class="next-config" data-name="giscus" type="application/json">{"enable":true,"repo":"shoothzj/shoothzj.github.io","repo_id":"R_kgDOIuCX3w","category":"Announcements","category_id":"DIC_kwDOIuCX384Ca5FJ","mapping":"title","reactions_enabled":1,"emit_metadata":1,"theme":"light","lang":"en","crossorigin":"anonymous","input_position":"bottom","loading":"lazy"}</script>
+
+<script>
+document.addEventListener('page:loaded', () => {
+  if (!CONFIG.page.comments) return;
+
+  NexT.utils.loadComments('.giscus-container')
+    .then(() => NexT.utils.getScript('https://giscus.app/client.js', {
+      attributes: {
+        async                   : true,
+        crossOrigin             : 'anonymous',
+        'data-repo'             : CONFIG.giscus.repo,
+        'data-repo-id'          : CONFIG.giscus.repo_id,
+        'data-category'         : CONFIG.giscus.category,
+        'data-category-id'      : CONFIG.giscus.category_id,
+        'data-mapping'          : CONFIG.giscus.mapping,
+        'data-reactions-enabled': CONFIG.giscus.reactions_enabled,
+        'data-emit-metadata'    : CONFIG.giscus.emit_metadata,
+        'data-theme'            : CONFIG.giscus.theme,
+        'data-lang'             : CONFIG.giscus.lang,
+        'data-input-position'   : CONFIG.giscus.input_position,
+        'data-loading'          : CONFIG.giscus.loading
+      },
+      parentNode: document.querySelector('.giscus-container')
+    }));
+});
+</script>
+
+</body>
+</html>

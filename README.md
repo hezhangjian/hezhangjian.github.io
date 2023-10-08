@@ -5,3 +5,9 @@
 ```bash
 hexo new $title
 ```
+
+## run hexo locally
+
+```bash
+hexo server
+```

@@ -34,7 +34,7 @@ example(maven artifactId: example-parent)/
 |-- example-spring-ignite-test(依赖spring，不依赖test-common，spring模块单元测试用)
 |-- example-starter(启动类)
 |-- example-test-common(不依赖example-common)
-|-- example-util(不依赖example-common，可选模块，为service与其他spring集成组件共用)
+|-- example-util(不依赖Spring框架，可选模块，为service与其他spring集成组件共用)
 ```
 
 依赖关系图:

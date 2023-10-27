@@ -2,6 +2,8 @@
 title: Ignite Java客户端最佳实践
 date: 2023-10-10 22:08:55
 tags:
+  - Ignite
+  - Java
 ---
 <!-- toc -->
 

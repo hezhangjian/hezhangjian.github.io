@@ -374,6 +374,7 @@
 
 <ul>
 <li><a href="#duo-yu-yan-sdk-she-ji-de-chang-jian-wen-ti">多语言SDK设计的常见问题</a><ul>
+<li><a href="#ri-zhi-da-yin-de-she-ji-ce-lue">日志打印的设计策略</a></li>
 <li><a href="#shi-fou-xu-yao-shi-yong-xian-shi-de-start-connect-fang-fa">是否需要使用显式的<code>start</code>&#x2F;<code>connect</code>方法？</a></li>
 </ul>
 </li>
@@ -382,7 +383,9 @@
 
 </div>
 
-<h1><span id="duo-yu-yan-sdk-she-ji-de-chang-jian-wen-ti">多语言SDK设计的常见问题</span><a href="#duo-yu-yan-sdk-she-ji-de-chang-jian-wen-ti" class="header-anchor">#</a></h1><h2><span id="shi-fou-xu-yao-shi-yong-xian-shi-de-start-x2f-connect-fang-fa">是否需要使用显式的<code>start</code>&#x2F;<code>connect</code>方法？</span><a href="#shi-fou-xu-yao-shi-yong-xian-shi-de-start-x2f-connect-fang-fa" class="header-anchor">#</a></h2><p>像go这样的语言，一般来说不太在意特定的时间内，某个协程是否处于阻塞等待连接的状态。而在java这样的语言，特别是在采用响应式编程模型的场景下，通常需要通过异步操作来管理连接的建立。这可以通过显式的start&#x2F;connect方法来或者是异步的工厂方法来实现。</p>
+<h1><span id="duo-yu-yan-sdk-she-ji-de-chang-jian-wen-ti">多语言SDK设计的常见问题</span><a href="#duo-yu-yan-sdk-she-ji-de-chang-jian-wen-ti" class="header-anchor">#</a></h1><h2><span id="ri-zhi-da-yin-de-she-ji-ce-lue">日志打印的设计策略</span><a href="#ri-zhi-da-yin-de-she-ji-ce-lue" class="header-anchor">#</a></h2><p>在SDK的关键节点，比如初始化完成、连接建立或者连接断开，都可以打印日志。如果是PerRequest的日志，一般默认不会打印INFO级别的日志。</p>
+<p>SDK应该避免仅仅打印错误日志然后忽略异常；相反，它应该提供机制让调用者能够捕获并处理异常信息。这种做法有助于保持错误处理的透明性，并允许调用者根据需要采取适当的响应措施。正如<strong>David J. Wheeler</strong>所说”Put the control in the hands of those who know how to handle the information, not those who know how to manage the computers, because encapsulated details will eventually leak out.”把控制权放到那些知道如何处理信息的人手中，而不是放在那些知道如何管理计算机的人手中，因为封装的细节最终都会暴露。</p>
+<h2><span id="shi-fou-xu-yao-shi-yong-xian-shi-de-start-x2f-connect-fang-fa">是否需要使用显式的<code>start</code>&#x2F;<code>connect</code>方法？</span><a href="#shi-fou-xu-yao-shi-yong-xian-shi-de-start-x2f-connect-fang-fa" class="header-anchor">#</a></h2><p>像go这样的语言，一般来说不太在意特定的时间内，某个协程是否处于阻塞等待连接的状态。而在java这样的语言，特别是在采用响应式编程模型的场景下，通常需要通过异步操作来管理连接的建立。这可以通过显式的start&#x2F;connect方法来或者是异步的工厂方法来实现。</p>
 ]]></content>
       <tags>
         <tag>Code</tag>
@@ -654,6 +657,11 @@
         + String database
         + String retentionPolicy
         + String command
+    }</pre>
+
+<h1><span id="ping-design">ping design</span><a href="#ping-design" class="header-anchor">#</a></h1><pre class="mermaid">classDiagram
+    class OpenGeminiClient {
+        + void ping(int index) // index selects one from multiple servers
     }</pre>
 
 

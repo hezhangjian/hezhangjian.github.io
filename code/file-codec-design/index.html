@@ -19,29 +19,28 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"shoothzj.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.18.2","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"style":null,"show_result":false},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="根据Python项目的需求和特性，可以为Python的Http SDK项目选择以下命名方式：  xxx-client-python：如果这个项目只有Http SDK，没有其他协议的SDK，推荐使用这个命名方式。 xxx-http-client-python：当存在其他协议的SDK时，可以使用这个命名方式，以区分不同协议的SDK。 xxx-admin-python：当项目使用其他协议作为数据通道，使">
+    <meta name="description" content="概述 Java      概述#我们以xyz文件格式为例，来说明文件编解码的代码设计。xyz文件格式内容如下：  header部分：文件头，包含文件版本号、文件类型、文件大小等信息 body部分：文件主体  通用设计大概如下 classDiagram     class XyzHeader {     }     class XyzBody {     }     class Xyz{">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Python Http SDK设计">
-<meta property="og:url" content="https://shoothzj.github.io/code/python/python-http-sdk-design/index.html">
+<meta property="og:title" content="文件编解码代码设计">
+<meta property="og:url" content="https://shoothzj.github.io/code/file-codec-design/index.html">
 <meta property="og:site_name" content="张俭的博客">
-<meta property="og:description" content="根据Python项目的需求和特性，可以为Python的Http SDK项目选择以下命名方式：  xxx-client-python：如果这个项目只有Http SDK，没有其他协议的SDK，推荐使用这个命名方式。 xxx-http-client-python：当存在其他协议的SDK时，可以使用这个命名方式，以区分不同协议的SDK。 xxx-admin-python：当项目使用其他协议作为数据通道，使">
+<meta property="og:description" content="概述 Java      概述#我们以xyz文件格式为例，来说明文件编解码的代码设计。xyz文件格式内容如下：  header部分：文件头，包含文件版本号、文件类型、文件大小等信息 body部分：文件主体  通用设计大概如下 classDiagram     class XyzHeader {     }     class XyzBody {     }     class Xyz{">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2023-10-28T16:52:15.000Z">
+<meta property="article:published_time" content="2023-11-20T15:30:54.000Z">
 <meta property="article:modified_time" content="2023-11-23T09:51:18.628Z">
 <meta property="article:author" content="shoothzj">
-<meta property="article:tag" content="SDK">
-<meta property="article:tag" content="Python">
+<meta property="article:tag" content="Codec">
 <meta name="twitter:card" content="summary">
 
 
-<link rel="canonical" href="https://shoothzj.github.io/code/python/python-http-sdk-design/">
+<link rel="canonical" href="https://shoothzj.github.io/code/file-codec-design/">
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://shoothzj.github.io/code/python/python-http-sdk-design/","path":"code/python/python-http-sdk-design/","title":"Python Http SDK设计"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://shoothzj.github.io/code/file-codec-design/","path":"code/file-codec-design/","title":"文件编解码代码设计"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>Python Http SDK设计 | 张俭的博客</title>
+<title>文件编解码代码设计 | 张俭的博客</title>
   
 
 
@@ -127,7 +126,7 @@
   
   <aside class="sidebar">
 
-    <div class="sidebar-inner sidebar-overview-active">
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
       <ul class="sidebar-nav">
         <li class="sidebar-nav-toc">
           文章目录
@@ -140,6 +139,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">2.</span> <span class="nav-text">Java</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -193,7 +193,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/code/python/python-http-sdk-design/">
+    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/code/file-codec-design/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -206,12 +206,12 @@
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="Python Http SDK设计 | 张俭的博客">
+      <meta itemprop="name" content="文件编解码代码设计 | 张俭的博客">
       <meta itemprop="description" content="">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          Python Http SDK设计
+          文件编解码代码设计
         </h1>
 
         <div class="post-meta-container">
@@ -222,7 +222,7 @@
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2023-10-28 16:52:15" itemprop="dateCreated datePublished" datetime="2023-10-28T16:52:15+00:00">2023-10-28</time>
+      <time title="创建时间：2023-11-20 15:30:54" itemprop="dateCreated datePublished" datetime="2023-11-20T15:30:54+00:00">2023-11-20</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -241,14 +241,60 @@
     
     
     
-    <div class="post-body" itemprop="articleBody"><p>根据Python项目的需求和特性，可以为Python的Http SDK项目选择以下命名方式：</p>
-<ul>
-<li><code>xxx-client-python</code>：如果这个项目只有Http SDK，没有其他协议的SDK，推荐使用这个命名方式。</li>
-<li><code>xxx-http-client-python</code>：当存在其他协议的SDK时，可以使用这个命名方式，以区分不同协议的SDK。</li>
-<li><code>xxx-admin-python</code>：当项目使用其他协议作为数据通道，使用HTTP协议作为管理通道时，可以使用这个命名方式。</li>
-</ul>
-<p>由于Python的调用方式通常是<code>模块名.类名.方法名</code>。</p>
+    <div class="post-body" itemprop="articleBody"><div class="toc">
 
+<!-- toc -->
+
+<ul>
+<li><a href="#gai-shu">概述</a></li>
+<li><a href="#java">Java</a></li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="gai-shu">概述</span><a href="#gai-shu" class="header-anchor">#</a></h1><p>我们以xyz文件格式为例，来说明文件编解码的代码设计。xyz文件格式内容如下：</p>
+<ul>
+<li>header部分：文件头，包含文件版本号、文件类型、文件大小等信息</li>
+<li>body部分：文件主体</li>
+</ul>
+<p>通用设计大概如下</p>
+<pre class="mermaid">classDiagram
+    class XyzHeader {
+    }
+    class XyzBody {
+    }
+    class Xyz{
+        + XyzHeader header
+        + XyzBody body
+    }
+    class XyzReader {
+        + Xyz read(fileName: string)
+        + void process(String fileName, XyzProcessor processor)
+        - XyzHeader readHeader()
+        - XyzBody readBody()
+    }
+    class XyzProcessor {
+        <<interface>>
+        + void processHeader(XyzHeader header)
+        + void processBody(XyzBody body)
+    }
+    class XyzReadCollectProcessor {
+        Xyz getXyz()
+    }
+    Xyz --> XyzHeader: contains
+    Xyz --> XyzBody: contains
+    XyzReader --> Xyz: reads
+    XyzReader --> XyzProcessor: processes
+    XyzReadCollectProcessor --|> XyzProcessor: implements</interface></pre>
+
+<h1><span id="java">Java</span><a href="#java" class="header-anchor">#</a></h1><p>使用<code>java.io.RandomAccessFile</code>和<code>java.nio.channels.FileChannel</code>来实现文件读取，使用<code>io.netty.buffer.ByteBuf</code>来读写文件。</p>
+<p>核心代码举例:</p>
+<p>XyzReader:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">XyzHeader</span> &#123;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">XyzBody</span> &#123;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Xyz</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> XyzHeader header;</span><br><span class="line">    <span class="keyword">private</span> XyzBody body;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">XyzProcessor</span> &#123;</span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">processHeader</span><span class="params">(XyzHeader header)</span>;</span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">processBody</span><span class="params">(XyzBody body)</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">XyzReadCollectProcessor</span> <span class="keyword">implements</span> <span class="title class_">XyzProcessor</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="type">Xyz</span> <span class="variable">xyz</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Xyz</span>();</span><br><span class="line">    <span class="keyword">public</span> Xyz <span class="title function_">getXyz</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> xyz;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">XyzReader</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> Xyz <span class="title function_">read</span><span class="params">(String fileName)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> XyzHeader <span class="title function_">readHeader</span><span class="params">(FileChannel fileChannel)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> XyzBody <span class="title function_">readBody</span><span class="params">(FileChannel fileChannel)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<script type="module"> import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.esm.min.mjs';	mermaid.initialize({startOnLoad: true, flowchart: {curve: 'linear'}}); </script>
     </div>
 
     
@@ -257,22 +303,18 @@
 
     <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/SDK/" rel="tag"># SDK</a>
-              <a href="/tags/Python/" rel="tag"># Python</a>
+              <a href="/tags/Codec/" rel="tag"># Codec</a>
           </div>
 
         
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/code/go/go-http-sdk-design/" rel="prev" title="Go Http SDK设计">
-                  <i class="fa fa-angle-left"></i> Go Http SDK设计
+                <a href="/code/multi-lang-http-client-config/" rel="prev" title="多语言编程 各大Http库配置指南">
+                  <i class="fa fa-angle-left"></i> 多语言编程 各大Http库配置指南
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/code/multi-lang-paradigm-tls-config-design/" rel="next" title="多语言编程 TLS配置参数设计">
-                  多语言编程 TLS配置参数设计 <i class="fa fa-angle-right"></i>
-                </a>
             </div>
           </div>
     </footer>

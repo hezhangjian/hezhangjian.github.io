@@ -19,23 +19,28 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"shoothzj.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.18.2","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"style":null,"show_result":false},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
 
-    <meta property="og:type" content="website">
-<meta property="og:title" content="张俭的博客">
-<meta property="og:url" content="https://shoothzj.github.io/archives/2023/11/index.html">
+    <meta name="description" content="Go Go标准库 timeout connection timeout          Go#Go标准库#timeout#123client :&#x3D; http.Client&amp;#123;    Timeout: timeout,&amp;#125;  connection timeout#1234567client :&#x3D; http.Client&amp;#123;    Transport: &amp;h">
+<meta property="og:type" content="article">
+<meta property="og:title" content="多语言编程 各大Http库配置指南">
+<meta property="og:url" content="https://shoothzj.github.io/code/multi-lang-http-client-config/index.html">
 <meta property="og:site_name" content="张俭的博客">
+<meta property="og:description" content="Go Go标准库 timeout connection timeout          Go#Go标准库#timeout#123client :&#x3D; http.Client&amp;#123;    Timeout: timeout,&amp;#125;  connection timeout#1234567client :&#x3D; http.Client&amp;#123;    Transport: &amp;h">
 <meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-11-18T17:24:58.000Z">
+<meta property="article:modified_time" content="2023-11-23T09:51:18.628Z">
 <meta property="article:author" content="shoothzj">
+<meta property="article:tag" content="Code">
 <meta name="twitter:card" content="summary">
 
 
-<link rel="canonical" href="https://shoothzj.github.io/archives/2023/11/">
+<link rel="canonical" href="https://shoothzj.github.io/code/multi-lang-http-client-config/">
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":false,"lang":"zh-CN","comments":"","permalink":"","path":"archives/2023/11/index.html","title":""}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://shoothzj.github.io/code/multi-lang-http-client-config/","path":"code/multi-lang-http-client-config/","title":"多语言编程 各大Http库配置指南"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>归档 | 张俭的博客</title>
+<title>多语言编程 各大Http库配置指南 | 张俭的博客</title>
   
 
 
@@ -68,7 +73,7 @@
 
     <a href="/" class="brand" rel="start">
       <i class="logo-line"></i>
-      <h1 class="site-title">张俭的博客</h1>
+      <p class="site-title">张俭的博客</p>
       <i class="logo-line"></i>
     </a>
   </div>
@@ -121,7 +126,7 @@
   
   <aside class="sidebar">
 
-    <div class="sidebar-inner sidebar-overview-active">
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
       <ul class="sidebar-nav">
         <li class="sidebar-nav-toc">
           文章目录
@@ -134,6 +139,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">1.</span> <span class="nav-text">Go</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">1.1.</span> <span class="nav-text">Go标准库</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">1.1.1.</span> <span class="nav-text">timeout</span></a></li><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">1.1.2.</span> <span class="nav-text">connection timeout</span></a></li></ol></li></ol></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -176,130 +182,127 @@
 
     </div>
 
-    <div class="main-inner archive posts-collapse">
+    <div class="main-inner post posts-expand">
 
 
   
-  
-  
-  <div class="post-block">
-    <div class="post-content">
-      <div class="collection-title">
-        <span class="collection-header">嗯..! 目前共计 27 篇日志。 继续努力。</span>
-      </div>
 
-      
-    <div class="collection-year">
-      <span class="collection-header">2023</span>
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/code/multi-lang-http-client-config/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="shoothzj">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="多语言编程 各大Http库配置指南 | 张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          多语言编程 各大Http库配置指南
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-11-18 17:24:58" itemprop="dateCreated datePublished" datetime="2023-11-18T17:24:58+00:00">2023-11-18</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-11-23 09:51:18" itemprop="dateModified" datetime="2023-11-23T09:51:18+00:00">2023-11-23</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#go">Go</a><ul>
+<li><a href="#go-biao-zhun-ku">Go标准库</a><ul>
+<li><a href="#timeout">timeout</a></li>
+<li><a href="#connection-timeout">connection timeout</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="go">Go</span><a href="#go" class="header-anchor">#</a></h1><h2><span id="go-biao-zhun-ku">Go标准库</span><a href="#go-biao-zhun-ku" class="header-anchor">#</a></h2><h3><span id="timeout">timeout</span><a href="#timeout" class="header-anchor">#</a></h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">client := http.Client&#123;</span><br><span class="line">    Timeout: timeout,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3><span id="connection-timeout">connection timeout</span><a href="#connection-timeout" class="header-anchor">#</a></h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">client := http.Client&#123;</span><br><span class="line">    Transport: &amp;http.Transport&#123;</span><br><span class="line">        Dial: (&amp;net.Dialer&#123;</span><br><span class="line">            Timeout: timeout,</span><br><span class="line">        &#125;).Dial,</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
     </div>
 
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-      <div class="post-meta-container">
-        <time itemprop="dateCreated"
-              datetime="2023-11-20T15:30:54+00:00"
-              content="2023-11-20">
-          11-20
-        </time>
-      </div>
+    
+    
+    
 
-      <div class="post-title">
-        <a class="post-title-link" href="/code/file-codec-design/" itemprop="url">
-          <span itemprop="name">文件编解码代码设计</span>
-        </a>
-      </div>
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Code/" rel="tag"># Code</a>
+          </div>
 
-      
-    </header>
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/code/multi-lang-client-sdk-design/" rel="prev" title="多语言SDK设计">
+                  <i class="fa fa-angle-left"></i> 多语言SDK设计
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/code/file-codec-design/" rel="next" title="文件编解码代码设计">
+                  文件编解码代码设计 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
   </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-      <div class="post-meta-container">
-        <time itemprop="dateCreated"
-              datetime="2023-11-18T17:24:58+00:00"
-              content="2023-11-18">
-          11-18
-        </time>
-      </div>
-
-      <div class="post-title">
-        <a class="post-title-link" href="/code/multi-lang-http-client-config/" itemprop="url">
-          <span itemprop="name">多语言编程 各大Http库配置指南</span>
-        </a>
-      </div>
-
-      
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-      <div class="post-meta-container">
-        <time itemprop="dateCreated"
-              datetime="2023-11-12T21:09:32+00:00"
-              content="2023-11-12">
-          11-12
-        </time>
-      </div>
-
-      <div class="post-title">
-        <a class="post-title-link" href="/code/multi-lang-client-sdk-design/" itemprop="url">
-          <span itemprop="name">多语言SDK设计</span>
-        </a>
-      </div>
-
-      
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-      <div class="post-meta-container">
-        <time itemprop="dateCreated"
-              datetime="2023-11-12T16:21:53+00:00"
-              content="2023-11-12">
-          11-12
-        </time>
-      </div>
-
-      <div class="post-title">
-        <a class="post-title-link" href="/opengemini/opengemini-sdk-design/" itemprop="url">
-          <span itemprop="name">opengemini client sdk 设计</span>
-        </a>
-      </div>
-
-      
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-      <div class="post-meta-container">
-        <time itemprop="dateCreated"
-              datetime="2023-11-06T10:11:35+00:00"
-              content="2023-11-06">
-          11-06
-        </time>
-      </div>
-
-      <div class="post-title">
-        <a class="post-title-link" href="/code/multi-lang-paradigm-tls-config-design/" itemprop="url">
-          <span itemprop="name">多语言编程 TLS配置参数设计</span>
-        </a>
-      </div>
-
-      
-    </header>
-  </article>
+</div>
 
 
-    </div>
+
+
+
+
+    
+  
+  <div class="comments giscus-container">
   </div>
   
   
-  
-
 </div>
   </main>
 

@@ -222,7 +222,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-11-23 09:51:18" itemprop="dateModified" datetime="2023-11-23T09:51:18+00:00">2023-11-23</time>
+      <time title="修改时间：2023-11-24 00:29:30" itemprop="dateModified" datetime="2023-11-24T00:29:30+00:00">2023-11-24</time>
     </span>
 
   
@@ -255,8 +255,10 @@
 <p>通用设计大概如下</p>
 <pre class="mermaid">classDiagram
     class XyzHeader {
+        + byte[] content
     }
     class XyzBody {
+        + byte[] content
     }
     class Xyz{
         + XyzHeader header
@@ -285,7 +287,7 @@
 <h1><span id="java">Java</span><a href="#java" class="header-anchor">#</a></h1><p>使用<code>java.io.RandomAccessFile</code>和<code>java.nio.channels.FileChannel</code>来实现文件读取，使用<code>io.netty.buffer.ByteBuf</code>来读写文件。</p>
 <p>核心代码举例:</p>
 <p>XyzReader:</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">XyzHeader</span> &#123;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">XyzBody</span> &#123;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Xyz</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> XyzHeader header;</span><br><span class="line">    <span class="keyword">private</span> XyzBody body;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">XyzProcessor</span> &#123;</span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">processHeader</span><span class="params">(XyzHeader header)</span>;</span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">processBody</span><span class="params">(XyzBody body)</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">XyzReadCollectProcessor</span> <span class="keyword">implements</span> <span class="title class_">XyzProcessor</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="type">Xyz</span> <span class="variable">xyz</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Xyz</span>();</span><br><span class="line">    <span class="keyword">public</span> Xyz <span class="title function_">getXyz</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> xyz;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">XyzReader</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> Xyz <span class="title function_">read</span><span class="params">(String fileName)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> XyzHeader <span class="title function_">readHeader</span><span class="params">(FileChannel fileChannel)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> XyzBody <span class="title function_">readBody</span><span class="params">(FileChannel fileChannel)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">XyzHeader</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="type">byte</span>[] content;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">XyzBody</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="type">byte</span>[] content;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Xyz</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> XyzHeader header;</span><br><span class="line">    <span class="keyword">private</span> XyzBody body;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">XyzProcessor</span> &#123;</span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">processHeader</span><span class="params">(XyzHeader header)</span>;</span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">processBody</span><span class="params">(XyzBody body)</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">XyzReadCollectProcessor</span> <span class="keyword">implements</span> <span class="title class_">XyzProcessor</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="type">Xyz</span> <span class="variable">xyz</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Xyz</span>();</span><br><span class="line">    <span class="keyword">public</span> Xyz <span class="title function_">getXyz</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> xyz;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">XyzReader</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> Xyz <span class="title function_">read</span><span class="params">(String fileName)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> XyzHeader <span class="title function_">readHeader</span><span class="params">(FileChannel fileChannel)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> XyzBody <span class="title function_">readBody</span><span class="params">(FileChannel fileChannel)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 
 <script type="module"> import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.esm.min.mjs';	mermaid.initialize({startOnLoad: true, flowchart: {curve: 'linear'}}); </script>
@@ -350,7 +352,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-11-23 09:51:18" itemprop="dateModified" datetime="2023-11-23T09:51:18+00:00">2023-11-23</time>
+      <time title="修改时间：2023-11-24 00:29:30" itemprop="dateModified" datetime="2023-11-24T00:29:30+00:00">2023-11-24</time>
     </span>
 
   
@@ -446,7 +448,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-11-23 09:51:18" itemprop="dateModified" datetime="2023-11-23T09:51:18+00:00">2023-11-23</time>
+      <time title="修改时间：2023-11-24 00:29:30" itemprop="dateModified" datetime="2023-11-24T00:29:30+00:00">2023-11-24</time>
     </span>
 
   
@@ -539,7 +541,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-11-23 09:51:18" itemprop="dateModified" datetime="2023-11-23T09:51:18+00:00">2023-11-23</time>
+      <time title="修改时间：2023-11-24 00:29:30" itemprop="dateModified" datetime="2023-11-24T00:29:30+00:00">2023-11-24</time>
     </span>
 
   
@@ -560,7 +562,7 @@
 <li>默认超时，连接超时10秒，读写超时30秒</li>
 </ul>
 <p>本文的方法假定编程语言不支持重载，如编程语言支持重载，可以对方法名进行一些优化调整。</p>
-<h1><span id="client-constructor-params-design">Client constructor params design</span><a href="#client-constructor-params-design" class="header-anchor">#</a></h1><p>tls相关配置可以参考<a href="../code/multi-lang-paradigm-tls-config-design.md">TLS配置参数设计</a></p>
+<h1><span id="client-constructor-params-design">Client constructor params design</span><a href="#client-constructor-params-design" class="header-anchor">#</a></h1><p>tls相关配置可以参考<a href="../../code/multi-lang-paradigm-tls-config-design">TLS配置参数设计</a></p>
 <pre class="mermaid">classDiagram
     class OpenGeminiClient {
         + List~Address~ addresses
@@ -605,14 +607,14 @@
         + Time time // language specific
         + Map~String, String~ tags
         + Map~String, Object~ fields
-        + AddTag(string, string)
-        + AddField(string, int)
-        + AddField(string, string)
-        + AddField(string, float)
-        + AddField(string, bool)
-        + Time(timestamp)
-        + Precision(type)
-        + Measurement(name)
+        + AddTag(string, string) // init container if null
+        + AddField(string, int) // init container if null
+        + AddField(string, string) // init container if null
+        + AddField(string, float) // init container if null
+        + AddField(string, bool) // init container if null
+        + SetTime(timestamp)
+        + SetPrecision(type)
+        + SetMeasurement(name)
     }
 
     BatchPoints "1" *-- "many" Point : contains</pre>
@@ -726,7 +728,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-11-23 09:51:18" itemprop="dateModified" datetime="2023-11-23T09:51:18+00:00">2023-11-23</time>
+      <time title="修改时间：2023-11-24 00:29:30" itemprop="dateModified" datetime="2023-11-24T00:29:30+00:00">2023-11-24</time>
     </span>
 
   
@@ -883,7 +885,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-11-23 09:51:18" itemprop="dateModified" datetime="2023-11-23T09:51:18+00:00">2023-11-23</time>
+      <time title="修改时间：2023-11-24 00:29:30" itemprop="dateModified" datetime="2023-11-24T00:29:30+00:00">2023-11-24</time>
     </span>
 
   
@@ -965,7 +967,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-11-23 09:51:18" itemprop="dateModified" datetime="2023-11-23T09:51:18+00:00">2023-11-23</time>
+      <time title="修改时间：2023-11-24 00:29:30" itemprop="dateModified" datetime="2023-11-24T00:29:30+00:00">2023-11-24</time>
     </span>
 
   
@@ -1050,7 +1052,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-11-23 09:51:18" itemprop="dateModified" datetime="2023-11-23T09:51:18+00:00">2023-11-23</time>
+      <time title="修改时间：2023-11-24 00:29:30" itemprop="dateModified" datetime="2023-11-24T00:29:30+00:00">2023-11-24</time>
     </span>
 
   
@@ -1164,7 +1166,7 @@ reactor --> common</pre>
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-11-23 09:51:18" itemprop="dateModified" datetime="2023-11-23T09:51:18+00:00">2023-11-23</time>
+      <time title="修改时间：2023-11-24 00:29:30" itemprop="dateModified" datetime="2023-11-24T00:29:30+00:00">2023-11-24</time>
     </span>
 
   
@@ -1285,7 +1287,7 @@ reactor --> common</pre>
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-11-23 09:51:18" itemprop="dateModified" datetime="2023-11-23T09:51:18+00:00">2023-11-23</time>
+      <time title="修改时间：2023-11-24 00:29:30" itemprop="dateModified" datetime="2023-11-24T00:29:30+00:00">2023-11-24</time>
     </span>
 
   

@@ -29,6 +29,8 @@ classDiagram
         + List~Address~ addresses
         + AuthConfig authConfig // nullable, if null, means no auth
         + BatchConfig batchConfig // nullable, if null, means batch is disabled
+        + timeout
+        + connectTimeout
         + bool gzipEnabled
         + bool tlsEnabled
         + TlsConfig tlsConfig // language specific
@@ -57,10 +59,26 @@ classDiagram
     OpenGeminiClient *-- BatchConfig : contains
 ```
 
+# Database & RetentionPolicy management design
+
+```mermaid
+classDiagram
+    class RpConfig {
+        + String Name
+        + String Duration
+        + String ShardGroupDuration
+        + String IndexDuration
+    }
+```
+
 # Write point design
 
 ```mermaid
 classDiagram
+    class OpenGeminiClient {
+        + WritePoint(String database, Point point)
+        + WriteBatchPoints(String database, BatchPoints batchPoints)
+    }
     class BatchPoints {
         + List~Point~ points
         + AddPoint(Point)

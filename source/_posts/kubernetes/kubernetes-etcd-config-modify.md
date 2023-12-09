@@ -34,4 +34,3 @@ Command:
 不过，如果您需要修改参数，还有另一个办法，通过修改`/etc/kubernetes/manifests/`下的yaml文件来修改运行中kubernetes集群中"系统"Pod的参数。原理是，当您把yaml文件修改后，kubelet会自动监听yaml文件的变更，并重新拉起本机器上的pod。
 
 举个例子，如果您希望关闭etcd集群对客户端的认证，那么您可以修改`/etc/kubernetes/mainfiest/etcd.yaml`,将**client-cert-auth**设置为false，把**trusted-ca-file**去掉。注意：三台master机器节点都需要执行此操作
-

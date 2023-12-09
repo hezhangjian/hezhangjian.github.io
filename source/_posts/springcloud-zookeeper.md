@@ -2,6 +2,7 @@
 title: SpringCloud ZooKeeper 详解，以及与Go、Rust等非Java服务的集成
 date: 2023-10-24 08:41:51
 tags:
+  - SpringCloud
 ---
 ZooKeeper，是一个开源的分布式协调服务，不仅支持分布式选举、任务分配，还可以用于微服务的注册中心和配置中心。本文，我们将深入探讨ZooKeeper用做微服务注册中心的场景。
 

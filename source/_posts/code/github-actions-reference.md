@@ -94,7 +94,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Run Go Mod Check Action
-        uses: Shoothzj/go-mod-check-action@main
+        uses: shoothzj/go-mod-check-action@main
         with:
           prohibitIndirectDepUpdate: 'true'
 ```

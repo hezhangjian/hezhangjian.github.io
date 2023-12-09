@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha256-yIDrPSXHZdOZhAqiBP7CKzIwMQmRCJ8UeB8Jo17YC4o=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"shoothzj.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.19.1","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"style":null,"show_result":false},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="中间件在很多系统中都存在#在一个系统里面，或多或少地都会有中间件的存在，总会有数据库吧，其他的如消息队列，缓存，大数据组件。即使是基于公有云构筑的系统，公有云厂商只提供广泛使用的中间件，假如你的系统里面有很多组件没那么泛用，那么就只能自己维护，如ZooKeeper、Etcd、Pulsar、Prometheus、Lvs等 什么是中间件adapter#中间件adapter指的是和中间件运行在一起（同一">
+<meta property="og:type" content="article">
+<meta property="og:title" content="中间件是开箱即用的吗？为什么要开发中间件adapter？">
+<meta property="og:url" content="https://shoothzj.github.io/middleware-adapter-paradigm/index.html">
+<meta property="og:site_name" content="张俭的博客">
+<meta property="og:description" content="中间件在很多系统中都存在#在一个系统里面，或多或少地都会有中间件的存在，总会有数据库吧，其他的如消息队列，缓存，大数据组件。即使是基于公有云构筑的系统，公有云厂商只提供广泛使用的中间件，假如你的系统里面有很多组件没那么泛用，那么就只能自己维护，如ZooKeeper、Etcd、Pulsar、Prometheus、Lvs等 什么是中间件adapter#中间件adapter指的是和中间件运行在一起（同一">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://shoothzj.github.io/middleware-adapter-paradigm/application-discover-middleware.png">
+<meta property="article:published_time" content="2021-08-09T17:37:59.000Z">
+<meta property="article:modified_time" content="2023-12-09T14:35:06.219Z">
+<meta property="article:author" content="shoothzj">
+<meta property="article:tag" content="middleware">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://shoothzj.github.io/middleware-adapter-paradigm/application-discover-middleware.png">
+
+
+<link rel="canonical" href="https://shoothzj.github.io/middleware-adapter-paradigm/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://shoothzj.github.io/middleware-adapter-paradigm/","path":"middleware-adapter-paradigm/","title":"中间件是开箱即用的吗？为什么要开发中间件adapter？"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>中间件是开箱即用的吗？为什么要开发中间件adapter？ | 张俭的博客</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">张俭的博客</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">1.</span> <span class="nav-text">中间件在很多系统中都存在</span></a></li><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">2.</span> <span class="nav-text">什么是中间件adapter</span></a></li><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">3.</span> <span class="nav-text">为什么不修改中间件源码直接集成</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">3.1.</span> <span class="nav-text">源码修改容易，维护困难</span></a></li><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">3.2.</span> <span class="nav-text">源码与团队技术栈不同，修改困难</span></a></li><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">3.3.</span> <span class="nav-text">和其他系统对接，有语言要求</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">4.</span> <span class="nav-text">为什么在商用系统中中间件做不到开箱即用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">5.</span> <span class="nav-text">适配原有的监控系统</span></a></li><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">6.</span> <span class="nav-text">适配原有的告警系统</span></a></li><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">7.</span> <span class="nav-text">适配原有的证书系统</span></a></li><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">8.</span> <span class="nav-text">适配原有的备份系统</span></a></li><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">9.</span> <span class="nav-text">适配原有的容灾系统</span></a></li><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">10.</span> <span class="nav-text">自动化能力</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">10.1.</span> <span class="nav-text">自动化部署</span></a></li><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">10.2.</span> <span class="nav-text">账号和策略的创建更新</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">11.</span> <span class="nav-text">对外暴露时封装一层接口</span></a></li><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">12.</span> <span class="nav-text">应用程序和中间件的服务发现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">12.1.</span> <span class="nav-text">应用程序发现中间件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">12.2.</span> <span class="nav-text">中间件到业务程序的发现</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">13.</span> <span class="nav-text">总结</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">shoothzj</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">60</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">31</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/shoothzj" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;shoothzj" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/shoothzj" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;shoothzj" rel="noopener me" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/middleware-adapter-paradigm/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="shoothzj">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="中间件是开箱即用的吗？为什么要开发中间件adapter？ | 张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          中间件是开箱即用的吗？为什么要开发中间件adapter？
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-08-09 17:37:59" itemprop="dateCreated datePublished" datetime="2021-08-09T17:37:59+00:00">2021-08-09</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-12-09 14:35:06" itemprop="dateModified" datetime="2023-12-09T14:35:06+00:00">2023-12-09</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2><span id="zhong-jian-jian-zai-hen-duo-xi-tong-zhong-du-cun-zai">中间件在很多系统中都存在</span><a href="#zhong-jian-jian-zai-hen-duo-xi-tong-zhong-du-cun-zai" class="header-anchor">#</a></h2><p>在一个系统里面，或多或少地都会有中间件的存在，总会有数据库吧，其他的如消息队列，缓存，大数据组件。即使是基于公有云构筑的系统，公有云厂商只提供广泛使用的中间件，假如你的系统里面有很多组件没那么泛用，那么就只能自己维护，如<code>ZooKeeper</code>、<code>Etcd</code>、<code>Pulsar</code>、<code>Prometheus</code>、<code>Lvs</code>等</p>
+<h2><span id="shi-me-shi-zhong-jian-jian-adapter">什么是中间件adapter</span><a href="#shi-me-shi-zhong-jian-jian-adapter" class="header-anchor">#</a></h2><p>中间件<code>adapter</code>指的是和中间件运行在一起（同一个物理机或同一个容器），使得中间件和商用系统中已有的组件进行对接，最终使得该中间件达到在该系统商用的标准。像Prometheus的众多<code>exporter</code>，就是将中间件和已有的监控系统（Prometheus）进行对接的<code>adpater</code>。</p>
+<h2><span id="wei-shi-me-bu-xiu-gai-zhong-jian-jian-yuan-ma-zhi-jie-ji-cheng">为什么不修改中间件源码直接集成</span><a href="#wei-shi-me-bu-xiu-gai-zhong-jian-jian-yuan-ma-zhi-jie-ji-cheng" class="header-anchor">#</a></h2><p>原因可以有很多，这里我列出几点</p>
+<h3><span id="yuan-ma-xiu-gai-rong-yi-wei-hu-kun-nan">源码修改容易，维护困难</span><a href="#yuan-ma-xiu-gai-rong-yi-wei-hu-kun-nan" class="header-anchor">#</a></h3><p>很多时候不是社区通用需求，无法合并到社区主干。后续每次中间件版本升级，源码的修改就要重新进行一次。社区大版本代码重构，有的甚至不知道如何修改下去。并且对研发人员的技能要求高。</p>
+<h3><span id="yuan-ma-yu-tuan-dui-ji-zhu-zhan-bu-tong-xiu-gai-kun-nan">源码与团队技术栈不同，修改困难</span><a href="#yuan-ma-yu-tuan-dui-ji-zhu-zhan-bu-tong-xiu-gai-kun-nan" class="header-anchor">#</a></h3><p>这是最常见的，像<code>java</code>团队维护<code>erlang</code>写的<code>rabbitmq</code></p>
+<h3><span id="he-qi-ta-xi-tong-dui-jie-you-yu-yan-yao-qiu">和其他系统对接，有语言要求</span><a href="#he-qi-ta-xi-tong-dui-jie-you-yu-yan-yao-qiu" class="header-anchor">#</a></h3><p>XX监控系统，只能使用X语言接入，但中间件使用Y语言写的，怎么办？adapter的能力就体现出来了。</p>
+<h2><span id="wei-shi-me-zai-shang-yong-xi-tong-zhong-zhong-jian-jian-zuo-bu-dao-kai-xiang-ji-yong">为什么在商用系统中中间件做不到开箱即用</span><a href="#wei-shi-me-zai-shang-yong-xi-tong-zhong-zhong-jian-jian-zuo-bu-dao-kai-xiang-ji-yong" class="header-anchor">#</a></h2><p>在商用系统中，对一个新引入的中间件，往往有如下能力上的诉求，原生的中间件很难满足</p>
+<ul>
+<li>适配原有的监控系统</li>
+<li>适配原有的告警系统</li>
+<li>适配原有的证书系统</li>
+<li>适配原有的备份系统（如果该中间件有状态）</li>
+<li>适配原有的容灾系统（如果该中间件有状态）</li>
+<li>自动化能力（适配部署、账号创建、权限策略创建）</li>
+<li>对外暴露时封装一层接口</li>
+<li>应用程序和中间件的服务发现</li>
+</ul>
+<p>有时候，业务也会根据业务的需求对中间件做一些能力增强，这部分需求比较定制，这里无法展开讨论了。</p>
+<p>我们来逐一讨论上面列出的能力诉求，凡是<code>adapter</code>能实现的功能，对中间件做修改也能实现，只不过因为上一节列出的原因，选择不在中间件处侵入式修改。</p>
+<h2><span id="gua-pei-yuan-you-de-jian-kong-xi-tong">适配原有的监控系统</span><a href="#gua-pei-yuan-you-de-jian-kong-xi-tong" class="header-anchor">#</a></h2><p>监控系统获取数据，往往是推拉两种模式，如果该中间件原生不支持和该监控系统对接。我们就可以让<code>adapter</code>先从中间件处取得监控数据，再和监控系统对接</p>
+<h2><span id="gua-pei-yuan-you-de-gao-jing-xi-tong">适配原有的告警系统</span><a href="#gua-pei-yuan-you-de-gao-jing-xi-tong" class="header-anchor">#</a></h2><p>如果中间件发生了不可恢复的错误，如写事务文件失败，操作ZooKeeper元数据失败，可以通过<code>adapter</code>来识别中间件是否发生了上述不可恢复的错误，并和告警系统对接，发出告警。</p>
+<h2><span id="gua-pei-yuan-you-de-zheng-shu-xi-tong">适配原有的证书系统</span><a href="#gua-pei-yuan-you-de-zheng-shu-xi-tong" class="header-anchor">#</a></h2><p>这一点也很关键，开源的中间件，根据我的了解，几乎没有项目做了动态证书轮换的方案，证书基本都不支持变更。而出色的商用系统是一定要支持证书轮换的。不过很遗憾的是，这些涉及到TLS握手的关键流程，<code>adapter</code>无法干涉这个流程，只能对中间件进行侵入式修改。</p>
+<h2><span id="gua-pei-yuan-you-de-bei-fen-xi-tong">适配原有的备份系统</span><a href="#gua-pei-yuan-you-de-bei-fen-xi-tong" class="header-anchor">#</a></h2><p>通过<code>adapter</code>对中间件进行定期备份、按照配置中心的策略备份、备份文件自动上传到文件服务器等。</p>
+<h2><span id="gua-pei-yuan-you-de-rong-zai-xi-tong">适配原有的容灾系统</span><a href="#gua-pei-yuan-you-de-rong-zai-xi-tong" class="header-anchor">#</a></h2><p>这个视中间件而定，有些中间件如<code>Pulsar</code>原生支持跨地域容灾的话，我们可能做一做配置就好了。另外一些，像<code>mysql</code>和<code>mongo</code>这种，可能我们还需要通过<code>adapter</code>来进行数据同步。不过这个时候<code>adapter</code>负责的职责就大了，还包括了容灾能力。</p>
+<h2><span id="zi-dong-hua-neng-li">自动化能力</span><a href="#zi-dong-hua-neng-li" class="header-anchor">#</a></h2><h3><span id="zi-dong-hua-bu-shu">自动化部署</span><a href="#zi-dong-hua-bu-shu" class="header-anchor">#</a></h3><p>比如<code>ZooKeeper</code>、<code>Kafka</code>、<code>filebeat</code>在安装的时候，要求填写配置文件，我们就可以让<code>adapter</code>来自动化生成配置或更新配置</p>
+<h3><span id="zhang-hao-he-ce-lue-de-chuang-jian-geng-xin">账号和策略的创建更新</span><a href="#zhang-hao-he-ce-lue-de-chuang-jian-geng-xin" class="header-anchor">#</a></h3><p>像<code>kubernetes</code>、<code>mysql</code>、<code>mongo</code>，我们可以在安装的时候通过<code>adapter</code>来自动化创建或更新</p>
+<h2><span id="dui-wai-bao-lu-shi-feng-zhuang-yi-ceng-jie-kou">对外暴露时封装一层接口</span><a href="#dui-wai-bao-lu-shi-feng-zhuang-yi-ceng-jie-kou" class="header-anchor">#</a></h2><p>封装接口常用于中间件的提供者，出于种种原因，如中间件原本接口能力太大、中间件原本接口未做权限控制、中间件原本接口未适配期望的权限框架等。我们可以用<code>adapter</code>封装实现一层新的接口对外暴露。</p>
+<h2><span id="ying-yong-cheng-xu-he-zhong-jian-jian-de-fu-wu-fa-xian">应用程序和中间件的服务发现</span><a href="#ying-yong-cheng-xu-he-zhong-jian-jian-de-fu-wu-fa-xian" class="header-anchor">#</a></h2><h3><span id="ying-yong-cheng-xu-fa-xian-zhong-jian-jian">应用程序发现中间件</span><a href="#ying-yong-cheng-xu-fa-xian-zhong-jian-jian" class="header-anchor">#</a></h3><p>应用程序与中间件的连接，说的简单一点就是如何获取<code>Ip</code>，如果是基于kubernetes的部署，那么不推荐配置<code>Ip</code>，最好是配置域名，因为<code>Ip</code>会跟着容器的生命周期变化。首先，你的应用程序并不会因为中间件的一个容器重启了来重建客户端，往往是通过一个简单重连的方式连接到新的中间件容器继续工作。其次，我们的运维人员也不会每时每刻盯着容器Ip是否变化来进行配置吧。以下图为例，域名的配置要优于Ip的配置。</p>
+<p><img src="/middleware-adapter-paradigm/application-discover-middleware.png" alt="application-discover-middleware"></p>
+<p>截止到目前，我们只需要一个静态配置，使得应用程序可以连接到中间件。最好这个配置是可以修改的，这样我们还可以继承蓝绿、灰度发布的能力。</p>
+<h3><span id="zhong-jian-jian-dao-ye-wu-cheng-xu-de-fa-xian">中间件到业务程序的发现</span><a href="#zhong-jian-jian-dao-ye-wu-cheng-xu-de-fa-xian" class="header-anchor">#</a></h3><p>这个模式常用于负载均衡中间件如<code>Lvs</code>、<code>Nginx</code>自动维护后端列表，我们可以通过<code>adapter</code>来从注册中心获取后端服务的实例信息，并实时更新。</p>
+<h2><span id="zong-jie">总结</span><a href="#zong-jie" class="header-anchor">#</a></h2><p>在商用系统中，中间件并没有想象中的那么开箱即用，本文讲述了一些中间件集成到商用系统中需要具备的能力。在对中间件侵入式修改没有技术能力或不想对中间件进行侵入式修改的场景。选用团队常用的、占用资源少的语言来开发中间件<code>adapter</code>应该是更好的选择。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/middleware/" rel="tag"># middleware</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/filebeat/filebeat-output-websocket/" rel="prev" title="开发一个filebeat output websocket插件">
+                  <i class="fa fa-angle-left"></i> 开发一个filebeat output websocket插件
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/code/java/java-metrics-statistic/" rel="next" title="java-metrics-statistic">
+                  java-metrics-statistic <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    
+  
+  <div class="comments giscus-container">
+  </div>
+  
+  
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2023</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">shoothzj</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+
+
+
+
+<script class="next-config" data-name="giscus" type="application/json">{"enable":true,"repo":"shoothzj/shoothzj.github.io","repo_id":"R_kgDOIuCX3w","category":"Announcements","category_id":"DIC_kwDOIuCX384Ca5FJ","mapping":"title","reactions_enabled":1,"emit_metadata":1,"theme":"light","lang":"en","crossorigin":"anonymous","input_position":"bottom","loading":"lazy"}</script>
+
+<script>
+document.addEventListener('page:loaded', () => {
+  if (!CONFIG.page.comments) return;
+
+  NexT.utils.loadComments('.giscus-container')
+    .then(() => NexT.utils.getScript('https://giscus.app/client.js', {
+      attributes: {
+        async                   : true,
+        crossOrigin             : 'anonymous',
+        'data-repo'             : CONFIG.giscus.repo,
+        'data-repo-id'          : CONFIG.giscus.repo_id,
+        'data-category'         : CONFIG.giscus.category,
+        'data-category-id'      : CONFIG.giscus.category_id,
+        'data-mapping'          : CONFIG.giscus.mapping,
+        'data-reactions-enabled': CONFIG.giscus.reactions_enabled,
+        'data-emit-metadata'    : CONFIG.giscus.emit_metadata,
+        'data-theme'            : CONFIG.giscus.theme,
+        'data-lang'             : CONFIG.giscus.lang,
+        'data-input-position'   : CONFIG.giscus.input_position,
+        'data-loading'          : CONFIG.giscus.loading
+      },
+      parentNode: document.querySelector('.giscus-container')
+    }));
+});
+</script>
+
+</body>
+</html>

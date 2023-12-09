@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha256-yIDrPSXHZdOZhAqiBP7CKzIwMQmRCJ8UeB8Jo17YC4o=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"shoothzj.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.19.1","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"style":null,"show_result":false},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="大型系统中的证书管理#随着安全的要求，现在我们在越来越多的通信中使用TLS加密。下图是一个微服务架构下数据流向的例子   蓝色部分，即和三方交互时需要TLS加密认证 红色部分，各个微服务、消息中间件等通信需要TLS加密认证 绿色部分，各个微服务和存储层通信也需要TLS加密认证  安全上对我们的要求逐步变化为，仅蓝色使用TLS&#x3D;》蓝色和红色使用TLS&#x3D;》全部使用TLS加密 证书管">
+<meta property="og:type" content="article">
+<meta property="og:title" content="大型系统中的证书管理">
+<meta property="og:url" content="https://shoothzj.github.io/security/cert-manager/index.html">
+<meta property="og:site_name" content="张俭的博客">
+<meta property="og:description" content="大型系统中的证书管理#随着安全的要求，现在我们在越来越多的通信中使用TLS加密。下图是一个微服务架构下数据流向的例子   蓝色部分，即和三方交互时需要TLS加密认证 红色部分，各个微服务、消息中间件等通信需要TLS加密认证 绿色部分，各个微服务和存储层通信也需要TLS加密认证  安全上对我们的要求逐步变化为，仅蓝色使用TLS&#x3D;》蓝色和红色使用TLS&#x3D;》全部使用TLS加密 证书管">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://shoothzj.github.io/security/cert-manager/cert-manager1.png">
+<meta property="og:image" content="https://shoothzj.github.io/security/cert-manager/cert-manager2.png">
+<meta property="og:image" content="https://shoothzj.github.io/security/cert-manager/cert-manager3.png">
+<meta property="og:image" content="https://shoothzj.github.io/security/cert-manager/cert-manager4.png">
+<meta property="og:image" content="https://shoothzj.github.io/security/cert-manager/cert-manager5.png">
+<meta property="article:published_time" content="2021-05-30T22:47:05.000Z">
+<meta property="article:modified_time" content="2023-12-09T14:35:06.235Z">
+<meta property="article:author" content="shoothzj">
+<meta property="article:tag" content="cert">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://shoothzj.github.io/security/cert-manager/cert-manager1.png">
+
+
+<link rel="canonical" href="https://shoothzj.github.io/security/cert-manager/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://shoothzj.github.io/security/cert-manager/","path":"security/cert-manager/","title":"大型系统中的证书管理"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>大型系统中的证书管理 | 张俭的博客</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">张俭的博客</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">1.</span> <span class="nav-text">大型系统中的证书管理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">1.1.</span> <span class="nav-text">证书管理的必要性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">1.2.</span> <span class="nav-text">证书管理概念</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">1.2.1.</span> <span class="nav-text">加密证书</span></a></li><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">1.2.2.</span> <span class="nav-text">验证证书</span></a></li><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">1.2.3.</span> <span class="nav-text">拆分为加密流程和验证流程的合理性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">1.2.4.</span> <span class="nav-text">Scene</span></a></li><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">1.2.5.</span> <span class="nav-text">多集群管理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">1.2.6.</span> <span class="nav-text">对小型系统的建议</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">1.3.</span> <span class="nav-text">证书管理的功能</span></a></li><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">1.4.</span> <span class="nav-text">证书管理场景</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">1.4.1.</span> <span class="nav-text">设定一个TLS会话</span></a></li><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">1.4.2.</span> <span class="nav-text">使用TLS会话</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">1.5.</span> <span class="nav-text">组织架构相关</span></a></li><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">1.6.</span> <span class="nav-text">TLDR</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">shoothzj</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">60</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">31</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/shoothzj" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;shoothzj" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/shoothzj" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;shoothzj" rel="noopener me" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/security/cert-manager/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="shoothzj">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="大型系统中的证书管理 | 张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          大型系统中的证书管理
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-05-30 22:47:05" itemprop="dateCreated datePublished" datetime="2021-05-30T22:47:05+00:00">2021-05-30</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-12-09 14:35:06" itemprop="dateModified" datetime="2023-12-09T14:35:06+00:00">2023-12-09</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h1><span id="da-xing-xi-tong-zhong-de-zheng-shu-guan-li">大型系统中的证书管理</span><a href="#da-xing-xi-tong-zhong-de-zheng-shu-guan-li" class="header-anchor">#</a></h1><p>随着安全的要求，现在我们在越来越多的通信中使用TLS加密。下图是一个微服务架构下数据流向的例子</p>
+<p><img src="/security/cert-manager/cert-manager1.png" alt="cert-manager1"></p>
+<ul>
+<li>蓝色部分，即和三方交互时需要TLS加密认证</li>
+<li>红色部分，各个微服务、消息中间件等通信需要TLS加密认证</li>
+<li>绿色部分，各个微服务和存储层通信也需要TLS加密认证</li>
+</ul>
+<p>安全上对我们的要求逐步变化为，仅蓝色使用TLS&#x3D;》蓝色和红色使用TLS&#x3D;》全部使用TLS加密</p>
+<h2><span id="zheng-shu-guan-li-de-bi-yao-xing">证书管理的必要性</span><a href="#zheng-shu-guan-li-de-bi-yao-xing" class="header-anchor">#</a></h2><p>从安全的角度上来说，我们最好能支持证书的更换和热加载。如果您的业务当前使用加密的场景不多，可能暂时看不到证书管理的意义。但是当你在各个方面使用TLS更加频繁之后，会发现证书管理可带来如下好处：</p>
+<ul>
+<li>可以通过抽象出场景，通过场景和证书的关联联系，在各个地方通信使用的证书，可以统一更换。</li>
+<li>统一提供证书过期告警等功能</li>
+<li>统一提供证书的变更通知，通知到各个实例</li>
+</ul>
+<p>以我在工作中接触到的两个基础PAAS平台，都有证书管理的功能，可见证书管理的必要性。</p>
+<p>PS: 开源组件大多都拥有证书配置能力，没有可对接证书管理的能力，但这个能力很难贡献给社区，需要自己开发。</p>
+<h2><span id="zheng-shu-guan-li-gai-nian">证书管理概念</span><a href="#zheng-shu-guan-li-gai-nian" class="header-anchor">#</a></h2><p>在TLS会话中，从依赖的证书文件角度来看，可以分为加密流程和验证流程。</p>
+<h3><span id="jia-mi-zheng-shu">加密证书</span><a href="#jia-mi-zheng-shu" class="header-anchor">#</a></h3><p>TLS加密流程的证书，包含证书链文件和密钥</p>
+<h3><span id="yan-zheng-zheng-shu">验证证书</span><a href="#yan-zheng-zheng-shu" class="header-anchor">#</a></h3><p>TLS验证流程的证书，仅包含证书链文件</p>
+<h3><span id="chai-fen-wei-jia-mi-liu-cheng-he-yan-zheng-liu-cheng-de-he-li-xing">拆分为加密流程和验证流程的合理性</span><a href="#chai-fen-wei-jia-mi-liu-cheng-he-yan-zheng-liu-cheng-de-he-li-xing" class="header-anchor">#</a></h3><p>这使得加密流程证书和验证流程证书可以互相独立的替换，更方便在大型场景下复用证书。</p>
+<p>让我们来假设如下的场景：</p>
+<p><img src="/security/cert-manager/cert-manager2.png" alt="cert-manager2"></p>
+<p>客户A、客户B、客户C、客户D的验证流程证书自然不相同，但服务跟客户交互的时候，使用的加密流程证书确实同一份。如果将两个阶段的证书合一，那么在更换证书的时候，就需要更新4份数据，当你有1000名用户的时候，这个数字将会是1000，这对于存储和应用程序来说都是不小的冲击。</p>
+<h3><span id="scene">Scene</span><a href="#scene" class="header-anchor">#</a></h3><p>Scene是在一个会话中，代表会话和请求证书、验证证书的绑定关系。Scene和请求证书、验证证书都是1：1的关系。这使得我们不仅仅可以修改证书文件，也可以对TLS会话中使用的证书进行修改。在证书无法复用，且证书绑定了多个场景的时候，针对单个场景修改其绑定的证书。</p>
+<p>以上图作为例子，假设客户D有特殊的要求，要求加密流程使用特定的证书或密钥，我们就可以将客户D的场景绑定到客户D独有的加密证书</p>
+<h3><span id="duo-ji-qun-guan-li">多集群管理</span><a href="#duo-ji-qun-guan-li" class="header-anchor">#</a></h3><p>如果证书管理需要管理多个集群，那么证书和Scene前面可以加上层级来隔离，如环境、集群等。</p>
+<h3><span id="dui-xiao-xing-xi-tong-de-jian-yi">对小型系统的建议</span><a href="#dui-xiao-xing-xi-tong-de-jian-yi" class="header-anchor">#</a></h3><p>如果规模不大，且TLS场景有限，需要考虑一下有无拆分加密证书和验证证书的必要，可以合一，应用程序直接以合一的证书id来关联，而非场景id。虽不方便复用，但大大降低了复杂性。</p>
+<h2><span id="zheng-shu-guan-li-de-gong-neng">证书管理的功能</span><a href="#zheng-shu-guan-li-de-gong-neng" class="header-anchor">#</a></h2><p><img src="/security/cert-manager/cert-manager3.png" alt="cert-manager3"></p>
+<h2><span id="zheng-shu-guan-li-chang-jing">证书管理场景</span><a href="#zheng-shu-guan-li-chang-jing" class="header-anchor">#</a></h2><h3><span id="she-ding-yi-ge-tls-hui-hua">设定一个TLS会话</span><a href="#she-ding-yi-ge-tls-hui-hua" class="header-anchor">#</a></h3><p><img src="/security/cert-manager/cert-manager4.png" alt="cert-manager4"></p>
+<h3><span id="shi-yong-tls-hui-hua">使用TLS会话</span><a href="#shi-yong-tls-hui-hua" class="header-anchor">#</a></h3><p>这要求应用程序持久化场景信息</p>
+<p><img src="/security/cert-manager/cert-manager5.png" alt="cert-manager5"></p>
+<h2><span id="zu-zhi-jia-gou-xiang-guan">组织架构相关</span><a href="#zu-zhi-jia-gou-xiang-guan" class="header-anchor">#</a></h2><p>大型系统下，证书管理是一个必须的组件，且一定是由团队最底层的组织架构承接。如若不然，那么由底层组织架构维护的组件，因为依赖关系，无法基于证书管理来统一实现证书的更换和过期告警。除非不基于证书管理自己构筑一套能力。</p>
+<h2><span id="tldr">TLDR</span><a href="#tldr" class="header-anchor">#</a></h2><p>随着组件和使用加密场景的不断扩大，证书管理是一个必须的组件，通过抽象出场景的概念来复用证书，通过变更通知在微服务模式下快速更换所有微服务实例上的证书，并提供统一的证书过期告警功能来提醒管理员更换证书。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/cert/" rel="tag"># cert</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/config/business-config-center-impl/" rel="prev" title="business-config-center-impl">
+                  <i class="fa fa-angle-left"></i> business-config-center-impl
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/filebeat/filebeat-output-websocket/" rel="next" title="开发一个filebeat output websocket插件">
+                  开发一个filebeat output websocket插件 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    
+  
+  <div class="comments giscus-container">
+  </div>
+  
+  
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2023</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">shoothzj</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+
+
+
+
+<script class="next-config" data-name="giscus" type="application/json">{"enable":true,"repo":"shoothzj/shoothzj.github.io","repo_id":"R_kgDOIuCX3w","category":"Announcements","category_id":"DIC_kwDOIuCX384Ca5FJ","mapping":"title","reactions_enabled":1,"emit_metadata":1,"theme":"light","lang":"en","crossorigin":"anonymous","input_position":"bottom","loading":"lazy"}</script>
+
+<script>
+document.addEventListener('page:loaded', () => {
+  if (!CONFIG.page.comments) return;
+
+  NexT.utils.loadComments('.giscus-container')
+    .then(() => NexT.utils.getScript('https://giscus.app/client.js', {
+      attributes: {
+        async                   : true,
+        crossOrigin             : 'anonymous',
+        'data-repo'             : CONFIG.giscus.repo,
+        'data-repo-id'          : CONFIG.giscus.repo_id,
+        'data-category'         : CONFIG.giscus.category,
+        'data-category-id'      : CONFIG.giscus.category_id,
+        'data-mapping'          : CONFIG.giscus.mapping,
+        'data-reactions-enabled': CONFIG.giscus.reactions_enabled,
+        'data-emit-metadata'    : CONFIG.giscus.emit_metadata,
+        'data-theme'            : CONFIG.giscus.theme,
+        'data-lang'             : CONFIG.giscus.lang,
+        'data-input-position'   : CONFIG.giscus.input_position,
+        'data-loading'          : CONFIG.giscus.loading
+      },
+      parentNode: document.querySelector('.giscus-container')
+    }));
+});
+</script>
+
+</body>
+</html>

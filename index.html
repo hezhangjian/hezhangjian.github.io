@@ -146,13 +146,13 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">30</span>
+          <span class="site-state-item-count">60</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-count">31</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -177,6 +177,97 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/ignite/ignite-huaweicloud-usage/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="shoothzj">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/ignite/ignite-huaweicloud-usage/" class="post-title-link" itemprop="url">Apache Ignite在华为云IoT服务产品部的使用</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-12-07 14:01:05" itemprop="dateCreated datePublished" datetime="2023-12-07T14:01:05+00:00">2023-12-07</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-12-09 14:35:06" itemprop="dateModified" datetime="2023-12-09T14:35:06+00:00">2023-12-09</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1><span id="apache-ignite-jian-jie">Apache Ignite简介</span><a href="#apache-ignite-jian-jie" class="header-anchor">#</a></h1><p>Apache Ignite是一个开源分布式的数据库、缓存和计算平台。它的核心是一个内存数据网格，它可以将内存作为分布式的持久化存储，以提供高性能和可扩展性。它还提供了一个分布式的键值存储、SQL数据库、流式数据处理和复杂的事件处理等功能。</p>
+<p>Ignite的核心竞争力包括：</p>
+<ul>
+<li>兼容Mysql、Oracle语法</li>
+<li>性能强大，可以水平扩展</li>
+<li>缓存与数据库同源，可通过KV、SQL、JDBC、ODBC等方式访问</li>
+</ul>
+<p>同时，为了便于开发，除了jdbc、odbc、restful方式外，Ignite还官方提供了Java、C++、.Net、Python、Node.js、PHP等语言的客户端，可以方便的与Ignite进行交互。</p>
+<p><img src="/ignite-storage-access" alt="ignite-storage-access"></p>
+<h1><span id="apache-ignite-de-wen-ti">Apache Ignite的问题</span><a href="#apache-ignite-de-wen-ti" class="header-anchor">#</a></h1><h2><span id="pin-fan-chuang-jian-shan-chu-biao-dao-zhi-ignite-discovery-history-size-chao-guo-xian-zhi">频繁创建删除表，导致IGNITE_DISCOVERY_HISTORY_SIZE超过限制</span><a href="#pin-fan-chuang-jian-shan-chu-biao-dao-zhi-ignite-discovery-history-size-chao-guo-xian-zhi" class="header-anchor">#</a></h2><p>根据Ignite2的拓扑模型，集群的拓扑版本会在创建表&#x2F;删除表的时候发生变化，该变化版本号递增，且仅会保留最近$IgniteDiscoveryHistorySize条记录，程序某处会写死读取版本为0的数据，读取不到时，ignite集群会重启。默认值为500。<br>社区issue: <a target="_blank" rel="noopener" href="https://github.com/apache/ignite/issues/10894">https://github.com/apache/ignite/issues/10894</a><br>笔者暂时没有时间来修复这个issue，可以通过将IGNITE_DISCOVERY_HISTORY_SIZE设置地比较大，来规避这个问题。</p>
+<h2><span id="ignite2-ke-hu-duan-yi-yong-xing-wen-ti">Ignite2客户端易用性问题</span><a href="#ignite2-ke-hu-duan-yi-yong-xing-wen-ti" class="header-anchor">#</a></h2><h3><span id="ignite2-ke-hu-duan-chao-shi-mo-ren-zhi-bu-he-li">Ignite2客户端超时默认值不合理</span><a href="#ignite2-ke-hu-duan-chao-shi-mo-ren-zhi-bu-he-li" class="header-anchor">#</a></h3><p>Ignite2客户端的连接超时、执行sql超时默认都是0，没有精心研究过配置的用户在异常场景下，应用程序可能会hang住。从易用性的角度来说，网络通信的任何操作，默认都应该有超时时间。</p>
+<h3><span id="ignite2-ke-hu-duan-bu-zhi-chi-yong-yuan-de-chong-shi">Ignite2客户端不支持永远的重试</span><a href="#ignite2-ke-hu-duan-bu-zhi-chi-yong-yuan-de-chong-shi" class="header-anchor">#</a></h3><p>Ignite通过预先计算出所有需要重连的时间点来实现重连，如果想配置成永远的重连，会因为时间点的计算导致内存溢出。从易用性的角度来说，应该支持永远的重连。</p>
+<h2><span id="ignite2-ke-hu-duan-zai-mou-xie-yi-chang-xia-wu-fa-zi-yu">Ignite2客户端在某些异常下无法自愈</span><a href="#ignite2-ke-hu-duan-zai-mou-xie-yi-chang-xia-wu-fa-zi-yu" class="header-anchor">#</a></h2><p>当client执行sql的时候，碰到如下异常的时候，无法自愈。可以通过执行SQL对client进行定期检查并重建。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Caused by: org.apache.ignite.internal.client.thin.ClientServerError: Ignite failed to process request [47]: 50000: Can not perform the operation because the cluster is inactive. Note, that the cluster is considered inactive by default if Ignite Persistent Store is used to let all the nodes join the cluster. To activate the cluster call Ignite.cluster.state(ClusterState.ACTIVE)</span><br></pre></td></tr></table></figure>
+
+<h2><span id="ignite2-socketchannel-xie-lu-wen-ti">Ignite2 SocketChannel泄露问题</span><a href="#ignite2-socketchannel-xie-lu-wen-ti" class="header-anchor">#</a></h2><p>Ignite客户端在连接时，如果对应的Server端没有启动，会导致SocketChannel泄露，已由笔者提交代码修复：<a target="_blank" rel="noopener" href="https://github.com/apache/ignite/pull/11016/files">https://github.com/apache/ignite/pull/11016/files</a></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -222,7 +313,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-09 06:00:45" itemprop="dateModified" datetime="2023-12-09T06:00:45+00:00">2023-12-09</time>
+      <time title="修改时间：2023-12-09 14:35:06" itemprop="dateModified" datetime="2023-12-09T14:35:06+00:00">2023-12-09</time>
     </span>
 
   
@@ -273,7 +364,7 @@
 
 <h1><span id="go">Go</span><a href="#go" class="header-anchor">#</a></h1><h2><span id="golangci-lint">golangci-lint</span><a href="#golangci-lint" class="header-anchor">#</a></h2><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">name:</span> <span class="string">go</span> <span class="string">ci</span> <span class="string">Lint</span></span><br><span class="line"><span class="attr">on:</span></span><br><span class="line">  <span class="attr">push:</span></span><br><span class="line">    <span class="attr">branches:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">main</span></span><br><span class="line">  <span class="attr">pull_request:</span></span><br><span class="line">    <span class="attr">branches:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">main</span></span><br><span class="line"><span class="attr">jobs:</span></span><br><span class="line">  <span class="attr">golangci:</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">lint</span></span><br><span class="line">    <span class="attr">runs-on:</span> <span class="string">ubuntu-latest</span></span><br><span class="line">    <span class="attr">steps:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">uses:</span> <span class="string">actions/checkout@v4</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">uses:</span> <span class="string">actions/setup-go@v4</span></span><br><span class="line">        <span class="attr">with:</span></span><br><span class="line">          <span class="attr">go-version:</span> <span class="string">&#x27;1.21&#x27;</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">golangci-lint</span></span><br><span class="line">        <span class="attr">uses:</span> <span class="string">golangci/golangci-lint-action@v3</span></span><br><span class="line">        <span class="attr">with:</span></span><br><span class="line">          <span class="attr">version:</span> <span class="string">latest</span></span><br><span class="line">          <span class="attr">args:</span> <span class="string">--timeout</span> <span class="string">3m0s</span></span><br></pre></td></tr></table></figure>
 
-<h2><span id="go-mod-check">go mod check</span><a href="#go-mod-check" class="header-anchor">#</a></h2><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">name:</span> <span class="string">go</span> <span class="string">mod</span> <span class="string">check</span></span><br><span class="line"></span><br><span class="line"><span class="attr">on:</span></span><br><span class="line">  <span class="attr">push:</span></span><br><span class="line">    <span class="attr">branches:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">main</span></span><br><span class="line">  <span class="attr">pull_request:</span></span><br><span class="line">    <span class="attr">branches:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">main</span></span><br><span class="line"></span><br><span class="line"><span class="attr">jobs:</span></span><br><span class="line">  <span class="attr">go_mod_check:</span></span><br><span class="line">    <span class="attr">runs-on:</span> <span class="string">ubuntu-latest</span></span><br><span class="line">    <span class="attr">steps:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">uses:</span> <span class="string">actions/checkout@v4</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Run</span> <span class="string">Go</span> <span class="string">Mod</span> <span class="string">Check</span> <span class="string">Action</span></span><br><span class="line">        <span class="attr">uses:</span> <span class="string">Shoothzj/go-mod-check-action@main</span></span><br><span class="line">        <span class="attr">with:</span></span><br><span class="line">          <span class="attr">prohibitIndirectDepUpdate:</span> <span class="string">&#x27;true&#x27;</span></span><br></pre></td></tr></table></figure>
+<h2><span id="go-mod-check">go mod check</span><a href="#go-mod-check" class="header-anchor">#</a></h2><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">name:</span> <span class="string">go</span> <span class="string">mod</span> <span class="string">check</span></span><br><span class="line"></span><br><span class="line"><span class="attr">on:</span></span><br><span class="line">  <span class="attr">push:</span></span><br><span class="line">    <span class="attr">branches:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">main</span></span><br><span class="line">  <span class="attr">pull_request:</span></span><br><span class="line">    <span class="attr">branches:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">main</span></span><br><span class="line"></span><br><span class="line"><span class="attr">jobs:</span></span><br><span class="line">  <span class="attr">go_mod_check:</span></span><br><span class="line">    <span class="attr">runs-on:</span> <span class="string">ubuntu-latest</span></span><br><span class="line">    <span class="attr">steps:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">uses:</span> <span class="string">actions/checkout@v4</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Run</span> <span class="string">Go</span> <span class="string">Mod</span> <span class="string">Check</span> <span class="string">Action</span></span><br><span class="line">        <span class="attr">uses:</span> <span class="string">shoothzj/go-mod-check-action@main</span></span><br><span class="line">        <span class="attr">with:</span></span><br><span class="line">          <span class="attr">prohibitIndirectDepUpdate:</span> <span class="string">&#x27;true&#x27;</span></span><br></pre></td></tr></table></figure>
 
 <h2><span id="go-unit-tests">go unit tests</span><a href="#go-unit-tests" class="header-anchor">#</a></h2><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">name:</span> <span class="string">go</span> <span class="string">unit</span> <span class="string">test</span></span><br><span class="line"></span><br><span class="line"><span class="attr">on:</span></span><br><span class="line">  <span class="attr">push:</span></span><br><span class="line">    <span class="attr">branches:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">main</span></span><br><span class="line">  <span class="attr">pull_request:</span></span><br><span class="line">    <span class="attr">branches:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">main</span></span><br><span class="line"></span><br><span class="line"><span class="attr">jobs:</span></span><br><span class="line">  <span class="attr">go_unit_test:</span></span><br><span class="line">    <span class="attr">runs-on:</span> <span class="string">ubuntu-latest</span></span><br><span class="line">    <span class="attr">steps:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">uses:</span> <span class="string">actions/checkout@v4</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">uses:</span> <span class="string">actions/setup-go@v4</span></span><br><span class="line">        <span class="attr">with:</span></span><br><span class="line">          <span class="attr">go-version:</span> <span class="string">&#x27;1.21&#x27;</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">setup</span> <span class="string">OpenGemini</span></span><br><span class="line">        <span class="attr">uses:</span> <span class="string">shoothzj/setup-opengemini-action@main</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Run</span> <span class="string">coverage</span></span><br><span class="line">        <span class="attr">run:</span> <span class="string">go</span> <span class="string">test</span> <span class="string">./...</span> <span class="string">-coverpkg=./padmin/...</span> <span class="string">-race</span> <span class="string">-coverprofile=coverage.out</span> <span class="string">-covermode=atomic</span></span><br></pre></td></tr></table></figure>
 
@@ -348,7 +439,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-09 06:00:45" itemprop="dateModified" datetime="2023-12-09T06:00:45+00:00">2023-12-09</time>
+      <time title="修改时间：2023-12-09 14:35:06" itemprop="dateModified" datetime="2023-12-09T14:35:06+00:00">2023-12-09</time>
     </span>
 
   
@@ -478,7 +569,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-09 06:00:45" itemprop="dateModified" datetime="2023-12-09T06:00:45+00:00">2023-12-09</time>
+      <time title="修改时间：2023-12-09 14:35:06" itemprop="dateModified" datetime="2023-12-09T14:35:06+00:00">2023-12-09</time>
     </span>
 
   
@@ -574,7 +665,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-09 06:00:45" itemprop="dateModified" datetime="2023-12-09T06:00:45+00:00">2023-12-09</time>
+      <time title="修改时间：2023-12-09 14:35:06" itemprop="dateModified" datetime="2023-12-09T14:35:06+00:00">2023-12-09</time>
     </span>
 
   
@@ -667,7 +758,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-09 06:00:45" itemprop="dateModified" datetime="2023-12-09T06:00:45+00:00">2023-12-09</time>
+      <time title="修改时间：2023-12-09 14:35:06" itemprop="dateModified" datetime="2023-12-09T14:35:06+00:00">2023-12-09</time>
     </span>
 
   
@@ -868,7 +959,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-09 06:00:45" itemprop="dateModified" datetime="2023-12-09T06:00:45+00:00">2023-12-09</time>
+      <time title="修改时间：2023-12-09 14:35:06" itemprop="dateModified" datetime="2023-12-09T14:35:06+00:00">2023-12-09</time>
     </span>
 
   
@@ -1025,7 +1116,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-09 06:00:45" itemprop="dateModified" datetime="2023-12-09T06:00:45+00:00">2023-12-09</time>
+      <time title="修改时间：2023-12-09 14:35:06" itemprop="dateModified" datetime="2023-12-09T14:35:06+00:00">2023-12-09</time>
     </span>
 
   
@@ -1107,7 +1198,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-09 06:00:45" itemprop="dateModified" datetime="2023-12-09T06:00:45+00:00">2023-12-09</time>
+      <time title="修改时间：2023-12-09 14:35:06" itemprop="dateModified" datetime="2023-12-09T14:35:06+00:00">2023-12-09</time>
     </span>
 
   
@@ -1191,7 +1282,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-09 06:00:45" itemprop="dateModified" datetime="2023-12-09T06:00:45+00:00">2023-12-09</time>
+      <time title="修改时间：2023-12-09 14:35:06" itemprop="dateModified" datetime="2023-12-09T14:35:06+00:00">2023-12-09</time>
     </span>
 
   
@@ -1232,122 +1323,8 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/code/java/java-http-sdk-design/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="shoothzj">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/code/java/java-http-sdk-design/" class="post-title-link" itemprop="url">Java Http SDK设计</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2023-10-27 20:37:49" itemprop="dateCreated datePublished" datetime="2023-10-27T20:37:49+00:00">2023-10-27</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-09 06:00:45" itemprop="dateModified" datetime="2023-12-09T06:00:45+00:00">2023-12-09</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <div class="toc">
-
-<!-- toc -->
-
-<ul>
-<li><a href="#java-http-sdk-she-ji">Java Http SDK设计</a><ul>
-<li><a href="#maven-mo-kuai-she-ji">maven模块设计</a></li>
-</ul>
-</li>
-</ul>
-<!-- tocstop -->
-
-</div>
-
-<h1><span id="java-http-sdk-she-ji">Java Http SDK设计</span><a href="#java-http-sdk-she-ji" class="header-anchor">#</a></h1><p>根据Java项目的需求和特性，可以为Java的Http SDK项目选择以下命名方式：</p>
-<ul>
-<li><code>xxx-client-java</code>：如果这个项目只有Http SDK，没有其他协议的SDK，推荐使用这个命名方式。</li>
-<li><code>xxx-http-client-java</code>：当存在其他协议的SDK时，可以使用这个命名方式，以区分不同协议的SDK。</li>
-<li><code>xxx-admin-java</code>：当项目使用其他协议作为数据通道，使用HTTP协议作为管理通道时，可以使用这个命名方式。</li>
-</ul>
-<h2><span id="maven-mo-kuai-she-ji">maven模块设计</span><a href="#maven-mo-kuai-she-ji" class="header-anchor">#</a></h2><p>maven module命名可以叫xxx-client或者xxx-http-client，这通常取决于你的项目是否有其他协议的client，如果没有，那么推荐直接使用xxx-client。</p>
-<p>假设包名前缀为com.xxx，module视图如下:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">xxx-client-java(maven artifactId: xxx-client-parent)/</span><br><span class="line">|-- xxx-client-api(接口定义，包名com.xxx.client.api，jdk8+)</span><br><span class="line">|-- xxx-client-common/core(核心实现，包名com.xxx.client.common，jdk8+)</span><br><span class="line">|-- xxx-client-jdk(基于jdk http client的实现，包名com.xxx.client.jdk，jdk17+)</span><br><span class="line">|-- xxx-client-okhttp(基于okhttp的实现，包名com.xxx.client.okhttp，jdk8+)</span><br><span class="line">|-- xxx-client-reactor(基于reactor-netty的实现，包名com.xxx.client.reactor，jdk8+)</span><br></pre></td></tr></table></figure>
-
-<p>依赖关系图:</p>
-<pre class="mermaid">graph TD
-api[xxx-client-api]
-common[xxx-client-common]
-jdk[xxx-client-jdk]
-okhttp[xxx-client-okhttp]
-reactor[xxx-client-reactor]
-
-common --> api
-
-jdk --> common
-okhttp --> common
-reactor --> common</pre>
-
-
-<script type="module"> import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.esm.min.mjs';	mermaid.initialize({startOnLoad: true, flowchart: {curve: 'linear'}}); </script>
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" title="下一页" aria-label="下一页" href="/page/2/"><i class="fa fa-angle-right"></i></a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><a class="extend next" rel="next" title="下一页" aria-label="下一页" href="/page/2/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 </div>

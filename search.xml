@@ -358,6 +358,16 @@
 ]]></content>
   </entry>
   <entry>
+    <title>敏感信息打印大全</title>
+    <url>/%E6%95%8F%E6%84%9F%E4%BF%A1%E6%81%AF%E6%89%93%E5%8D%B0%E5%A4%A7%E5%85%A8/</url>
+    <content><![CDATA[<h2><span id="java">Java</span><a href="#java" class="header-anchor">#</a></h2><h2><span id="apache-http-client">Apache http client</span><a href="#apache-http-client" class="header-anchor">#</a></h2><h3><span id="wire-log">Wire log</span><a href="#wire-log" class="header-anchor">#</a></h3><p>Apache http client会打印请求和响应的wire log，包含请求和响应的header和body，打印在debug级别。</p>
+<p>Apache http client的日志都通过<code>org.apache.http.wire</code>这个logger打印，可以通过配置这个logger来控制wire log的打印。</p>
+<p>注：Apache http client默认通过apache common logging来打印日志，可以通过配置</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.slf4j<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>jcl-over-slf4j<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.7.32<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>来使用slf4j来打印日志。</p>
+]]></content>
+  </entry>
+  <entry>
     <title>提升网络协议服务器的定位能力</title>
     <url>/%E6%8F%90%E5%8D%87%E7%BD%91%E7%BB%9C%E5%8D%8F%E8%AE%AE%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%AE%9A%E4%BD%8D%E8%83%BD%E5%8A%9B/</url>
     <content><![CDATA[<p>近期，我再次涉足于协议服务器相关的工作领域，致力于定位并解决各种问题。简单总结一些心得给大家。如果想要定位出协议服务器的问题，那么这些能力可能至关重要。</p>
@@ -390,16 +400,6 @@
 <h3><span id="guo-lu-tiao-jian-de-she-ding">过滤条件的设定</span><a href="#guo-lu-tiao-jian-de-she-ding" class="header-anchor">#</a></h3><p>设定过滤条件是抓包的关键，因为在实际环境中，数据流量可能非常大，如果没有过滤条件，抓包的数据量可能会非常庞大，对应用和系统的性能产生影响。在应用层，我们可以设置更多更精细的过滤条件，如网络地址、端口、协议类型、特定的字段等。这些过滤条件可以帮助我们更精确地定位问题，减少无效的数据。</p>
 <h3><span id="shu-ju-cun-chu-wen-ti">数据存储问题</span><a href="#shu-ju-cun-chu-wen-ti" class="header-anchor">#</a></h3><p>将抓到的数据存储起来也是很重要的一步。可以选择将数据存储到内存或者硬盘。需要注意的是，如果选择存储到内存，要考虑到内存的大小，避免因为抓包数据过大导致内存溢出。如果选择存储到硬盘，要考虑到硬盘的读写速度和容量，避免因为抓包数据过大导致硬盘满载。</p>
 <h2><span id="zong-jie">总结</span><a href="#zong-jie" class="header-anchor">#</a></h2><p>本文首先阐述了网络协议服务器的一些问题定位能力，包括CPU内存分析能力、日志和网络连接的关联能力、针对特征值的跟踪能力，以及查看原始报文的能力，也讨论了将网络报文与业务trace有效关联的重要性和实现挑战。强调了抓包的重要性和对于解密TLS报文的挑战。为了解决网络层抓包遇到的困难，我们可以考虑应用层抓包方案。最后，我们讨论了应用层抓包的一些关键问题，包括抓包地点的选择、过滤条件的设定和数据存储问题。</p>
-]]></content>
-  </entry>
-  <entry>
-    <title>敏感信息打印大全</title>
-    <url>/%E6%95%8F%E6%84%9F%E4%BF%A1%E6%81%AF%E6%89%93%E5%8D%B0%E5%A4%A7%E5%85%A8/</url>
-    <content><![CDATA[<h2><span id="java">Java</span><a href="#java" class="header-anchor">#</a></h2><h2><span id="apache-http-client">Apache http client</span><a href="#apache-http-client" class="header-anchor">#</a></h2><h3><span id="wire-log">Wire log</span><a href="#wire-log" class="header-anchor">#</a></h3><p>Apache http client会打印请求和响应的wire log，包含请求和响应的header和body，打印在debug级别。</p>
-<p>Apache http client的日志都通过<code>org.apache.http.wire</code>这个logger打印，可以通过配置这个logger来控制wire log的打印。</p>
-<p>注：Apache http client默认通过apache common logging来打印日志，可以通过配置</p>
-<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.slf4j<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>jcl-over-slf4j<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.7.32<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
-<p>来使用slf4j来打印日志。</p>
 ]]></content>
   </entry>
   <entry>
@@ -528,6 +528,35 @@
 ]]></content>
       <tags>
         <tag>calcite</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>异步网络请求编码</title>
+    <url>/code/async-network-code/</url>
+    <content><![CDATA[<p>本文介绍常见的异步网络请求编码手法。尽管像golang这些的语言，支持协程，可以使得Programmer以同步的方式编写代码，大大降低编码者的心智负担。但网络编程中，批量又非常常见，这就导致即使在Golang中，也不得不进行协程的切换来满足批量的诉求，在Golang中往往对外以callback的方式暴露接口。</p>
+<p>无论是callback、还是返回future、还是返回Mono&#x2F;Flux，亦或是从channel中读取，这是不同的异步编程范式，编码的时候，可以从项目整体、团队编码风格、个人喜好来依次考虑。本文将以callback为主，但移植到其他异步编码范式，并不困难。</p>
+<p>使用callback模式后，对外的方法签名类似:</p>
+<p>go</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Client)</span></span> Get(ctx context.Context, req *Request, callback <span class="function"><span class="keyword">func</span><span class="params">(resp *Response, err <span class="type">error</span>)</span></span>) <span class="type">error</span></span><br></pre></td></tr></table></figure>
+
+<p>java</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">Client</span> &#123;</span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">get</span><span class="params">(Request req, Callback callback)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2><span id="wang-luo-bian-cheng-zhong-de-pi-liang">网络编程中的批量</span><a href="#wang-luo-bian-cheng-zhong-de-pi-liang" class="header-anchor">#</a></h2><p>对于网络请求来说，批量可以提高性能。 批量处理是指将多个请求或任务组合在一起，作为单一的工作单元进行处理。批量尽量对用户透明，用户只需要简单地对批量进行配置，而不需要关心批量的实现细节。</p>
+<p>常见的批量相关配置</p>
+<ul>
+<li>batch interval: 批量的时间间隔，比如每隔1s，批量一次</li>
+<li>batch size: 批量的最大大小，比如每次最多批量100个请求</li>
+</ul>
+<p>批量可以通过定时任务实现，也可以做一些优化，比如队列中无请求时，暂停定时任务，有请求时，启动定时任务。</p>
+<h2><span id="bian-ma-xi-jie">编码细节</span><a href="#bian-ma-xi-jie" class="header-anchor">#</a></h2><p>整体流程大概如下图所示：</p>
+<p><img src="/code/async-network-code/async-network-code.png" alt="async-network-code"></p>
+<h3><span id="yi-ding-yao-xian-ba-qing-qiu-fang-dao-dui-lie-x2f-map-zhong">一定要先把请求放到队列&#x2F;map中</span><a href="#yi-ding-yao-xian-ba-qing-qiu-fang-dao-dui-lie-x2f-map-zhong" class="header-anchor">#</a></h3><p>避免网络请求响应过快，导致callback还没注册上，就已经收到响应了。</p>
+<h3><span id="dui-lie-zhong-de-xiao-xi-yi-ding-yao-you-chao-shi-ji-zhi">队列中的消息一定要有超时机制</span><a href="#dui-lie-zhong-de-xiao-xi-yi-ding-yao-you-chao-shi-ji-zhi" class="header-anchor">#</a></h3><p>避免由于丢包等原因，导致请求一直没有响应，而导致队列中的请求越来越多，最终内存溢出。</p>
+<h3><span id="wait-dui-lie-sheng-ming-zhou-qi-yu-di-ceng-wang-luo-client-sheng-ming-zhou-qi-yi-zhi">wait队列生命周期与底层网络client生命周期一致</span><a href="#wait-dui-lie-sheng-ming-zhou-qi-yu-di-ceng-wang-luo-client-sheng-ming-zhou-qi-yi-zhi" class="header-anchor">#</a></h3><p>wait队列中请求一定是依附于client的，一旦client重建，队列也需要重建，并触发callback、future的失败回调。</p>
+]]></content>
+      <tags>
+        <tag>Code</tag>
       </tags>
   </entry>
   <entry>
@@ -1354,6 +1383,33 @@
       </tags>
   </entry>
   <entry>
+    <title>linux umask 解析</title>
+    <url>/linux/linux-umask-analyze/</url>
+    <content><![CDATA[<p>什么是<strong>umask</strong>， umask即user file-creation mask. 用来控制最终创建文件的权限。</p>
+<p>umask是进程级属性，通常是由<strong>login shell</strong>设置，可以通过系统调用<strong>umask()<strong>或者命令</strong>umask permission</strong>来修改，通过umask命令来查询，linux内核版本4.7之后，还可以通过<strong>cat &#x2F;proc&#x2F;self&#x2F;status|grep -i umask</strong> 查询，示例如下</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">shoothzj:~/masktest $ <span class="built_in">umask</span></span><br><span class="line">0022</span><br><span class="line">shoothzj:~/masktest $ <span class="built_in">umask</span> 0077</span><br><span class="line">shoothzj:~/masktest $ <span class="built_in">umask</span></span><br><span class="line">0077</span><br><span class="line">shoothzj:~/masktest $ <span class="built_in">umask</span> 0022</span><br><span class="line">shoothzj:~/masktest $ <span class="built_in">umask</span></span><br><span class="line">0022</span><br><span class="line">shoothzj:~/masktest $</span><br></pre></td></tr></table></figure>
+
+<p>一般来说，umask的系统默认值在**&#x2F;etc&#x2F;login.defs** 中设置</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">shoothzj:~ <span class="variable">$cat</span> /etc/login.defs|grep -i <span class="built_in">umask</span></span><br><span class="line"><span class="comment">#	UMASK		Default &quot;umask&quot; value.</span></span><br><span class="line"><span class="comment"># UMASK is the default umask value for pam_umask and is used by</span></span><br><span class="line"><span class="comment"># 022 is the &quot;historical&quot; value in Debian for UMASK</span></span><br><span class="line"><span class="comment"># If USERGROUPS_ENAB is set to &quot;yes&quot;, that will modify this UMASK default value</span></span><br><span class="line">UMASK		022</span><br><span class="line"><span class="comment"># Other former uses of this variable such as setting the umask when</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>最常见的默认的umask值是022，目录权限755，文件权限644</li>
+<li>077 的 umask 适用于私有的系统，则其他用户无法读取或写入您的数据。</li>
+</ul>
+<p>针对标准函数<strong>open</strong>来说，最终写入磁盘的权限位是由mode参数和用户的文件创建掩码(umask)执行按位与操作而得到。</p>
+<p>假设当<strong>umask</strong>为0022时，创建一个具有0666权限的文件，就会进行运算决定文件的最终权限，先对掩码取非，再和指定的权限进行binary-And操作，如图所示</p>
+<p><img src="/linux/linux-umask-analyze/linux-umask-analyze.png" alt="linux-umask-analyze"></p>
+<p>示例代码如下</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;fcntl.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> *argv[])</span> &#123;</span><br><span class="line">    <span class="type">int</span> fd;</span><br><span class="line">    <span class="keyword">if</span> (argc != <span class="number">2</span>) &#123;</span><br><span class="line">        <span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">&quot;usage: %s &lt;file&gt;&quot;</span>, argv[<span class="number">0</span>]);</span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">fprintf</span>(<span class="built_in">stdout</span>, <span class="string">&quot;create file %s&quot;</span>, argv[<span class="number">1</span>]);</span><br><span class="line">    fd = open(argv[<span class="number">1</span>], O_WRONLY | O_CREAT | O_TRUNC, <span class="number">0666</span>);</span><br><span class="line">    <span class="keyword">if</span> (fd == <span class="number">-1</span>) &#123;</span><br><span class="line">        perror(<span class="string">&quot;open&quot;</span>);</span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    close(fd);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>结果如下，权限644，符合预期</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ll</span><br><span class="line">total 8</span><br><span class="line">drwxr-xr-x  2 shoothzj shoothzj 4096 Nov  8 06:25 .</span><br><span class="line">drwxr-xr-x 15 shoothzj shoothzj 4096 Nov  8 06:18 ..</span><br><span class="line">-rw-r--r--  1 shoothzj shoothzj    0 Nov  8 06:25 my.txt</span><br></pre></td></tr></table></figure>
+]]></content>
+      <tags>
+        <tag>linux</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>lvs-performance-manual</title>
     <url>/lvs/lvs-performance-manual/</url>
     <content><![CDATA[<h1><span id="lvs-shi-zuo-shi-me-de">lvs是做什么的</span><a href="#lvs-shi-zuo-shi-me-de" class="header-anchor">#</a></h1><p>lvs通常用做tcp&#x2F;udp协议的四层负载均衡</p>
@@ -1421,33 +1477,6 @@
 ]]></content>
       <tags>
         <tag>lvs</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>linux umask 解析</title>
-    <url>/linux/linux-umask-analyze/</url>
-    <content><![CDATA[<p>什么是<strong>umask</strong>， umask即user file-creation mask. 用来控制最终创建文件的权限。</p>
-<p>umask是进程级属性，通常是由<strong>login shell</strong>设置，可以通过系统调用<strong>umask()<strong>或者命令</strong>umask permission</strong>来修改，通过umask命令来查询，linux内核版本4.7之后，还可以通过<strong>cat &#x2F;proc&#x2F;self&#x2F;status|grep -i umask</strong> 查询，示例如下</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">shoothzj:~/masktest $ <span class="built_in">umask</span></span><br><span class="line">0022</span><br><span class="line">shoothzj:~/masktest $ <span class="built_in">umask</span> 0077</span><br><span class="line">shoothzj:~/masktest $ <span class="built_in">umask</span></span><br><span class="line">0077</span><br><span class="line">shoothzj:~/masktest $ <span class="built_in">umask</span> 0022</span><br><span class="line">shoothzj:~/masktest $ <span class="built_in">umask</span></span><br><span class="line">0022</span><br><span class="line">shoothzj:~/masktest $</span><br></pre></td></tr></table></figure>
-
-<p>一般来说，umask的系统默认值在**&#x2F;etc&#x2F;login.defs** 中设置</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">shoothzj:~ <span class="variable">$cat</span> /etc/login.defs|grep -i <span class="built_in">umask</span></span><br><span class="line"><span class="comment">#	UMASK		Default &quot;umask&quot; value.</span></span><br><span class="line"><span class="comment"># UMASK is the default umask value for pam_umask and is used by</span></span><br><span class="line"><span class="comment"># 022 is the &quot;historical&quot; value in Debian for UMASK</span></span><br><span class="line"><span class="comment"># If USERGROUPS_ENAB is set to &quot;yes&quot;, that will modify this UMASK default value</span></span><br><span class="line">UMASK		022</span><br><span class="line"><span class="comment"># Other former uses of this variable such as setting the umask when</span></span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>最常见的默认的umask值是022，目录权限755，文件权限644</li>
-<li>077 的 umask 适用于私有的系统，则其他用户无法读取或写入您的数据。</li>
-</ul>
-<p>针对标准函数<strong>open</strong>来说，最终写入磁盘的权限位是由mode参数和用户的文件创建掩码(umask)执行按位与操作而得到。</p>
-<p>假设当<strong>umask</strong>为0022时，创建一个具有0666权限的文件，就会进行运算决定文件的最终权限，先对掩码取非，再和指定的权限进行binary-And操作，如图所示</p>
-<p><img src="/linux/linux-umask-analyze/linux-umask-analyze.png" alt="linux-umask-analyze"></p>
-<p>示例代码如下</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;fcntl.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> *argv[])</span> &#123;</span><br><span class="line">    <span class="type">int</span> fd;</span><br><span class="line">    <span class="keyword">if</span> (argc != <span class="number">2</span>) &#123;</span><br><span class="line">        <span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">&quot;usage: %s &lt;file&gt;&quot;</span>, argv[<span class="number">0</span>]);</span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">fprintf</span>(<span class="built_in">stdout</span>, <span class="string">&quot;create file %s&quot;</span>, argv[<span class="number">1</span>]);</span><br><span class="line">    fd = open(argv[<span class="number">1</span>], O_WRONLY | O_CREAT | O_TRUNC, <span class="number">0666</span>);</span><br><span class="line">    <span class="keyword">if</span> (fd == <span class="number">-1</span>) &#123;</span><br><span class="line">        perror(<span class="string">&quot;open&quot;</span>);</span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    close(fd);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>结果如下，权限644，符合预期</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ll</span><br><span class="line">total 8</span><br><span class="line">drwxr-xr-x  2 shoothzj shoothzj 4096 Nov  8 06:25 .</span><br><span class="line">drwxr-xr-x 15 shoothzj shoothzj 4096 Nov  8 06:18 ..</span><br><span class="line">-rw-r--r--  1 shoothzj shoothzj    0 Nov  8 06:25 my.txt</span><br></pre></td></tr></table></figure>
-]]></content>
-      <tags>
-        <tag>linux</tag>
       </tags>
   </entry>
   <entry>
@@ -1697,6 +1726,32 @@
       </tags>
   </entry>
   <entry>
+    <title>pulsar-third-vendor</title>
+    <url>/pulsar/pulsar-third-vendor/</url>
+    <content><![CDATA[<h1><span id="xu-yao-liao-jie-de-gai-nian">需要了解的概念</span><a href="#xu-yao-liao-jie-de-gai-nian" class="header-anchor">#</a></h1><ul>
+<li>VPC：用户的私有网段</li>
+<li>peering：多个VPC之间打通的方式，可跨用户</li>
+</ul>
+<h1><span id="qian-yan">前言</span><a href="#qian-yan" class="header-anchor">#</a></h1><p>今天微信推送Pulsar社区有个Hackathon比赛, 开始想的idea就是，实现<code>pulsar</code>在华为云上提供服务。因为是社区的比赛，是以一个三方系统的方式在华为云上提供服务，而非是以华为云的名义提供服务。分析了下可行性和能达到的效果，对比了<code>StreamNative</code>的官网上提供的<code>pulsar</code>服务在阿里云托管的能力，能提供的能力差不多，最多只不过是实现了在华为云托管的能力，没有从0到1的突破。</p>
+<p>现在，在公有云上买<code>redis</code>和<code>kafka</code>这类组件已经变得非常普遍，由公有云供应商提供的中间件往往能给你带来良好的体验，相比三方厂家在云上进行托管，我个人认为云厂商的优势主要在以下三点</p>
+<h2><span id="wang-luo-da-tong-rong-yi">网络打通容易</span><a href="#wang-luo-da-tong-rong-yi" class="header-anchor">#</a></h2><p>下文说一下不是公有云的供应商能以什么样的方式暴露自己的服务。云厂商可以把中间件的ip地址申请在你的vpc内，对任何应用程序来说，连接都是最方便的。无论是容器化部署、虚拟机部署、和其他vpc peering打通的场景，都可以通信。</p>
+<h2><span id="di-lian-de-cheng-ben">低廉的成本</span><a href="#di-lian-de-cheng-ben" class="header-anchor">#</a></h2><p>不考虑人力成本，云厂商自运营的价格要低于三方厂家。</p>
+<h2><span id="jian-kong-xi-tong-dui-jie">监控系统对接</span><a href="#jian-kong-xi-tong-dui-jie" class="header-anchor">#</a></h2><p>方便地和云厂商的告警、统计系统对接，接收告警通知和报表等。</p>
+<p>其中<strong>网络打通</strong>和<strong>成本</strong>尤为重要，三方厂家好好做监控统计系统，也能给用户较为良好的体验。</p>
+<h1><span id="san-fang-han-jia-neng-ti-gong-shi-me-yang-de-pulsar-jie-ru">三方厂家能提供什么样的Pulsar接入</span><a href="#san-fang-han-jia-neng-ti-gong-shi-me-yang-de-pulsar-jie-ru" class="header-anchor">#</a></h1><h2><span id="tong-yi-jie-ru">统一接入</span><a href="#tong-yi-jie-ru" class="header-anchor">#</a></h2><p>三方厂家自己作为公有云上一个用户，无论这个Region上有多少个租户，都用这一个用户提供服务，这也就意味着无法与每个用户进行私网通信。如果在华为云，利用华为云推出的<strong>VPCEP</strong>服务（此处应有链接），倒是可以给每个用户提供私网通信，不过这个是做了DNAT地址转换的，跟做了DNAT转换的中间件连接，是非常麻烦的。（懂的自然懂。如果有人想详细了解，可以留言，我可以写一个文章介绍里面的坑）</p>
+<p>如果使用公网，又想避免扩容的时候动态申请EIP，动态申请EIP并不复杂，问题是EIP是有配额限制的，这才是关键。那么就需要一个统一的接入点，就需要部署pulsar proxy。到这一步，是每个用户申请一个EIP的，如果还想继续节省EIP，那么可以统一域名接入，后端通过SNI的方式转发，个别流量大的客户，单独把域名指向单独的集群。</p>
+<p><img src="/pulsar/pulsar-third-vendor/pulsar-third-vendor1.png" alt="pulsar-third-vendor1"></p>
+<h2><span id="peering-da-tong">Peering打通</span><a href="#peering-da-tong" class="header-anchor">#</a></h2><p>Peering打通可以给用户不错的私网体验，需要用户预留一个网段，网段不需要太大，能容纳pulsar所在的vm就行。采用peering打通一般绝不会选择容器化部署，想要两个容器化的集群互通，对网设的要求很高，暂且忽略Service的存在，这要求用户的vpc网段和pod网段和三方厂商的vpc网段和pod网段都不重叠！而且peering打通，给用户私有，再搭建一个k8s集群，对成本影响比较大。主要有如下两个问题</p>
+<h3><span id="zi-dong-hua">自动化</span><a href="#zi-dong-hua" class="header-anchor">#</a></h3><p>和客户peering打通，需要较大的权限，如何自动化，最大程度的减少需要的权限。</p>
+<h3><span id="ke-hu-wang-duan-he-qi-ta-wang-duan-you-zuo-liao-peering">客户网段和其他网段又做了peering</span><a href="#ke-hu-wang-duan-he-qi-ta-wang-duan-you-zuo-liao-peering" class="header-anchor">#</a></h3><p><img src="/pulsar/pulsar-third-vendor/pulsar-third-vendor2.png" alt="pulsar-third-vendor2"></p>
+<p>这个问题其实还好，就是路由规则配置麻烦</p>
+<h1><span id="zong-jie">总结</span><a href="#zong-jie" class="header-anchor">#</a></h1><p>Peering打通对用户来说已经比较方便了，相信做到自动化也没有太大的技术难度，只是时间和人力投入的问题。统一接入因为网络打通的原因，不好使用<code>kop</code>、<code>mop</code>这些高级特性，此外还有不小的公网带宽成本，羊毛出在羊身上，比较大量的用户也会倾向于Peering打通的模式吧。</p>
+]]></content>
+      <tags>
+        <tag>pulsar</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>prometheus tsdb索引布局及查询流程</title>
     <url>/prometheus/prometheus-tsdb-index/</url>
     <content><![CDATA[<h1><span id="prometheus-ci-pan-bu-ju">prometheus 磁盘布局</span><a href="#prometheus-ci-pan-bu-ju" class="header-anchor">#</a></h1><p>采集到的数据每两个小时形成一个block。每个block由一个目录组成，并存放在data路径下。该目录包含一个包含该时间窗口的所有时间序列样本的块子目录、一个元数据文件和一个索引文件（将metric_name和label索引到目录下的时间序列）。 chunks 目录中的样本默认组合成一个或多个段文件，每个段文件最大为 512MB。 当通过 API 删除系列时，删除记录存储在单独的 tombstone 文件中（而不是立即从块段中删除数据）。</p>
@@ -1755,32 +1810,6 @@
 ]]></content>
       <tags>
         <tag>prometheus</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>pulsar-third-vendor</title>
-    <url>/pulsar/pulsar-third-vendor/</url>
-    <content><![CDATA[<h1><span id="xu-yao-liao-jie-de-gai-nian">需要了解的概念</span><a href="#xu-yao-liao-jie-de-gai-nian" class="header-anchor">#</a></h1><ul>
-<li>VPC：用户的私有网段</li>
-<li>peering：多个VPC之间打通的方式，可跨用户</li>
-</ul>
-<h1><span id="qian-yan">前言</span><a href="#qian-yan" class="header-anchor">#</a></h1><p>今天微信推送Pulsar社区有个Hackathon比赛, 开始想的idea就是，实现<code>pulsar</code>在华为云上提供服务。因为是社区的比赛，是以一个三方系统的方式在华为云上提供服务，而非是以华为云的名义提供服务。分析了下可行性和能达到的效果，对比了<code>StreamNative</code>的官网上提供的<code>pulsar</code>服务在阿里云托管的能力，能提供的能力差不多，最多只不过是实现了在华为云托管的能力，没有从0到1的突破。</p>
-<p>现在，在公有云上买<code>redis</code>和<code>kafka</code>这类组件已经变得非常普遍，由公有云供应商提供的中间件往往能给你带来良好的体验，相比三方厂家在云上进行托管，我个人认为云厂商的优势主要在以下三点</p>
-<h2><span id="wang-luo-da-tong-rong-yi">网络打通容易</span><a href="#wang-luo-da-tong-rong-yi" class="header-anchor">#</a></h2><p>下文说一下不是公有云的供应商能以什么样的方式暴露自己的服务。云厂商可以把中间件的ip地址申请在你的vpc内，对任何应用程序来说，连接都是最方便的。无论是容器化部署、虚拟机部署、和其他vpc peering打通的场景，都可以通信。</p>
-<h2><span id="di-lian-de-cheng-ben">低廉的成本</span><a href="#di-lian-de-cheng-ben" class="header-anchor">#</a></h2><p>不考虑人力成本，云厂商自运营的价格要低于三方厂家。</p>
-<h2><span id="jian-kong-xi-tong-dui-jie">监控系统对接</span><a href="#jian-kong-xi-tong-dui-jie" class="header-anchor">#</a></h2><p>方便地和云厂商的告警、统计系统对接，接收告警通知和报表等。</p>
-<p>其中<strong>网络打通</strong>和<strong>成本</strong>尤为重要，三方厂家好好做监控统计系统，也能给用户较为良好的体验。</p>
-<h1><span id="san-fang-han-jia-neng-ti-gong-shi-me-yang-de-pulsar-jie-ru">三方厂家能提供什么样的Pulsar接入</span><a href="#san-fang-han-jia-neng-ti-gong-shi-me-yang-de-pulsar-jie-ru" class="header-anchor">#</a></h1><h2><span id="tong-yi-jie-ru">统一接入</span><a href="#tong-yi-jie-ru" class="header-anchor">#</a></h2><p>三方厂家自己作为公有云上一个用户，无论这个Region上有多少个租户，都用这一个用户提供服务，这也就意味着无法与每个用户进行私网通信。如果在华为云，利用华为云推出的<strong>VPCEP</strong>服务（此处应有链接），倒是可以给每个用户提供私网通信，不过这个是做了DNAT地址转换的，跟做了DNAT转换的中间件连接，是非常麻烦的。（懂的自然懂。如果有人想详细了解，可以留言，我可以写一个文章介绍里面的坑）</p>
-<p>如果使用公网，又想避免扩容的时候动态申请EIP，动态申请EIP并不复杂，问题是EIP是有配额限制的，这才是关键。那么就需要一个统一的接入点，就需要部署pulsar proxy。到这一步，是每个用户申请一个EIP的，如果还想继续节省EIP，那么可以统一域名接入，后端通过SNI的方式转发，个别流量大的客户，单独把域名指向单独的集群。</p>
-<p><img src="/pulsar/pulsar-third-vendor/pulsar-third-vendor1.png" alt="pulsar-third-vendor1"></p>
-<h2><span id="peering-da-tong">Peering打通</span><a href="#peering-da-tong" class="header-anchor">#</a></h2><p>Peering打通可以给用户不错的私网体验，需要用户预留一个网段，网段不需要太大，能容纳pulsar所在的vm就行。采用peering打通一般绝不会选择容器化部署，想要两个容器化的集群互通，对网设的要求很高，暂且忽略Service的存在，这要求用户的vpc网段和pod网段和三方厂商的vpc网段和pod网段都不重叠！而且peering打通，给用户私有，再搭建一个k8s集群，对成本影响比较大。主要有如下两个问题</p>
-<h3><span id="zi-dong-hua">自动化</span><a href="#zi-dong-hua" class="header-anchor">#</a></h3><p>和客户peering打通，需要较大的权限，如何自动化，最大程度的减少需要的权限。</p>
-<h3><span id="ke-hu-wang-duan-he-qi-ta-wang-duan-you-zuo-liao-peering">客户网段和其他网段又做了peering</span><a href="#ke-hu-wang-duan-he-qi-ta-wang-duan-you-zuo-liao-peering" class="header-anchor">#</a></h3><p><img src="/pulsar/pulsar-third-vendor/pulsar-third-vendor2.png" alt="pulsar-third-vendor2"></p>
-<p>这个问题其实还好，就是路由规则配置麻烦</p>
-<h1><span id="zong-jie">总结</span><a href="#zong-jie" class="header-anchor">#</a></h1><p>Peering打通对用户来说已经比较方便了，相信做到自动化也没有太大的技术难度，只是时间和人力投入的问题。统一接入因为网络打通的原因，不好使用<code>kop</code>、<code>mop</code>这些高级特性，此外还有不小的公网带宽成本，羊毛出在羊身上，比较大量的用户也会倾向于Peering打通的模式吧。</p>
-]]></content>
-      <tags>
-        <tag>pulsar</tag>
       </tags>
   </entry>
   <entry>
@@ -1943,25 +1972,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Go Http SDK设计</title>
-    <url>/code/go/go-http-sdk-design/</url>
-    <content><![CDATA[<p>根据Go项目的需求和特性，可以为Go的Http SDK项目选择以下命名方式：</p>
-<ul>
-<li><code>xxx-client-go</code>：如果这个项目只有Http SDK，没有其他协议的SDK，推荐使用这个命名方式。</li>
-<li><code>xxx-http-client-go</code>：当存在其他协议的SDK时，可以使用这个命名方式，以区分不同协议的SDK。</li>
-<li><code>xxx-admin-go</code>：当项目使用其他协议作为数据通道，使用HTTP协议作为管理通道时，可以使用这个命名方式。</li>
-</ul>
-<p>由于Go语言的调用方式是<code>包名.结构体名.方法名</code>，所以在设计SDK时，需要考虑包名、结构体名、方法名的设计。</p>
-<p>以xxx业务为例，假设业务名为<code>xxx</code>，推荐包名也为<code>xxx</code>，结构体名为<code>Client</code>。</p>
-<p>目录布局可以是这样子的：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">xxx-client-go/</span><br><span class="line">|-- xxx/</span><br><span class="line">|   |-- client.go</span><br></pre></td></tr></table></figure>
-]]></content>
-      <tags>
-        <tag>SDK</tag>
-        <tag>Go</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Apache ZooKeeper在华为云IoT服务产品部的使用</title>
     <url>/zookeeper/zookeeper-huaweicloud-usage/</url>
     <content><![CDATA[<div class="toc">
@@ -2064,6 +2074,25 @@
 ]]></content>
       <tags>
         <tag>ZooKeeper</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Go Http SDK设计</title>
+    <url>/code/go/go-http-sdk-design/</url>
+    <content><![CDATA[<p>根据Go项目的需求和特性，可以为Go的Http SDK项目选择以下命名方式：</p>
+<ul>
+<li><code>xxx-client-go</code>：如果这个项目只有Http SDK，没有其他协议的SDK，推荐使用这个命名方式。</li>
+<li><code>xxx-http-client-go</code>：当存在其他协议的SDK时，可以使用这个命名方式，以区分不同协议的SDK。</li>
+<li><code>xxx-admin-go</code>：当项目使用其他协议作为数据通道，使用HTTP协议作为管理通道时，可以使用这个命名方式。</li>
+</ul>
+<p>由于Go语言的调用方式是<code>包名.结构体名.方法名</code>，所以在设计SDK时，需要考虑包名、结构体名、方法名的设计。</p>
+<p>以xxx业务为例，假设业务名为<code>xxx</code>，推荐包名也为<code>xxx</code>，结构体名为<code>Client</code>。</p>
+<p>目录布局可以是这样子的：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">xxx-client-go/</span><br><span class="line">|-- xxx/</span><br><span class="line">|   |-- client.go</span><br></pre></td></tr></table></figure>
+]]></content>
+      <tags>
+        <tag>SDK</tag>
+        <tag>Go</tag>
       </tags>
   </entry>
   <entry>

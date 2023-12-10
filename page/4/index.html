@@ -146,7 +146,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">60</span>
+          <span class="site-state-item-count">61</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -177,6 +177,91 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/mysql/mysql-default-tls/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="shoothzj">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/mysql/mysql-default-tls/" class="post-title-link" itemprop="url">有些事你只有抓包才知道之mysql tls会话</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-02-09 08:21:43" itemprop="dateCreated datePublished" datetime="2023-02-09T08:21:43+00:00">2023-02-09</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-12-10 04:13:56" itemprop="dateModified" datetime="2023-12-10T04:13:56+00:00">2023-12-10</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>你的mysql客户端和服务端之间开启tls了吗？你的回答可能是No，我根本没开启mysql的tls。</p>
+<p>可是当你抓取了3306 mysql的端口之后，你会发现，抓出来的包里居然有Client Hello、Server Hello这样的典型TLS报文。</p>
+<p><img src="/mysql/mysql-default-tls/mysql-tls-pcap.png" alt="mysql-tls-pcap"></p>
+<p>Mysql返回的<strong>Server Greeting</strong> 中有一个flag的集合字段，名为<strong>Capabilities Flag</strong>，顾名思义，这就是用来做兼容性的位flag。其中的2048位、也就是第12位，代表着<strong>CLIENT_SSL</strong>，如果设置为1，则会在后面的会话中切换到TLS。可以看到里面还有一些其他的flag，事务、长密码等等相关的兼容性开关。</p>
+<p><img src="/mysql/mysql-default-tls/mysql-pcap-capabilities-flag.png" alt="mysql-pcap-capabilities-flag"></p>
+<p>那么该如何关闭这个TLS呢，只需要在my.cnf中添加</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">&quot;ssl=0&quot;</span> &gt;&gt; /etc/my.cnf</span><br></pre></td></tr></table></figure>
+
+<p>重启mysql。再度进行抓包，就发现没有tls的报文了，都是在使用明文进行通信了。</p>
+<p><img src="/mysql/mysql-default-tls/mysql-plain-pcap.png" alt="mysql-plain-pcap"></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -222,7 +307,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-09 14:35:06" itemprop="dateModified" datetime="2023-12-09T14:35:06+00:00">2023-12-09</time>
+      <time title="修改时间：2023-12-10 04:13:56" itemprop="dateModified" datetime="2023-12-10T04:13:56+00:00">2023-12-10</time>
     </span>
 
   
@@ -332,7 +417,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-09 14:35:06" itemprop="dateModified" datetime="2023-12-09T14:35:06+00:00">2023-12-09</time>
+      <time title="修改时间：2023-12-10 04:13:56" itemprop="dateModified" datetime="2023-12-10T04:13:56+00:00">2023-12-10</time>
     </span>
 
   
@@ -417,7 +502,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-09 14:35:06" itemprop="dateModified" datetime="2023-12-09T14:35:06+00:00">2023-12-09</time>
+      <time title="修改时间：2023-12-10 04:13:56" itemprop="dateModified" datetime="2023-12-10T04:13:56+00:00">2023-12-10</time>
     </span>
 
   
@@ -513,7 +598,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-09 14:35:06" itemprop="dateModified" datetime="2023-12-09T14:35:06+00:00">2023-12-09</time>
+      <time title="修改时间：2023-12-10 04:13:56" itemprop="dateModified" datetime="2023-12-10T04:13:56+00:00">2023-12-10</time>
     </span>
 
   
@@ -607,7 +692,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-09 14:35:06" itemprop="dateModified" datetime="2023-12-09T14:35:06+00:00">2023-12-09</time>
+      <time title="修改时间：2023-12-10 04:13:56" itemprop="dateModified" datetime="2023-12-10T04:13:56+00:00">2023-12-10</time>
     </span>
 
   
@@ -712,7 +797,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-09 14:35:06" itemprop="dateModified" datetime="2023-12-09T14:35:06+00:00">2023-12-09</time>
+      <time title="修改时间：2023-12-10 04:13:56" itemprop="dateModified" datetime="2023-12-10T04:13:56+00:00">2023-12-10</time>
     </span>
 
   
@@ -849,7 +934,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-09 14:35:06" itemprop="dateModified" datetime="2023-12-09T14:35:06+00:00">2023-12-09</time>
+      <time title="修改时间：2023-12-10 04:13:56" itemprop="dateModified" datetime="2023-12-10T04:13:56+00:00">2023-12-10</time>
     </span>
 
   
@@ -977,7 +1062,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-09 14:35:06" itemprop="dateModified" datetime="2023-12-09T14:35:06+00:00">2023-12-09</time>
+      <time title="修改时间：2023-12-10 04:13:56" itemprop="dateModified" datetime="2023-12-10T04:13:56+00:00">2023-12-10</time>
     </span>
 
   
@@ -1088,7 +1173,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-09 14:35:06" itemprop="dateModified" datetime="2023-12-09T14:35:06+00:00">2023-12-09</time>
+      <time title="修改时间：2023-12-10 04:13:56" itemprop="dateModified" datetime="2023-12-10T04:13:56+00:00">2023-12-10</time>
     </span>
 
   
@@ -1147,105 +1232,8 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/kubernetes/kubernetes-registry-ha/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="shoothzj">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/kubernetes/kubernetes-registry-ha/" class="post-title-link" itemprop="url">kubernetes-ha-registry</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-08-28 18:30:18" itemprop="dateCreated datePublished" datetime="2021-08-28T18:30:18+00:00">2021-08-28</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-09 14:35:06" itemprop="dateModified" datetime="2023-12-09T14:35:06+00:00">2023-12-09</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>本篇文章探讨镜像仓库<code>registry</code>的高可用</p>
-<h1><span id="jing-xiang-cang-ku-gao-ke-yong-wu-dan-dian-gu-zhang-she-ji-na-xie-chang-jing">镜像仓库高可用无单点故障涉及那些场景</span><a href="#jing-xiang-cang-ku-gao-ke-yong-wu-dan-dian-gu-zhang-she-ji-na-xie-chang-jing" class="header-anchor">#</a></h1><h2><span id="jing-xiang-cang-ku-dui-wai-ti-gong-fang-wen-wu-dan-dian-gu-zhang">镜像仓库对外提供访问无单点故障</span><a href="#jing-xiang-cang-ku-dui-wai-ti-gong-fang-wen-wu-dan-dian-gu-zhang" class="header-anchor">#</a></h2><p>镜像仓库对外提供的访问点保持高可用</p>
-<h2><span id="jing-xiang-cang-ku-de-shu-ju-cun-chu-gao-ke-yong">镜像仓库的数据存储高可用</span><a href="#jing-xiang-cang-ku-de-shu-ju-cun-chu-gao-ke-yong" class="header-anchor">#</a></h2><p>存储在镜像仓库中的数据都得是高可用的</p>
-<h1><span id="jing-xiang-cang-ku-wu-dan-dian-gu-zhang-ji-zhu-guan-jian-dian">镜像仓库无单点故障技术关键点</span><a href="#jing-xiang-cang-ku-wu-dan-dian-gu-zhang-ji-zhu-guan-jian-dian" class="header-anchor">#</a></h1><h2><span id="jing-xiang-cang-ku-dui-wai-ti-gong-fang-wen-wu-dan-dian-gu-zhang">镜像仓库对外提供访问无单点故障</span><a href="#jing-xiang-cang-ku-dui-wai-ti-gong-fang-wen-wu-dan-dian-gu-zhang" class="header-anchor">#</a></h2><p>和上一篇文章一样，如果<code>IaaS</code>能提供<code>ELB</code>，我们最好是使用<code>ELB</code>，或者使用浮动IP的方式替换</p>
-<h2><span id="jing-xiang-cang-ku-de-shu-ju-cun-chu-gao-ke-yong">镜像仓库的数据存储高可用</span><a href="#jing-xiang-cang-ku-de-shu-ju-cun-chu-gao-ke-yong" class="header-anchor">#</a></h2><ul>
-<li>配置镜像仓库使用<code>IaaS</code>的S3存储</li>
-<li>配置镜像仓库使用本地存储，通过共享文件路径存储来实现高可用，如<code>Glusterfs</code>等</li>
-<li>配置镜像仓库使用S3存储，自建兼容S3 API的存储<code>Server</code></li>
-</ul>
-<p>通常会使用共享存储来做到镜像仓库存储的高可用</p>
-<h1><span id="fang-an-gai-shu">方案概述</span><a href="#fang-an-gai-shu" class="header-anchor">#</a></h1><p>那么其实镜像仓库的高可用方案就是对上面方案的组合，下面我们举几个例子</p>
-<h2><span id="jing-xiang-cang-ku-yi-lai-zu-jian-bu-shu-fang-shi">镜像仓库依赖组件部署方式</span><a href="#jing-xiang-cang-ku-yi-lai-zu-jian-bu-shu-fang-shi" class="header-anchor">#</a></h2><p><code>MinIo</code>、<code>KeepAlived</code>、<code>registry</code>都推荐使用容器部署，方便运维管理，但是镜像推荐内置到虚拟机中，不依赖镜像仓库或其他组件，避免循环依赖</p>
-<h2><span id="shi-yong-iaas-de-s3-cun-chu-fu-zai-jun-heng-zu-jian">使用IaaS的S3存储 + 负载均衡组件</span><a href="#shi-yong-iaas-de-s3-cun-chu-fu-zai-jun-heng-zu-jian" class="header-anchor">#</a></h2><p>这是最简单的方案，得益于云厂商提供的S3存储和负载均衡组件，我们可以进行很简单的配置，并部署一台以上的<code>registry</code>,如下图所示</p>
-<p><img src="/kubernetes/kubernetes-registry-ha/kubernetes-registry-ha-s3.png" alt="kubernetes-registry-ha-s3"></p>
-<h2><span id="zi-jian-jian-rong-s3-cun-chu-keepalived-fu-dong-ip">自建兼容S3存储 + KeepAlived浮动Ip</span><a href="#zi-jian-jian-rong-s3-cun-chu-keepalived-fu-dong-ip" class="header-anchor">#</a></h2><p>我们可以自己搭建<code>MinIo</code>集群来作为兼容S3存储，由于MINIO最低部署4个节点，我们需要根据故障域机器来选择部署MINIO的数目，比如，故障域是三台物理机，我们部署4节点就不妥。原因是，4节点，总会有一台物理机上会部署2个minio节点，如果这台物理机挂掉，就会导致单点故障。所以，如果故障域为三台物理机，我们最好部署6节点，可容忍一台物理机宕机。其他的节点，读者也可以自行测算。</p>
-<p>下图是假设三台物理机，<code>minio</code>6副本场景下的部署示意图</p>
-<p><img src="/kubernetes/kubernetes-registry-ha/kubernetes-registry-ha-minio.png" alt="kubernetes-registry-ha-minio"></p>
-<p>注，为了图的美观，并未画出所有的连线</p>
-<h3><span id="minio-guan-jian-pei-zhi">MINIO关键配置</span><a href="#minio-guan-jian-pei-zhi" class="header-anchor">#</a></h3><ul>
-<li>节点数目6个</li>
-<li>EC2</li>
-</ul>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
-    <a class="extend prev" rel="prev" title="上一页" aria-label="上一页" href="/page/3/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><a class="page-number" href="/page/6/">6</a><a class="extend next" rel="next" title="下一页" aria-label="下一页" href="/page/5/"><i class="fa fa-angle-right"></i></a>
+    <a class="extend prev" rel="prev" title="上一页" aria-label="上一页" href="/page/3/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><a class="extend next" rel="next" title="下一页" aria-label="下一页" href="/page/5/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 </div>

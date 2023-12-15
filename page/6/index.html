@@ -146,13 +146,13 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">61</span>
+          <span class="site-state-item-count">62</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">31</span>
+        <span class="site-state-item-count">33</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -177,6 +177,114 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/kubernetes/kubernetes-pod-api/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="shoothzj">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/kubernetes/kubernetes-pod-api/" class="post-title-link" itemprop="url">Kubernetes pod内调用API</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-04-13 21:17:20" itemprop="dateCreated datePublished" datetime="2021-04-13T21:17:20+00:00">2021-04-13</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-12-15 15:57:27" itemprop="dateModified" datetime="2023-12-15T15:57:27+00:00">2023-12-15</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>Kubernetes pod内调用API的流程总体分为以下步骤</p>
+<ul>
+<li>创建role</li>
+<li>创建serviceaccount</li>
+<li>绑定role到serviceaccount</li>
+<li>指定pod使用serviceaccount</li>
+</ul>
+<p>我们以查pod为例，演示一下整个流程</p>
+<h2><span id="chuang-jian-role">创建role</span><a href="#chuang-jian-role" class="header-anchor">#</a></h2><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># role.yaml</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">rbac.authorization.k8s.io/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Role</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">role-hzj</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">default</span></span><br><span class="line"><span class="attr">rules:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">apiGroups:</span> [<span class="string">&quot;&quot;</span>]</span><br><span class="line">    <span class="attr">resources:</span> [<span class="string">&quot;pods&quot;</span>]</span><br><span class="line">    <span class="attr">verbs:</span> [<span class="string">&quot;get&quot;</span>,<span class="string">&quot;list&quot;</span>]</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl apply -f role.yaml</span><br></pre></td></tr></table></figure>
+
+<h2><span id="chuang-jian-serviceaccount">创建serviceaccount</span><a href="#chuang-jian-serviceaccount" class="header-anchor">#</a></h2><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># serviceaccount.yaml</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ServiceAccount</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">serviceaccount-hzj</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">default</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl apply -f serviceaccount.yaml</span><br></pre></td></tr></table></figure>
+
+<h2><span id="bang-ding-role">绑定role</span><a href="#bang-ding-role" class="header-anchor">#</a></h2><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># rolebinding.yaml</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">rbac.authorization.k8s.io/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">RoleBinding</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">rolebinding-hzj</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">default</span></span><br><span class="line"><span class="attr">subjects:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">kind:</span> <span class="string">ServiceAccount</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">serviceaccount-hzj</span></span><br><span class="line">    <span class="attr">namespace:</span> <span class="string">default</span></span><br><span class="line"><span class="attr">roleRef:</span></span><br><span class="line">  <span class="attr">kind:</span> <span class="string">Role</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">role-hzj</span></span><br><span class="line">  <span class="attr">apiGroup:</span> <span class="string">rbac.authorization.k8s.io</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl apply -f rolebinding.yaml</span><br></pre></td></tr></table></figure>
+
+<h2><span id="bu-shu-pod-jin-xing-ce-shi">部署pod进行测试</span><a href="#bu-shu-pod-jin-xing-ce-shi" class="header-anchor">#</a></h2><h3><span id="bu-shu-yi-ge-zookeeper-jin-xing-ce-shi">部署一个zookeeper进行测试</span><a href="#bu-shu-yi-ge-zookeeper-jin-xing-ce-shi" class="header-anchor">#</a></h3><p>手上刚好有zookeeper的模板文件</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">apps/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Deployment</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">zookeeper</span></span><br><span class="line">  <span class="attr">labels:</span></span><br><span class="line">    <span class="attr">app:</span> <span class="string">zookeeper</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">replicas:</span> <span class="number">1</span></span><br><span class="line">  <span class="attr">selector:</span></span><br><span class="line">    <span class="attr">matchLabels:</span></span><br><span class="line">      <span class="attr">app:</span> <span class="string">zookeeper</span></span><br><span class="line">  <span class="attr">template:</span></span><br><span class="line">    <span class="attr">metadata:</span></span><br><span class="line">      <span class="attr">labels:</span></span><br><span class="line">        <span class="attr">app:</span> <span class="string">zookeeper</span></span><br><span class="line">    <span class="attr">spec:</span></span><br><span class="line">      <span class="attr">hostNetwork:</span> <span class="literal">true</span></span><br><span class="line">      <span class="attr">dnsPolicy:</span> <span class="string">ClusterFirstWithHostNet</span></span><br><span class="line">      <span class="attr">containers:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">zookeeper</span></span><br><span class="line">        <span class="attr">image:</span> <span class="string">ttbb/zookeeper:stand-alone</span></span><br><span class="line">        <span class="attr">imagePullPolicy:</span> <span class="string">IfNotPresent</span></span><br><span class="line">        <span class="attr">resources:</span></span><br><span class="line">          <span class="attr">limits:</span></span><br><span class="line">            <span class="attr">memory:</span> <span class="string">2G</span></span><br><span class="line">            <span class="attr">cpu:</span> <span class="string">1000m</span></span><br><span class="line">          <span class="attr">requests:</span></span><br><span class="line">            <span class="attr">memory:</span> <span class="string">2G</span></span><br><span class="line">            <span class="attr">cpu:</span> <span class="string">1000m</span></span><br><span class="line">        <span class="attr">env:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">NODE_NAME</span></span><br><span class="line">          <span class="attr">valueFrom:</span></span><br><span class="line">            <span class="attr">fieldRef:</span></span><br><span class="line">                <span class="attr">fieldPath:</span> <span class="string">spec.nodeName</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">POD_NAME</span></span><br><span class="line">          <span class="attr">valueFrom:</span></span><br><span class="line">            <span class="attr">fieldRef:</span></span><br><span class="line">                <span class="attr">fieldPath:</span> <span class="string">metadata.name</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">PS1</span></span><br><span class="line">          <span class="attr">value:</span> <span class="string">&#x27;[\u@zookeeper@\W]\$ &#x27;</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h3><span id="diao-yong-api">调用API</span><a href="#diao-yong-api" class="header-anchor">#</a></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Point to the internal API server hostname</span></span><br><span class="line">APISERVER=https://kubernetes.default.svc</span><br><span class="line"><span class="comment"># Path to ServiceAccount token</span></span><br><span class="line">SERVICEACCOUNT=/var/run/secrets/kubernetes.io/serviceaccount</span><br><span class="line"><span class="comment"># Read this Pod&#x27;s namespace</span></span><br><span class="line">NAMESPACE=$(<span class="built_in">cat</span> <span class="variable">$&#123;SERVICEACCOUNT&#125;</span>/namespace)</span><br><span class="line"><span class="comment"># Read the ServiceAccount bearer token</span></span><br><span class="line">TOKEN=$(<span class="built_in">cat</span> <span class="variable">$&#123;SERVICEACCOUNT&#125;</span>/token)</span><br><span class="line"><span class="comment"># Reference the internal certificate authority (CA)</span></span><br><span class="line">CACERT=<span class="variable">$&#123;SERVICEACCOUNT&#125;</span>/ca.crt</span><br><span class="line"><span class="comment"># Explore the API with TOKEN</span></span><br><span class="line">curl --cacert <span class="variable">$&#123;CACERT&#125;</span> --header <span class="string">&quot;Authorization: Bearer <span class="variable">$&#123;TOKEN&#125;</span>&quot;</span> -X GET <span class="variable">$&#123;APISERVER&#125;</span>/api</span><br><span class="line">curl --cacert <span class="variable">$&#123;CACERT&#125;</span> --header <span class="string">&quot;Authorization: Bearer <span class="variable">$&#123;TOKEN&#125;</span>&quot;</span> -X GET <span class="variable">$&#123;APISERVER&#125;</span>/api/v1/namespaces/default/pods</span><br></pre></td></tr></table></figure>
+
+<p><img src="/kubernetes/kubernetes-pod-api/kubernetes-pod-api1.png" alt="kubernetes-pod-api1"></p>
+<p>发现这里，调用后面的api，403错误。第一个api不报错，是因为该接口不需要鉴权。</p>
+<h3><span id="xiu-gai-pod-dui-ying-de-serviceaccount">修改pod对应的serviceaccount</span><a href="#xiu-gai-pod-dui-ying-de-serviceaccount" class="header-anchor">#</a></h3><p>让我们修改部署模板对应的ServiceAccountName，注入权限。在pod的spec下，设置serviceAccountName</p>
+<p><img src="/kubernetes/kubernetes-pod-api/kubernetes-pod-api2.png" alt="kubernetes-pod-api2"></p>
+<h3><span id="xiu-gai-bu-shu-mo-ban-chong-qi-hou-diao-yong-api-zheng-chang">修改部署模板重启后调用api正常</span><a href="#xiu-gai-bu-shu-mo-ban-chong-qi-hou-diao-yong-api-zheng-chang" class="header-anchor">#</a></h3><p>再次尝试上述命令，api结果返回正常</p>
+<p><img src="/kubernetes/kubernetes-pod-api/kubernetes-pod-api3.png" alt="kubernetes-pod-api3"></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -222,7 +330,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-10 04:13:56" itemprop="dateModified" datetime="2023-12-10T04:13:56+00:00">2023-12-10</time>
+      <time title="修改时间：2023-12-15 15:57:27" itemprop="dateModified" datetime="2023-12-15T15:57:27+00:00">2023-12-15</time>
     </span>
 
   
@@ -394,7 +502,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-10 04:13:56" itemprop="dateModified" datetime="2023-12-10T04:13:56+00:00">2023-12-10</time>
+      <time title="修改时间：2023-12-15 15:57:27" itemprop="dateModified" datetime="2023-12-15T15:57:27+00:00">2023-12-15</time>
     </span>
 
   
@@ -484,7 +592,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-10 04:13:56" itemprop="dateModified" datetime="2023-12-10T04:13:56+00:00">2023-12-10</time>
+      <time title="修改时间：2023-12-15 15:57:27" itemprop="dateModified" datetime="2023-12-15T15:57:27+00:00">2023-12-15</time>
     </span>
 
   
@@ -571,7 +679,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-10 04:13:56" itemprop="dateModified" datetime="2023-12-10T04:13:56+00:00">2023-12-10</time>
+      <time title="修改时间：2023-12-15 15:57:27" itemprop="dateModified" datetime="2023-12-15T15:57:27+00:00">2023-12-15</time>
     </span>
 
   
@@ -673,7 +781,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-10 04:13:56" itemprop="dateModified" datetime="2023-12-10T04:13:56+00:00">2023-12-10</time>
+      <time title="修改时间：2023-12-15 15:57:27" itemprop="dateModified" datetime="2023-12-15T15:57:27+00:00">2023-12-15</time>
     </span>
 
   
@@ -763,7 +871,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-10 04:13:56" itemprop="dateModified" datetime="2023-12-10T04:13:56+00:00">2023-12-10</time>
+      <time title="修改时间：2023-12-15 15:57:27" itemprop="dateModified" datetime="2023-12-15T15:57:27+00:00">2023-12-15</time>
     </span>
 
   
@@ -838,7 +946,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/nginx/nginx-sni/" class="post-title-link" itemprop="url">nginx-sni</a>
+          <a href="/nginx/nginx-sni/" class="post-title-link" itemprop="url">Nginx支持SNI转发</a>
         </h2>
 
         <div class="post-meta-container">
@@ -856,7 +964,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-10 04:13:56" itemprop="dateModified" datetime="2023-12-10T04:13:56+00:00">2023-12-10</time>
+      <time title="修改时间：2023-12-15 15:57:27" itemprop="dateModified" datetime="2023-12-15T15:57:27+00:00">2023-12-15</time>
     </span>
 
   
@@ -952,7 +1060,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-10 04:13:56" itemprop="dateModified" datetime="2023-12-10T04:13:56+00:00">2023-12-10</time>
+      <time title="修改时间：2023-12-15 15:57:27" itemprop="dateModified" datetime="2023-12-15T15:57:27+00:00">2023-12-15</time>
     </span>
 
   
@@ -1044,7 +1152,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-10 04:13:56" itemprop="dateModified" datetime="2023-12-10T04:13:56+00:00">2023-12-10</time>
+      <time title="修改时间：2023-12-15 15:57:27" itemprop="dateModified" datetime="2023-12-15T15:57:27+00:00">2023-12-15</time>
     </span>
 
   
@@ -1076,125 +1184,6 @@
 <h3><span id="zhi-xian-shi-http-ke-hu-duan-fa-qi-de-bao-han-zhi-ding-uri-qing-qiu-de-http-xie-yi-shu-ju-bao">只显示HTTP 客户端发起的包含指定URI请求的HTTP协议数据包</span><a href="#zhi-xian-shi-http-ke-hu-duan-fa-qi-de-bao-han-zhi-ding-uri-qing-qiu-de-http-xie-yi-shu-ju-bao" class="header-anchor">#</a></h3><p>http.request.uri &#x3D;&#x3D; &lt;”Full request URI”&gt;</p>
 <h3><span id="zhi-xian-shi-bao-han-zip-wen-jian-de-shu-ju-bao">只显示包含ZIP文件的数据包</span><a href="#zhi-xian-shi-bao-han-zip-wen-jian-de-shu-ju-bao" class="header-anchor">#</a></h3><p>http matches “.zip” &amp;&amp; http.request.method &#x3D;&#x3D; ‘GET’</p>
 
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/wireshark/wireshark-capture-filter/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="shoothzj">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/wireshark/wireshark-capture-filter/" class="post-title-link" itemprop="url">WireShark 捕获过滤器</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2018-09-09 09:47:02" itemprop="dateCreated datePublished" datetime="2018-09-09T09:47:02+00:00">2018-09-09</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-10 04:13:56" itemprop="dateModified" datetime="2023-12-10T04:13:56+00:00">2023-12-10</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1><span id="ru-he-shi-yong-bu-huo-guo-lu-qi">如何使用捕获过滤器</span><a href="#ru-he-shi-yong-bu-huo-guo-lu-qi" class="header-anchor">#</a></h1><p>点击捕获，选项，然后在所选择的捕获过滤器上输入对应的捕获表达式</p>
-<p><img src="/wireshark/wireshark-capture-filter/wireshark-capture-filter1.png" alt="wireshark-capture-filter1"></p>
-<p><img src="/wireshark/wireshark-capture-filter/wireshark-capture-filter2.png" alt="wireshark-capture-filter2"></p>
-<h1><span id="zhua-bao-guo-lu-qi">抓包过滤器</span><a href="#zhua-bao-guo-lu-qi" class="header-anchor">#</a></h1><ul>
-<li>type(类型) 限定符: 比如host，net，port限定符等</li>
-<li>dir(方向) 限定符: src dst</li>
-<li>Proto(协议类型)限定符: ether ip arp</li>
-</ul>
-<h2><span id="er-ceng-guo-lu-qi-ju-li">二层过滤器举例</span><a href="#er-ceng-guo-lu-qi-ju-li" class="header-anchor">#</a></h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">tcp dst port 135 //tcp协议，目标端口为135的数据包</span><br><span class="line">ether host &lt;Ethernet host&gt; //让wireshark只抓取这个地址相关的以太网帧</span><br><span class="line">ether dst &lt;Ethernet host&gt;</span><br><span class="line">ether src &lt;Ethernet src&gt;</span><br><span class="line">ether broadcast //Wireshark只抓取所有以太网广播流量</span><br><span class="line">ether multicast //只抓取多播流量</span><br><span class="line">ether proto &lt;protocol&gt;</span><br><span class="line">vlan &lt;vlan_id&gt;</span><br></pre></td></tr></table></figure>
-
-<h2><span id="san-ceng-guo-lu-qi-ju-li">三层过滤器举例</span><a href="#san-ceng-guo-lu-qi-ju-li" class="header-anchor">#</a></h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">ip #只抓取ipv4流量</span><br><span class="line">ipv6</span><br><span class="line">host 10.0.0.2</span><br><span class="line">dest host &lt;host&gt;</span><br><span class="line">src host &lt;host&gt;</span><br><span class="line">broadcast #ip广播包</span><br><span class="line">multicast #ip多播包</span><br><span class="line">ip proto &lt;protocol code&gt; #ip数据包有多种类型，比如TCP(6), UDP(17) ICMP(1)</span><br></pre></td></tr></table></figure>
-
-<h3><span id="zhi-zhua-qu-yuan-yu-huo-zhe-fa-wang-ipv6-2001-x2f-16-de-shu-ju-bao">只抓取源于或者发往IPv6 2001::&#x2F;16的数据包</span><a href="#zhi-zhua-qu-yuan-yu-huo-zhe-fa-wang-ipv6-2001-x2f-16-de-shu-ju-bao" class="header-anchor">#</a></h3><p>net 2001::&#x2F;16</p>
-<h3><span id="zhi-zhua-qu-icmp-liu-liang">只抓取ICMP流量</span><a href="#zhi-zhua-qu-icmp-liu-liang" class="header-anchor">#</a></h3><p>ip proto 1</p>
-<h3><span id="zhi-zhua-qu-icmp-echo-request-liu-liang">只抓取ICMP echo request流量</span><a href="#zhi-zhua-qu-icmp-echo-request-liu-liang" class="header-anchor">#</a></h3><p>icmp[icmptype]&#x3D;&#x3D;icmp-echo<br>icmp[icmptype]&#x3D;&#x3D;8</p>
-<h3><span id="zhi-zhua-qu-te-ding-chang-du-de-ip-shu-ju-bao">只抓取特定长度的IP数据包</span><a href="#zhi-zhua-qu-te-ding-chang-du-de-ip-shu-ju-bao" class="header-anchor">#</a></h3><p>ip[2:2] &#x3D;&#x3D; <number></number></p>
-<h3><span id="zhi-zhua-qu-ju-you-te-ding-ttl-de-ip-shu-ju-bao">只抓取具有特定TTL的IP数据包</span><a href="#zhi-zhua-qu-ju-you-te-ding-ttl-de-ip-shu-ju-bao" class="header-anchor">#</a></h3><p>ip[8] &#x3D;&#x3D; <number></number></p>
-<h3><span id="zhua-qu-shu-ju-bao-de-yuan-he-mu-de-ip-di-zhi-xiang-tong">抓取数据包的源和目的IP地址相同</span><a href="#zhua-qu-shu-ju-bao-de-yuan-he-mu-de-ip-di-zhi-xiang-tong" class="header-anchor">#</a></h3><p>ip[12:4] &#x3D;&#x3D;1 ip[16:4]</p>
-<h2><span id="si-ceng-zhua-bao-guo-lu-qi-ju-li">四层抓包过滤器举例</span><a href="#si-ceng-zhua-bao-guo-lu-qi-ju-li" class="header-anchor">#</a></h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">port &lt;port&gt;</span><br><span class="line">dst port &lt;port&gt;</span><br><span class="line">src port &lt;port&gt;</span><br><span class="line">tcp portrange &lt;p1&gt;-&lt;p2&gt;</span><br></pre></td></tr></table></figure>
-
-<h3><span id="zhi-zhua-qu-tcp-zhong-syn-huo-zhe-fin-de-shu-ju-bao">只抓取TCP中SYN或者FIN的数据包</span><a href="#zhi-zhua-qu-tcp-zhong-syn-huo-zhe-fin-de-shu-ju-bao" class="header-anchor">#</a></h3><p>tcp [tcpflags] &amp; (tcp-syn | tcp-fin) !&#x3D; 0</p>
-<h3><span id="zhi-zhua-suo-you-rst-biao-ji-wei-zhi-wei-1-de-tcp-shu-ju-bao">只抓所有RST标记位置为1的TCP数据包</span><a href="#zhi-zhua-suo-you-rst-biao-ji-wei-zhi-wei-1-de-tcp-shu-ju-bao" class="header-anchor">#</a></h3><p>tcp[tcpflags] &amp; (tcp-rst) !&#x3D; 0</p>
-<h3><span id="tcp-tou-bu-de-chang-yong-biao-ji-wei">tcp头部的常用标记位</span><a href="#tcp-tou-bu-de-chang-yong-biao-ji-wei" class="header-anchor">#</a></h3><ul>
-<li>SYN: 用来表示打开连接</li>
-<li>FIN: 用来表示拆除连接</li>
-<li>ACK: 用来确认收到的数据</li>
-<li>RST: 用来表示立刻拆除连接</li>
-<li>PSH: 用来表示应将数据提交给末端应用程序处理</li>
-</ul>
-<h3><span id="zhua-qu-suo-you-biao-ji-wei-du-wei-zhi-1-de-tcp-liu-liang">抓取所有标记位都未置1的TCP流量</span><a href="#zhua-qu-suo-you-biao-ji-wei-du-wei-zhi-1-de-tcp-liu-liang" class="header-anchor">#</a></h3><p>该报文可能用于端口探测,即如果<br>tcp[13] &amp; 0x00 &#x3D; 0</p>
-<h3><span id="she-zhi-liao-urg-wei-de-tcp-shu-ju-bao">设置了URG位的TCP数据包</span><a href="#she-zhi-liao-urg-wei-de-tcp-shu-ju-bao" class="header-anchor">#</a></h3><p>URG位,表示该数据包十分紧急,不进入缓冲区,直接送给进程<br>tcp[13] &amp; 32 &#x3D;&#x3D; 32</p>
-<h3><span id="she-zhi-liao-ack-wei-de-tcp-shu-ju-bao">设置了ACK位的TCP数据包</span><a href="#she-zhi-liao-ack-wei-de-tcp-shu-ju-bao" class="header-anchor">#</a></h3><p>tcp[13] &amp; 16 &#x3D;&#x3D; 16</p>
-<h3><span id="she-zhi-liao-psh-wei-de-tcp-shu-ju-bao">设置了PSH位的TCP数据包</span><a href="#she-zhi-liao-psh-wei-de-tcp-shu-ju-bao" class="header-anchor">#</a></h3><p>PSH代表这个消息要从缓冲区立刻发送给应用程序<br>tcp[13] &amp; 8 &#x3D;&#x3D; 8</p>
-<h3><span id="she-zhi-liao-rst-wei-de-tcp-shu-ju-bao">设置了RST位的TCP数据包</span><a href="#she-zhi-liao-rst-wei-de-tcp-shu-ju-bao" class="header-anchor">#</a></h3><p>tcp[13] &amp; 4 &#x3D;&#x3D; 4</p>
-<h3><span id="she-zhi-liao-syn-wei-de-tcp-shu-ju-bao">设置了SYN位的TCP数据包</span><a href="#she-zhi-liao-syn-wei-de-tcp-shu-ju-bao" class="header-anchor">#</a></h3><p>tcp[13] &amp; 2 &#x3D;&#x3D; 2</p>
-<h3><span id="she-zhi-liao-fin-wei-de-tcp-shu-ju-bao">设置了FIN位的TCP数据包</span><a href="#she-zhi-liao-fin-wei-de-tcp-shu-ju-bao" class="header-anchor">#</a></h3><p>tcp[13] &amp; 1 &#x3D;&#x3D; 1</p>
-<h3><span id="tcp-syn-ack-shu-ju-bao">TCP SYN-ACK数据包</span><a href="#tcp-syn-ack-shu-ju-bao" class="header-anchor">#</a></h3><p>tcp[13] &#x3D;&#x3D; 18</p>
-<h3><span id="zhua-qu-mu-de-duan-kou-fan-wei-de-shu-ju-bao">抓取目的端口范围的数据包</span><a href="#zhua-qu-mu-de-duan-kou-fan-wei-de-shu-ju-bao" class="header-anchor">#</a></h3><p>tcp portrange 2000-2500</p>
-<p>###tcpdump捕获过滤器</p>
-<p>常见命令介绍</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tcpdump -w hzj.pcap -s0 -iany port 1028</span><br></pre></td></tr></table></figure>
-
-<p>上面的命令代表<br>-w hzj.pcap 存储在hzj.pcap这个文件中<br>-s 0 代表抓取字节数不限制,在大多数linux系统下,默认捕获每个帧的前96个字节</p>
-<h3><span id="tcpdump-bu-huo-yi-ding-fan-wei-de-duan-kou-9200-9400">tcpdump捕获一定范围的端口(9200-9400)</span><a href="#tcpdump-bu-huo-yi-ding-fan-wei-de-duan-kou-9200-9400" class="header-anchor">#</a></h3><p>tcpdump portrange 9200-9400</p>
-<h3><span id="tcpdump-r-ke-yi-yue-du-bu-huo-de-wen-jian-jian-yi-kao-bei-dao-wireshark-zhong-fen-xi">tcpdump -r 可以阅读捕获的文件(建议拷贝到wireshark中分析)</span><a href="#tcpdump-r-ke-yi-yue-du-bu-huo-de-wen-jian-jian-yi-kao-bei-dao-wireshark-zhong-fen-xi" class="header-anchor">#</a></h3>
       
     </div>
 

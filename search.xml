@@ -235,83 +235,9 @@
 
 <h3><span id="rust-fu-wu-xiao-fei-zhe-zai-springcloud-zookeeper">Rust服务消费者在SpringCloud ZooKeeper</span><a href="#rust-fu-wu-xiao-fei-zhe-zai-springcloud-zookeeper" class="header-anchor">#</a></h3><figure class="highlight rust"><table><tr><td class="code"><pre><span class="line"><span class="keyword">use</span> std::collections::HashMap;</span><br><span class="line"><span class="keyword">use</span> std::time::Duration;</span><br><span class="line"><span class="keyword">use</span> zookeeper::&#123;WatchedEvent, Watcher, ZooKeeper&#125;;</span><br><span class="line"><span class="keyword">use</span> reqwest;</span><br><span class="line"><span class="keyword">use</span> serde_json::Value;</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> ZK_SERVERS: &amp;<span class="type">str</span> = <span class="string">&quot;localhost:2181&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">LoggingWatcher</span>;</span><br><span class="line"><span class="keyword">impl</span> <span class="title class_">Watcher</span> <span class="keyword">for</span> <span class="title class_">LoggingWatcher</span> &#123;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">handle</span>(&amp;<span class="keyword">self</span>, e: WatchedEvent) &#123;</span><br><span class="line">        <span class="built_in">println!</span>(<span class="string">&quot;WatchedEvent: &#123;:?&#125;&quot;</span>, e);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#[tokio::main]</span></span><br><span class="line"><span class="keyword">async</span> <span class="keyword">fn</span> <span class="title function_">main</span>() &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">provider_data</span> = <span class="title function_ invoke__">fetch_provider_data_from_zookeeper</span>().<span class="keyword">await</span>;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">response</span> = <span class="title function_ invoke__">request_provider</span>(&amp;provider_data).<span class="keyword">await</span>;</span><br><span class="line">    <span class="built_in">println!</span>(<span class="string">&quot;Response from provider: &#123;&#125;&quot;</span>, response);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">async</span> <span class="keyword">fn</span> <span class="title function_">fetch_provider_data_from_zookeeper</span>() <span class="punctuation">-&gt;</span> HashMap&lt;<span class="type">String</span>, Value&gt; &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">zk</span> = ZooKeeper::<span class="title function_ invoke__">connect</span>(ZK_SERVERS, Duration::<span class="title function_ invoke__">from_secs</span>(<span class="number">5</span>), LoggingWatcher).<span class="title function_ invoke__">unwrap</span>();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> <span class="variable">children</span> = zk.<span class="title function_ invoke__">get_children</span>(<span class="string">&quot;/services/provider-service&quot;</span>, <span class="literal">false</span>).<span class="title function_ invoke__">unwrap</span>();</span><br><span class="line">    <span class="keyword">if</span> children.<span class="title function_ invoke__">is_empty</span>() &#123;</span><br><span class="line">        <span class="built_in">panic!</span>(<span class="string">&quot;No provider services found!&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// For simplicity, we just take the first child (i.e., service instance). </span></span><br><span class="line">    <span class="comment">// In a real-world scenario, load balancing strategies would determine which service instance to use.</span></span><br><span class="line">    <span class="keyword">let</span> <span class="variable">data</span> = zk.<span class="title function_ invoke__">get_data</span>(&amp;<span class="built_in">format!</span>(<span class="string">&quot;/services/provider-service/&#123;&#125;&quot;</span>, children[<span class="number">0</span>]), <span class="literal">false</span>).<span class="title function_ invoke__">unwrap</span>();</span><br><span class="line">    serde_json::<span class="title function_ invoke__">from_slice</span>(&amp;data.<span class="number">0</span>).<span class="title function_ invoke__">unwrap</span>()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">async</span> <span class="keyword">fn</span> <span class="title function_">request_provider</span>(provider_data: &amp;HashMap&lt;<span class="type">String</span>, Value&gt;) <span class="punctuation">-&gt;</span> <span class="type">String</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">address</span> = provider_data.<span class="title function_ invoke__">get</span>(<span class="string">&quot;address&quot;</span>).<span class="title function_ invoke__">unwrap</span>().<span class="title function_ invoke__">as_str</span>().<span class="title function_ invoke__">unwrap</span>();</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">port</span> = provider_data.<span class="title function_ invoke__">get</span>(<span class="string">&quot;port&quot;</span>).<span class="title function_ invoke__">unwrap</span>().<span class="title function_ invoke__">as_i64</span>().<span class="title function_ invoke__">unwrap</span>();</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">url</span> = <span class="built_in">format!</span>(<span class="string">&quot;http://&#123;&#125;:&#123;&#125;/hello&quot;</span>, address, port);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> <span class="variable">response</span> = reqwest::<span class="title function_ invoke__">get</span>(&amp;url).<span class="keyword">await</span>.<span class="title function_ invoke__">unwrap</span>();</span><br><span class="line">    response.<span class="title function_ invoke__">text</span>().<span class="keyword">await</span>.<span class="title function_ invoke__">unwrap</span>()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 ]]></content>
-  </entry>
-  <entry>
-    <title>容器内指定特定域名解析结果的几种方式</title>
-    <url>/%E5%AE%B9%E5%99%A8%E5%86%85%E6%8C%87%E5%AE%9A%E7%89%B9%E5%AE%9A%E5%9F%9F%E5%90%8D%E8%A7%A3%E6%9E%90%E7%BB%93%E6%9E%9C%E7%9A%84%E5%87%A0%E7%A7%8D%E6%96%B9%E5%BC%8F/</url>
-    <content><![CDATA[<p>在本篇文章中，我们将探讨如何在容器内指定特定域名解析结果的几种方式。为了方便演示，首先我们创建一个演示用的Deployment配置文件。</p>
-<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">apps/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Deployment</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">busybox-deployment</span></span><br><span class="line">  <span class="attr">labels:</span></span><br><span class="line">    <span class="attr">app:</span> <span class="string">busybox</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">replicas:</span> <span class="number">1</span></span><br><span class="line">  <span class="attr">selector:</span></span><br><span class="line">    <span class="attr">matchLabels:</span></span><br><span class="line">      <span class="attr">app:</span> <span class="string">busybox</span></span><br><span class="line">  <span class="attr">template:</span></span><br><span class="line">    <span class="attr">metadata:</span></span><br><span class="line">      <span class="attr">labels:</span></span><br><span class="line">        <span class="attr">app:</span> <span class="string">busybox</span></span><br><span class="line">    <span class="attr">spec:</span></span><br><span class="line">      <span class="attr">containers:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">busybox</span></span><br><span class="line">        <span class="attr">image:</span> <span class="string">busybox</span></span><br><span class="line">        <span class="attr">args:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="string">/bin/sh</span></span><br><span class="line">        <span class="bullet">-</span> <span class="string">-c</span></span><br><span class="line">        <span class="bullet">-</span> <span class="string">&quot;while true; do echo Hello, Kubernetes!; sleep 10;done&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>这个deployment会创建1个busybox的pod，容器每隔10s会打印“Hello, Kubernetes!”到控制台</p>
-<h2><span id="tl-dr">TL;DR</span><a href="#tl-dr" class="header-anchor">#</a></h2><table>
-<thead>
-<tr>
-<th>方案</th>
-<th>修改级别</th>
-<th>是否推荐</th>
-<th>备注</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>修改&#x2F;etc&#x2F;hosts</td>
-<td>pod</td>
-<td>否</td>
-<td></td>
-</tr>
-<tr>
-<td>添加HostAliases记录</td>
-<td>pod&#x2F;deploy&#x2F;statefulset</td>
-<td>是</td>
-<td></td>
-</tr>
-<tr>
-<td>修改Coredns配置</td>
-<td>整个kubernetes集群</td>
-<td>是</td>
-<td></td>
-</tr>
-<tr>
-<td>自定义DNS策略</td>
-<td>pod&#x2F;deploy&#x2F;statefulset</td>
-<td>视情况而定</td>
-<td>如需对接三方的DNS服务器，推荐采用</td>
-</tr>
-<tr>
-<td>使用三方DNS插件</td>
-<td>整个kubernetes集群</td>
-<td>否</td>
-<td>不推荐，Coredns为业内主流</td>
-</tr>
-</tbody></table>
-<h2><span id="xiu-gai-x2f-etc-x2f-hosts">修改&#x2F;etc&#x2F;hosts</span><a href="#xiu-gai-x2f-etc-x2f-hosts" class="header-anchor">#</a></h2><p>修改&#x2F;etc&#x2F;hosts是最传统的方式，直接在容器内修改相应的文件来实现域名解析，在Pod级别生效。由于其可维护性较差（每次pod发生重启都需要手动修改），不推荐在生产环境使用。</p>
-<p>例如，我们可以在&#x2F;etc&#x2F;hosts里面添加这样一条记录</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">250.250.250.250 four-250</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">/ # ping four-250</span><br><span class="line">PING four-250 (250.250.250.250): 56 data bytes</span><br></pre></td></tr></table></figure>
-
-<h2><span id="tian-jia-hostaliases-ji-lu">添加HostAliases记录</span><a href="#tian-jia-hostaliases-ji-lu" class="header-anchor">#</a></h2><p>HostAliases是kubernetes中Pod配置的一个字段，它提供了Pod内容器的<code>/etc/hosts</code>文件的附加记录。这在某些情况下非常有用，特别是当你想要覆盖某个主机名的解析结果，或者提供网络中没有的主机名解析时。</p>
-<p>这个可以在Pod、Replica、Deployment、StatefulSet的级别修改，维护性稍强。举个🌰，我们将上面的yaml修改为</p>
-<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">apps/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Deployment</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">busybox-deployment</span></span><br><span class="line">  <span class="attr">labels:</span></span><br><span class="line">    <span class="attr">app:</span> <span class="string">busybox</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">replicas:</span> <span class="number">3</span></span><br><span class="line">  <span class="attr">selector:</span></span><br><span class="line">    <span class="attr">matchLabels:</span></span><br><span class="line">      <span class="attr">app:</span> <span class="string">busybox</span></span><br><span class="line">  <span class="attr">template:</span></span><br><span class="line">    <span class="attr">metadata:</span></span><br><span class="line">      <span class="attr">labels:</span></span><br><span class="line">        <span class="attr">app:</span> <span class="string">busybox</span></span><br><span class="line">    <span class="attr">spec:</span></span><br><span class="line">      <span class="attr">hostAliases:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">ip:</span> <span class="string">&quot;250.250.250.250&quot;</span></span><br><span class="line">        <span class="attr">hostnames:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="string">&quot;four-250&quot;</span></span><br><span class="line">      <span class="attr">containers:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">busybox</span></span><br><span class="line">        <span class="attr">image:</span> <span class="string">busybox</span></span><br><span class="line">        <span class="attr">args:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="string">/bin/sh</span></span><br><span class="line">        <span class="bullet">-</span> <span class="string">-c</span></span><br><span class="line">        <span class="bullet">-</span> <span class="string">&quot;while true; do echo Hello, Kubernetes!; sleep 10;done&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>这个时候我们查看容器的&#x2F;etc&#x2F;hosts，发现它被kubernetes自动插入了一条记录<strong>Entries add by HostAliases。</strong>这就是hostAliases的实现原理</p>
-<p>在<strong>kubelet_pods</strong>代码中进行了这样的写入动作</p>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">hostsEntriesFromHostAliases</span><span class="params">(hostAliases []v1.HostAlias)</span></span> []<span class="type">byte</span> &#123;</span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(hostAliases) == <span class="number">0</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> []<span class="type">byte</span>&#123;&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">var</span> buffer bytes.Buffer</span><br><span class="line">	buffer.WriteString(<span class="string">&quot;\n&quot;</span>)</span><br><span class="line">	buffer.WriteString(<span class="string">&quot;# Entries added by HostAliases.\n&quot;</span>)</span><br><span class="line">	<span class="comment">// for each IP, write all aliases onto single line in hosts file</span></span><br><span class="line">	<span class="keyword">for</span> _, hostAlias := <span class="keyword">range</span> hostAliases &#123;</span><br><span class="line">		buffer.WriteString(fmt.Sprintf(<span class="string">&quot;%s\t%s\n&quot;</span>, hostAlias.IP, strings.Join(hostAlias.Hostnames, <span class="string">&quot;\t&quot;</span>)))</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> buffer.Bytes()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2><span id="coredns-pei-zhi">Coredns配置</span><a href="#coredns-pei-zhi" class="header-anchor">#</a></h2><p>我们可以通过修改ConfigMap来实现让容器解析特定域名的目的。</p>
-<h3><span id="geng-gai-coredns-pei-zhi">更改Coredns配置</span><a href="#geng-gai-coredns-pei-zhi" class="header-anchor">#</a></h3><p>我们可以通过以下命令修改Coredns的配置：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl edit cm coredns -n kube-system</span><br></pre></td></tr></table></figure>
-
-<h3><span id="yuan-you-de-configmap">原有的configmap</span><a href="#yuan-you-de-configmap" class="header-anchor">#</a></h3><figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">Corefile:</span> <span class="string">|</span></span><br><span class="line"><span class="string">    .:53 &#123;</span></span><br><span class="line"><span class="string">        log</span></span><br><span class="line"><span class="string">        errors</span></span><br><span class="line"><span class="string">        health &#123;</span></span><br><span class="line"><span class="string">           lameduck 5s</span></span><br><span class="line"><span class="string">        &#125;</span></span><br><span class="line"><span class="string">        ready</span></span><br><span class="line"><span class="string">        kubernetes cluster.local in-addr.arpa ip6.arpa &#123;</span></span><br><span class="line"><span class="string">           pods insecure</span></span><br><span class="line"><span class="string">           fallthrough in-addr.arpa ip6.arpa</span></span><br><span class="line"><span class="string">           ttl 30</span></span><br><span class="line"><span class="string">        &#125;</span></span><br><span class="line"><span class="string">        prometheus :9153</span></span><br><span class="line"><span class="string">        hosts &#123;</span></span><br><span class="line"><span class="string">           192.168.65.2 host.minikube.internal</span></span><br><span class="line"><span class="string">           fallthrough</span></span><br><span class="line"><span class="string">        &#125;</span></span><br><span class="line"><span class="string">        forward . /etc/resolv.conf &#123;</span></span><br><span class="line"><span class="string">           max_concurrent 1000</span></span><br><span class="line"><span class="string">        &#125;</span></span><br><span class="line"><span class="string">        cache 30</span></span><br><span class="line"><span class="string">        loop</span></span><br><span class="line"><span class="string">        reload</span></span><br><span class="line"><span class="string">        loadbalance</span></span><br><span class="line"><span class="string">    &#125;</span></span><br></pre></td></tr></table></figure>
-
-<p>在hosts里面加上特定的记录</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">250.250.250.250 four-250</span><br></pre></td></tr></table></figure>
-
-<p>如果您没有配置reload插件，则需要重启Coredns才能生效，默认的reload时间是30s，在plugin&#x2F;reload&#x2F;setup.go的defaultInterval中定义</p>
-<h2><span id="zi-ding-yi-dns-ce-lue">自定义DNS策略</span><a href="#zi-ding-yi-dns-ce-lue" class="header-anchor">#</a></h2><p>通过修改DNS策略。使得对于单个Pod&#x2F;Deploy&#x2F;StatefulSet将特定的域名解析发给特定的服务器来达到效果，如下，可以对pod添加dns的服务器以及search域</p>
-<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">spec:</span></span><br><span class="line">   <span class="attr">dnsConfig:</span></span><br><span class="line">     <span class="attr">nameservers:</span></span><br><span class="line">       <span class="bullet">-</span> <span class="number">1.2</span><span class="number">.3</span><span class="number">.4</span></span><br><span class="line">     <span class="attr">searches:</span></span><br><span class="line">       <span class="bullet">-</span> <span class="string">search.prefix</span></span><br><span class="line">   <span class="attr">containers:</span></span><br><span class="line">   <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">busybox</span></span><br><span class="line">     <span class="attr">image:</span> <span class="string">busybox</span></span><br><span class="line">     <span class="attr">args:</span></span><br><span class="line">     <span class="bullet">-</span> <span class="string">/bin/sh</span></span><br><span class="line">     <span class="bullet">-</span> <span class="string">-c</span></span><br><span class="line">     <span class="bullet">-</span> <span class="string">&quot;while true; do echo Hello, Kubernetes!; sleep 10;done&quot;</span></span><br></pre></td></tr></table></figure>
-
-<h2><span id="shi-yong-di-san-fang-dns-cha-jian">使用第三方DNS插件</span><a href="#shi-yong-di-san-fang-dns-cha-jian" class="header-anchor">#</a></h2><p>不推荐，使用其他的DNS插件，来做一些炫酷的自定义操作。而且目前Coredns也是业内的主流，没有很好的替代</p>
-]]></content>
+      <tags>
+        <tag>SpringCloud</tag>
+      </tags>
   </entry>
   <entry>
     <title>微服务广播模式实践</title>
@@ -358,16 +284,6 @@
 ]]></content>
   </entry>
   <entry>
-    <title>敏感信息打印大全</title>
-    <url>/%E6%95%8F%E6%84%9F%E4%BF%A1%E6%81%AF%E6%89%93%E5%8D%B0%E5%A4%A7%E5%85%A8/</url>
-    <content><![CDATA[<h2><span id="java">Java</span><a href="#java" class="header-anchor">#</a></h2><h2><span id="apache-http-client">Apache http client</span><a href="#apache-http-client" class="header-anchor">#</a></h2><h3><span id="wire-log">Wire log</span><a href="#wire-log" class="header-anchor">#</a></h3><p>Apache http client会打印请求和响应的wire log，包含请求和响应的header和body，打印在debug级别。</p>
-<p>Apache http client的日志都通过<code>org.apache.http.wire</code>这个logger打印，可以通过配置这个logger来控制wire log的打印。</p>
-<p>注：Apache http client默认通过apache common logging来打印日志，可以通过配置</p>
-<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.slf4j<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>jcl-over-slf4j<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.7.32<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
-<p>来使用slf4j来打印日志。</p>
-]]></content>
-  </entry>
-  <entry>
     <title>提升网络协议服务器的定位能力</title>
     <url>/%E6%8F%90%E5%8D%87%E7%BD%91%E7%BB%9C%E5%8D%8F%E8%AE%AE%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%AE%9A%E4%BD%8D%E8%83%BD%E5%8A%9B/</url>
     <content><![CDATA[<p>近期，我再次涉足于协议服务器相关的工作领域，致力于定位并解决各种问题。简单总结一些心得给大家。如果想要定位出协议服务器的问题，那么这些能力可能至关重要。</p>
@@ -400,6 +316,16 @@
 <h3><span id="guo-lu-tiao-jian-de-she-ding">过滤条件的设定</span><a href="#guo-lu-tiao-jian-de-she-ding" class="header-anchor">#</a></h3><p>设定过滤条件是抓包的关键，因为在实际环境中，数据流量可能非常大，如果没有过滤条件，抓包的数据量可能会非常庞大，对应用和系统的性能产生影响。在应用层，我们可以设置更多更精细的过滤条件，如网络地址、端口、协议类型、特定的字段等。这些过滤条件可以帮助我们更精确地定位问题，减少无效的数据。</p>
 <h3><span id="shu-ju-cun-chu-wen-ti">数据存储问题</span><a href="#shu-ju-cun-chu-wen-ti" class="header-anchor">#</a></h3><p>将抓到的数据存储起来也是很重要的一步。可以选择将数据存储到内存或者硬盘。需要注意的是，如果选择存储到内存，要考虑到内存的大小，避免因为抓包数据过大导致内存溢出。如果选择存储到硬盘，要考虑到硬盘的读写速度和容量，避免因为抓包数据过大导致硬盘满载。</p>
 <h2><span id="zong-jie">总结</span><a href="#zong-jie" class="header-anchor">#</a></h2><p>本文首先阐述了网络协议服务器的一些问题定位能力，包括CPU内存分析能力、日志和网络连接的关联能力、针对特征值的跟踪能力，以及查看原始报文的能力，也讨论了将网络报文与业务trace有效关联的重要性和实现挑战。强调了抓包的重要性和对于解密TLS报文的挑战。为了解决网络层抓包遇到的困难，我们可以考虑应用层抓包方案。最后，我们讨论了应用层抓包的一些关键问题，包括抓包地点的选择、过滤条件的设定和数据存储问题。</p>
+]]></content>
+  </entry>
+  <entry>
+    <title>敏感信息打印大全</title>
+    <url>/%E6%95%8F%E6%84%9F%E4%BF%A1%E6%81%AF%E6%89%93%E5%8D%B0%E5%A4%A7%E5%85%A8/</url>
+    <content><![CDATA[<h2><span id="java">Java</span><a href="#java" class="header-anchor">#</a></h2><h2><span id="apache-http-client">Apache http client</span><a href="#apache-http-client" class="header-anchor">#</a></h2><h3><span id="wire-log">Wire log</span><a href="#wire-log" class="header-anchor">#</a></h3><p>Apache http client会打印请求和响应的wire log，包含请求和响应的header和body，打印在debug级别。</p>
+<p>Apache http client的日志都通过<code>org.apache.http.wire</code>这个logger打印，可以通过配置这个logger来控制wire log的打印。</p>
+<p>注：Apache http client默认通过apache common logging来打印日志，可以通过配置</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.slf4j<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>jcl-over-slf4j<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.7.32<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>来使用slf4j来打印日志。</p>
 ]]></content>
   </entry>
   <entry>
@@ -441,6 +367,9 @@
 </ul>
 <p>这个问题的解决方案应根据实际情况进行选择，希望对你有所帮助。</p>
 ]]></content>
+      <tags>
+        <tag>kafka</tag>
+      </tags>
   </entry>
   <entry>
     <title>网络通信超时之后该不该重启客户端</title>
@@ -496,7 +425,7 @@
     <title>calcite parser代码生成详解</title>
     <url>/calcite/calcite-parser-code-generate/</url>
     <content><![CDATA[<h1><span id="calcite-parser-dai-ma-sheng-cheng-xiang-jie">calcite parser代码生成详解</span><a href="#calcite-parser-dai-ma-sheng-cheng-xiang-jie" class="header-anchor">#</a></h1><p>本文代码均已上传到<a href="https://gitee.com/shoothzj/calcite-examples">gitee</a><br>calcite的parser代码生成分为如下两个步骤</p>
-<p><img src="/calcite-parser-code-generate.png" alt="calcite-parser-code-generate-process"></p>
+<p><img src="/calcite/calcite-parser-code-generate/calcite-parser-code-generate-process.png" alt="calcite-parser-code-generate-process"></p>
 <h2><span id="sheng-cheng-parse-jj">生成Parse.jj</span><a href="#sheng-cheng-parse-jj" class="header-anchor">#</a></h2><p>文件目录如下</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">├── pom.xml</span><br><span class="line">└── src</span><br><span class="line">    ├── main</span><br><span class="line">    │   ├── codegen</span><br><span class="line">    │   │   ├── config.fmpp</span><br><span class="line">    │   │   ├── includes</span><br><span class="line">    │   │   │   ├── compoundIdentifier.ftl</span><br><span class="line">    │   │   │   └── parserImpls.ftl</span><br><span class="line">    │   │   └── templates</span><br><span class="line">    │   │       └── Parser.jj</span><br></pre></td></tr></table></figure>
 
@@ -899,7 +828,7 @@
       </tags>
   </entry>
   <entry>
-    <title>business-config-center-impl</title>
+    <title>业务配置中心的实现</title>
     <url>/config/business-config-center-impl/</url>
     <content><![CDATA[<h1><span id="qian-yan">前言</span><a href="#qian-yan" class="header-anchor">#</a></h1><p>之前在InfoQ的《华为云物联网四年配置中心实践》文章中分享了业务配置中心。</p>
 <p>本文讲述业务配置中心（下文简述为配置中心）的关键技术和实现方式。华为云物联网平台按照本文的实现方式实现了一个业务配置中心，该配置中心2020年1月上线，平稳运行至今。</p>
@@ -1104,7 +1033,7 @@
       </tags>
   </entry>
   <entry>
-    <title>kubernetes-domain-specify-result</title>
+    <title>容器内指定特定域名解析结果的几种方式</title>
     <url>/kubernetes/kubernetes-domain-specify-result/</url>
     <content><![CDATA[<p>在本篇文章中，我们将探讨如何在容器内指定特定域名解析结果的几种方式。为了方便演示，首先我们创建一个演示用的Deployment配置文件。</p>
 <figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">apps/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Deployment</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">busybox-deployment</span></span><br><span class="line">  <span class="attr">labels:</span></span><br><span class="line">    <span class="attr">app:</span> <span class="string">busybox</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">replicas:</span> <span class="number">1</span></span><br><span class="line">  <span class="attr">selector:</span></span><br><span class="line">    <span class="attr">matchLabels:</span></span><br><span class="line">      <span class="attr">app:</span> <span class="string">busybox</span></span><br><span class="line">  <span class="attr">template:</span></span><br><span class="line">    <span class="attr">metadata:</span></span><br><span class="line">      <span class="attr">labels:</span></span><br><span class="line">        <span class="attr">app:</span> <span class="string">busybox</span></span><br><span class="line">    <span class="attr">spec:</span></span><br><span class="line">      <span class="attr">containers:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">busybox</span></span><br><span class="line">        <span class="attr">image:</span> <span class="string">busybox</span></span><br><span class="line">        <span class="attr">args:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="string">/bin/sh</span></span><br><span class="line">        <span class="bullet">-</span> <span class="string">-c</span></span><br><span class="line">        <span class="bullet">-</span> <span class="string">&quot;while true; do echo Hello, Kubernetes!; sleep 10;done&quot;</span></span><br></pre></td></tr></table></figure>
@@ -1225,7 +1154,7 @@
   <entry>
     <title>记一次kubernetes获取internal Ip错误流程</title>
     <url>/kubernetes/kubernetes-internal-ip-error/</url>
-    <content><![CDATA[<p>偶尔也回首一下处理的棘手问题吧。问题的现象是，通过kubernetes get node输出的ip不是期望的ip地址。大概如下图所示</p>
+    <content><![CDATA[<p>偶尔也回首一下处理的棘手问题吧。问题的现象是，通过kubernetes get node输出的ip不是期望的ip地址。大概如下所示</p>
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ip addr</span><br><span class="line"></span><br><span class="line">eth0 ip1</span><br><span class="line">eth0:xxx ip2</span><br></pre></td></tr></table></figure>
 
 <p>最终输出的不是预期的ip1地址，而是ip2地址。</p>
@@ -1252,7 +1181,7 @@
       </tags>
   </entry>
   <entry>
-    <title>kubernetes-pod-api</title>
+    <title>Kubernetes pod内调用API</title>
     <url>/kubernetes/kubernetes-pod-api/</url>
     <content><![CDATA[<p>Kubernetes pod内调用API的流程总体分为以下步骤</p>
 <ul>
@@ -1293,7 +1222,7 @@
       </tags>
   </entry>
   <entry>
-    <title>kubernetes-ha-registry</title>
+    <title>高可用无单点架构之镜像仓库</title>
     <url>/kubernetes/kubernetes-registry-ha/</url>
     <content><![CDATA[<p>本篇文章探讨镜像仓库<code>registry</code>的高可用</p>
 <h1><span id="jing-xiang-cang-ku-gao-ke-yong-wu-dan-dian-gu-zhang-she-ji-na-xie-chang-jing">镜像仓库高可用无单点故障涉及那些场景</span><a href="#jing-xiang-cang-ku-gao-ke-yong-wu-dan-dian-gu-zhang-she-ji-na-xie-chang-jing" class="header-anchor">#</a></h1><h2><span id="jing-xiang-cang-ku-dui-wai-ti-gong-fang-wen-wu-dan-dian-gu-zhang">镜像仓库对外提供访问无单点故障</span><a href="#jing-xiang-cang-ku-dui-wai-ti-gong-fang-wen-wu-dan-dian-gu-zhang" class="header-anchor">#</a></h2><p>镜像仓库对外提供的访问点保持高可用</p>
@@ -1323,7 +1252,7 @@
       </tags>
   </entry>
   <entry>
-    <title>kubernetes-sidecar</title>
+    <title>一步一步教你写kubernetes sidecar</title>
     <url>/kubernetes/kubernetes-sidecar/</url>
     <content><![CDATA[<h1><span id="shi-me-shi-sidecar">什么是sidecar？</span><a href="#shi-me-shi-sidecar" class="header-anchor">#</a></h1><p><img src="/kubernetes/kubernetes-sidecar/kubernetes-sidecar-what-is.png" alt="kubernetes-sidecar-what-is"></p>
 <p>sidecar，直译为边车。 如上图所示，边车就是加装在摩托车旁来达到拓展功能的目的，比如行驶更加稳定，可以拉更多的人和货物，坐在边车上的人可以给驾驶员指路等。边车模式通过给应用服务加装一个“边车”来达到<strong>控制</strong>和<strong>逻辑</strong>的分离的目的。</p>
@@ -1367,7 +1296,7 @@
       </tags>
   </entry>
   <entry>
-    <title>linux-process-exist</title>
+    <title>比调用Shell更高效的判断进程是否存在的方式</title>
     <url>/linux/linux-process-exist/</url>
     <content><![CDATA[<p>有很多场景需要我们的代码检测一个进程是否存在，常用的一种方式是通过调用脚本通过<code>ps -ef</code>的方式查看，然而其实这种做法并不怎么高效，会fork一个进程出来，还会影响<code>go</code>协程的调度</p>
 <p>一种更好的方式是可以通过解析<code>/proc</code>文件夹来得到想要的信息，其实可以通过<code>strace</code>命令查看，<code>ps -ef</code>也是读取了这个路径下的信息</p>
@@ -1410,7 +1339,7 @@
       </tags>
   </entry>
   <entry>
-    <title>lvs-performance-manual</title>
+    <title>lvs 性能手册</title>
     <url>/lvs/lvs-performance-manual/</url>
     <content><![CDATA[<h1><span id="lvs-shi-zuo-shi-me-de">lvs是做什么的</span><a href="#lvs-shi-zuo-shi-me-de" class="header-anchor">#</a></h1><p>lvs通常用做tcp&#x2F;udp协议的四层负载均衡</p>
 <p><img src="/lvs/lvs-performance-manual/lvs-brief.png" alt="lvs-brief"></p>
@@ -1518,7 +1447,38 @@
       </tags>
   </entry>
   <entry>
-    <title>nginx-sni</title>
+    <title>Mysql是如何隐藏ps命令行中的密码的</title>
+    <url>/mysql/mysql-ps-password/</url>
+    <content><![CDATA[<h2><span id="can-kao">参考</span><a href="#can-kao" class="header-anchor">#</a></h2><ul>
+<li><a href="http://northernmost.org/blog/how-does-mysql-hide-the-command-line-password-in-ps/index.html">http://northernmost.org/blog/how-does-mysql-hide-the-command-line-password-in-ps/index.html</a></li>
+</ul>
+<p>之前就在环境上<code>ps -ef</code>看到过<code>xxxxxx</code>的密码，一直没搞明白怎么回事，今天整理了一下，核心内容均来自于上述连接，作了一些额外的测试和查阅资料。</p>
+<h2><span id="ce-shi">测试</span><a href="#ce-shi" class="header-anchor">#</a></h2><h3><span id="yun-xing-mysql-shi-li">运行Mysql实例</span><a href="#yun-xing-mysql-shi-li" class="header-anchor">#</a></h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 自己做的Mysql8的镜像</span></span><br><span class="line">docker run ttbb/mysql:stand-alone</span><br></pre></td></tr></table></figure>
+
+<h3><span id="shi-yong-mi-ma-lian-jie-mysql-fu-wu-qi">使用密码连接Mysql服务器</span><a href="#shi-yong-mi-ma-lian-jie-mysql-fu-wu-qi" class="header-anchor">#</a></h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">mysql -u hzj -p Mysql@123 -e <span class="string">&quot;select 1&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h3><span id="ps-ef-cha-kan">ps -ef查看</span><a href="#ps-ef-cha-kan" class="header-anchor">#</a></h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@91bcbd15a82e mysql]# ps -ef</span><br><span class="line">UID        PID  PPID  C STIME TTY          TIME CMD</span><br><span class="line">root         1     0  0 07:34 ?        00:00:00 /usr/local/bin/dumb-init bash -vx /opt/sh/mysql/hzj/scripts/start.sh</span><br><span class="line">root         8     1  0 07:34 ?        00:00:00 bash -vx /opt/sh/mysql/hzj/scripts/start.sh</span><br><span class="line">root        17     1  0 07:34 ?        00:00:00 mysqld --daemonize --user=root</span><br><span class="line">root        62     8  0 07:34 ?        00:00:00 tail -f /dev/null</span><br><span class="line">root        63     0  0 07:34 pts/0    00:00:00 bash</span><br><span class="line">root        98    63  0 07:37 pts/0    00:00:00 mysql -h 127.0.0.1 -u hzj -px xxxxxxx</span><br><span class="line">root        99     0  1 07:37 pts/1    00:00:00 bash</span><br><span class="line">root       122    99  0 07:37 pts/1    00:00:00 ps -ef</span><br></pre></td></tr></table></figure>
+
+<h2><span id="mysql-yin-cang-mi-ma-yuan-li">Mysql隐藏密码原理</span><a href="#mysql-yin-cang-mi-ma-yuan-li" class="header-anchor">#</a></h2><p>改写了<code>args</code>系统参数，demo如下</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// Created by 张俭 on 2021/4/26.</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> *argv[])</span> &#123;</span><br><span class="line">    <span class="type">int</span> i = <span class="number">0</span>;</span><br><span class="line">    <span class="type">pid_t</span> mypid = getpid();</span><br><span class="line">    <span class="keyword">if</span> (argc == <span class="number">1</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;argc = %d and arguments are:\n&quot;</span>, argc);</span><br><span class="line">    <span class="keyword">for</span> (i; i &lt; argc; i++) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;%d = %s\n&quot;</span>, i, argv[i]);</span><br><span class="line">    &#125;</span><br><span class="line">    fflush(<span class="built_in">stdout</span>);</span><br><span class="line">    sleep(<span class="number">30</span>);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Replacing first argument with x:es... Now open another terminal and run: ps p %d\n&quot;</span>, (<span class="type">int</span>)mypid);</span><br><span class="line">    <span class="built_in">memset</span>(argv[<span class="number">1</span>], <span class="string">&#x27;x&#x27;</span>, <span class="built_in">strlen</span>(argv[<span class="number">1</span>]));</span><br><span class="line">    getc(<span class="built_in">stdin</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>编译并运行</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">gcc password_hide.c</span><br><span class="line">[root@c77dc365cd1a sh]<span class="comment"># ./a.out abcd</span></span><br><span class="line">argc = 2 and arguments are:</span><br><span class="line">0 = ./a.out</span><br><span class="line">1 = abcd</span><br><span class="line">Replacing first argument with x:es... Now open another terminal and run: ps p 55</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>观测结果，开始看的确有明文密码</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@c77dc365cd1a sh]# ps -ef</span><br><span class="line">UID        PID  PPID  C STIME TTY          TIME CMD</span><br><span class="line">root         1     0  0 07:49 pts/0    00:00:00 bash</span><br><span class="line">root        32     0  0 07:51 pts/1    00:00:00 bash</span><br><span class="line">root        64     1  0 07:56 pts/0    00:00:00 ./a.out abcd</span><br><span class="line">root        66    32  0 07:56 pts/1    00:00:00 ps -ef</span><br></pre></td></tr></table></figure>
+<p>经过30秒后，已经被复写</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@c77dc365cd1a sh]# ps p 55</span><br><span class="line">  PID TTY      STAT   TIME COMMAND</span><br><span class="line">   55 pts/0    S+     0:00 ./a.out xxxx</span><br></pre></td></tr></table></figure>
+<h2><span id="mysql-yuan-ma-di-zhi">Mysql源码地址</span><a href="#mysql-yuan-ma-di-zhi" class="header-anchor">#</a></h2><p>mysql-server&#x2F;client&#x2F;mysql.cc line 2054</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">if (argument) &#123;</span><br><span class="line">  char *start = argument;</span><br><span class="line">  my_free(opt_password);</span><br><span class="line">  opt_password = my_strdup(PSI_NOT_INSTRUMENTED, argument, MYF(MY_FAE));</span><br><span class="line">  while (*argument) *argument++ = &#x27;x&#x27;;  // Destroy argument</span><br><span class="line">  if (*start) start[1] = 0;</span><br><span class="line">  tty_password = false;</span><br><span class="line">&#125; else</span><br><span class="line">  tty_password = true;</span><br></pre></td></tr></table></figure>
+
+<p>PS: 后面，我还在OSX上用go程序尝试修改参数，估摸go程序的args传入是值拷贝，修改完成之后args没有生效，看来这个黑科技只有c程序能使用呀。</p>
+]]></content>
+      <tags>
+        <tag>mysql</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Nginx支持SNI转发</title>
     <url>/nginx/nginx-sni/</url>
     <content><![CDATA[<p>SNI是一个TLS的扩展字段，经常用于访问域名跳转到不同的后端地址。</p>
 <p>配置方式如下：打开nginx.conf文件，以ttbb&#x2F;nginx:nake镜像为例&#x2F;usr&#x2F;local&#x2F;openresty&#x2F;nginx&#x2F;conf&#x2F;nginx.conf</p>
@@ -1682,76 +1642,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Pulsar消息积压topic级别策略老化的两种方案</title>
-    <url>/pulsar/pulsar-msg-topic-level-policy-aging/</url>
-    <content><![CDATA[<p><code>Pulsar</code>像大多数消息中间件一样,支持按时间和大小对消息积压进行老化。但是默认的策略只能在namespace级别配置。本文将介绍如何在topic级别实现老化策略的两种方案。</p>
-<h2><span id="fang-an-yi-kai-qi-topiclevelpolicy-lai-shi-xian">方案一：开启 TopicLevelPolicy 来实现</span><a href="#fang-an-yi-kai-qi-topiclevelpolicy-lai-shi-xian" class="header-anchor">#</a></h2><p>默认的策略配置通过在<code>Zookeeper</code>上配置对应的策略，可以通过<code>./pulsar zookeeper-shell</code>命令来登录zookeeper集群查询。但是如果将这一实现方式扩展到topic级别，将会产生大量的（百万、千万级别）的ZooKeeper节点，这对于<code>ZooKeeper</code>集群来说几乎是不可接受的。因此，Pulsar提供了一种新的实现方式，即通过<code>Topic</code>来存储策略配置，而不是通过<code>ZooKeeper</code>来存储。</p>
-<p><code>Pulsar</code>，从2.7.0版本开始，引入了<code>SystemTopic</code>，用于存储<code>Topic</code>的元数据信息，包括<code>Topic</code>的策略配置。主题级策略使用户可以更灵活地管理主题,并不会给 ZooKeeper 带来额外负担。</p>
-<p>您可以通过如下配置来开启<code>TopicLevelPolicy</code>：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">systemTopicEnabled=true</span><br><span class="line">topicLevelPoliciesEnabled=true</span><br></pre></td></tr></table></figure>
-
-<p>然后通过<code>set-backlog-quota</code>命令来设置您想要的老化时间和老化大小</p>
-<p>PS: 完整的一些功能，如命令行<code>set-backlog-quota</code>，在3.0.0版本中支持</p>
-<h2><span id="fang-an-er-tong-guo-zi-ding-yi-dai-ma-lai-shi-xian">方案二：通过自定义代码来实现</span><a href="#fang-an-er-tong-guo-zi-ding-yi-dai-ma-lai-shi-xian" class="header-anchor">#</a></h2><p><code>Pulsar</code>的<code>TopicLevelPolicy</code>实现需要通过topic存储策略配置，而不是通过<code>ZooKeeper</code>来存储。在实际的极端场景下，<code>Topic</code>中存储的内容可能会丢失（因为未开启<code>Bookkeeper</code>立即落盘或磁盘文件损坏等原因），这将导致策略配置丢失，从而导致策略失效。因此，我们可以通过自定义代码来实现topic级别的策略配置，这样可以避免策略配置丢失的问题。</p>
-<p>举个例子，业务可以将策略存放在<code>Mysql</code>中，然后通过<code>Pulsar</code>的<code>Admin API</code>来让策略生效</p>
-<h3><span id="zi-ding-yi-dai-ma-shi-xian-backlog-shi-jian-ce-lue">自定义代码实现Backlog时间策略</span><a href="#zi-ding-yi-dai-ma-shi-xian-backlog-shi-jian-ce-lue" class="header-anchor">#</a></h3><pre class="mermaid">sequenceDiagram
-    participant C as Client
-    participant B as Broker
-    loop
-        C ->> B: expire-messages-all-subscriptions Request
-        B -->> C: expire-messages-all-subscriptions Response
-    end</pre>
-
-<h3><span id="zi-ding-yi-dai-ma-shi-xian-backlog-da-xiao-ce-lue">自定义代码实现Backlog大小策略</span><a href="#zi-ding-yi-dai-ma-shi-xian-backlog-da-xiao-ce-lue" class="header-anchor">#</a></h3><pre class="mermaid">sequenceDiagram
-    participant C as Client
-    participant B as Broker
-    loop
-        C ->> B: stats-internal Request
-        B -->> C: stats-internal Response
-        alt messageBacklogSize < maxMessageBacklogSize
-        else messageBacklogSize >= maxMessageBacklogSize
-            Note over B,C: estimate the backlog position
-            C ->> B: get-message-by-id Request
-            B -->> C: get-message-by-id
-            Note over B,C: get the timestamp of the message
-            C ->> B: expire-messages-all-subscriptions Request
-            B -->> C: expire-messages-all-subscriptions Response
-        end
-    end</pre>
-
-
-<script type="module"> import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.esm.min.mjs';	mermaid.initialize({startOnLoad: true, flowchart: {curve: 'linear'}}); </script>]]></content>
-      <tags>
-        <tag>Pulsar</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>pulsar-third-vendor</title>
-    <url>/pulsar/pulsar-third-vendor/</url>
-    <content><![CDATA[<h1><span id="xu-yao-liao-jie-de-gai-nian">需要了解的概念</span><a href="#xu-yao-liao-jie-de-gai-nian" class="header-anchor">#</a></h1><ul>
-<li>VPC：用户的私有网段</li>
-<li>peering：多个VPC之间打通的方式，可跨用户</li>
-</ul>
-<h1><span id="qian-yan">前言</span><a href="#qian-yan" class="header-anchor">#</a></h1><p>今天微信推送Pulsar社区有个Hackathon比赛, 开始想的idea就是，实现<code>pulsar</code>在华为云上提供服务。因为是社区的比赛，是以一个三方系统的方式在华为云上提供服务，而非是以华为云的名义提供服务。分析了下可行性和能达到的效果，对比了<code>StreamNative</code>的官网上提供的<code>pulsar</code>服务在阿里云托管的能力，能提供的能力差不多，最多只不过是实现了在华为云托管的能力，没有从0到1的突破。</p>
-<p>现在，在公有云上买<code>redis</code>和<code>kafka</code>这类组件已经变得非常普遍，由公有云供应商提供的中间件往往能给你带来良好的体验，相比三方厂家在云上进行托管，我个人认为云厂商的优势主要在以下三点</p>
-<h2><span id="wang-luo-da-tong-rong-yi">网络打通容易</span><a href="#wang-luo-da-tong-rong-yi" class="header-anchor">#</a></h2><p>下文说一下不是公有云的供应商能以什么样的方式暴露自己的服务。云厂商可以把中间件的ip地址申请在你的vpc内，对任何应用程序来说，连接都是最方便的。无论是容器化部署、虚拟机部署、和其他vpc peering打通的场景，都可以通信。</p>
-<h2><span id="di-lian-de-cheng-ben">低廉的成本</span><a href="#di-lian-de-cheng-ben" class="header-anchor">#</a></h2><p>不考虑人力成本，云厂商自运营的价格要低于三方厂家。</p>
-<h2><span id="jian-kong-xi-tong-dui-jie">监控系统对接</span><a href="#jian-kong-xi-tong-dui-jie" class="header-anchor">#</a></h2><p>方便地和云厂商的告警、统计系统对接，接收告警通知和报表等。</p>
-<p>其中<strong>网络打通</strong>和<strong>成本</strong>尤为重要，三方厂家好好做监控统计系统，也能给用户较为良好的体验。</p>
-<h1><span id="san-fang-han-jia-neng-ti-gong-shi-me-yang-de-pulsar-jie-ru">三方厂家能提供什么样的Pulsar接入</span><a href="#san-fang-han-jia-neng-ti-gong-shi-me-yang-de-pulsar-jie-ru" class="header-anchor">#</a></h1><h2><span id="tong-yi-jie-ru">统一接入</span><a href="#tong-yi-jie-ru" class="header-anchor">#</a></h2><p>三方厂家自己作为公有云上一个用户，无论这个Region上有多少个租户，都用这一个用户提供服务，这也就意味着无法与每个用户进行私网通信。如果在华为云，利用华为云推出的<strong>VPCEP</strong>服务（此处应有链接），倒是可以给每个用户提供私网通信，不过这个是做了DNAT地址转换的，跟做了DNAT转换的中间件连接，是非常麻烦的。（懂的自然懂。如果有人想详细了解，可以留言，我可以写一个文章介绍里面的坑）</p>
-<p>如果使用公网，又想避免扩容的时候动态申请EIP，动态申请EIP并不复杂，问题是EIP是有配额限制的，这才是关键。那么就需要一个统一的接入点，就需要部署pulsar proxy。到这一步，是每个用户申请一个EIP的，如果还想继续节省EIP，那么可以统一域名接入，后端通过SNI的方式转发，个别流量大的客户，单独把域名指向单独的集群。</p>
-<p><img src="/pulsar/pulsar-third-vendor/pulsar-third-vendor1.png" alt="pulsar-third-vendor1"></p>
-<h2><span id="peering-da-tong">Peering打通</span><a href="#peering-da-tong" class="header-anchor">#</a></h2><p>Peering打通可以给用户不错的私网体验，需要用户预留一个网段，网段不需要太大，能容纳pulsar所在的vm就行。采用peering打通一般绝不会选择容器化部署，想要两个容器化的集群互通，对网设的要求很高，暂且忽略Service的存在，这要求用户的vpc网段和pod网段和三方厂商的vpc网段和pod网段都不重叠！而且peering打通，给用户私有，再搭建一个k8s集群，对成本影响比较大。主要有如下两个问题</p>
-<h3><span id="zi-dong-hua">自动化</span><a href="#zi-dong-hua" class="header-anchor">#</a></h3><p>和客户peering打通，需要较大的权限，如何自动化，最大程度的减少需要的权限。</p>
-<h3><span id="ke-hu-wang-duan-he-qi-ta-wang-duan-you-zuo-liao-peering">客户网段和其他网段又做了peering</span><a href="#ke-hu-wang-duan-he-qi-ta-wang-duan-you-zuo-liao-peering" class="header-anchor">#</a></h3><p><img src="/pulsar/pulsar-third-vendor/pulsar-third-vendor2.png" alt="pulsar-third-vendor2"></p>
-<p>这个问题其实还好，就是路由规则配置麻烦</p>
-<h1><span id="zong-jie">总结</span><a href="#zong-jie" class="header-anchor">#</a></h1><p>Peering打通对用户来说已经比较方便了，相信做到自动化也没有太大的技术难度，只是时间和人力投入的问题。统一接入因为网络打通的原因，不好使用<code>kop</code>、<code>mop</code>这些高级特性，此外还有不小的公网带宽成本，羊毛出在羊身上，比较大量的用户也会倾向于Peering打通的模式吧。</p>
-]]></content>
-      <tags>
-        <tag>pulsar</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>prometheus tsdb索引布局及查询流程</title>
     <url>/prometheus/prometheus-tsdb-index/</url>
     <content><![CDATA[<h1><span id="prometheus-ci-pan-bu-ju">prometheus 磁盘布局</span><a href="#prometheus-ci-pan-bu-ju" class="header-anchor">#</a></h1><p>采集到的数据每两个小时形成一个block。每个block由一个目录组成，并存放在data路径下。该目录包含一个包含该时间窗口的所有时间序列样本的块子目录、一个元数据文件和一个索引文件（将metric_name和label索引到目录下的时间序列）。 chunks 目录中的样本默认组合成一个或多个段文件，每个段文件最大为 512MB。 当通过 API 删除系列时，删除记录存储在单独的 tombstone 文件中（而不是立即从块段中删除数据）。</p>
@@ -1810,6 +1700,76 @@
 ]]></content>
       <tags>
         <tag>prometheus</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Pulsar消息积压topic级别策略老化的两种方案</title>
+    <url>/pulsar/pulsar-msg-topic-level-policy-aging/</url>
+    <content><![CDATA[<p><code>Pulsar</code>像大多数消息中间件一样,支持按时间和大小对消息积压进行老化。但是默认的策略只能在namespace级别配置。本文将介绍如何在topic级别实现老化策略的两种方案。</p>
+<h2><span id="fang-an-yi-kai-qi-topiclevelpolicy-lai-shi-xian">方案一：开启 TopicLevelPolicy 来实现</span><a href="#fang-an-yi-kai-qi-topiclevelpolicy-lai-shi-xian" class="header-anchor">#</a></h2><p>默认的策略配置通过在<code>Zookeeper</code>上配置对应的策略，可以通过<code>./pulsar zookeeper-shell</code>命令来登录zookeeper集群查询。但是如果将这一实现方式扩展到topic级别，将会产生大量的（百万、千万级别）的ZooKeeper节点，这对于<code>ZooKeeper</code>集群来说几乎是不可接受的。因此，Pulsar提供了一种新的实现方式，即通过<code>Topic</code>来存储策略配置，而不是通过<code>ZooKeeper</code>来存储。</p>
+<p><code>Pulsar</code>，从2.7.0版本开始，引入了<code>SystemTopic</code>，用于存储<code>Topic</code>的元数据信息，包括<code>Topic</code>的策略配置。主题级策略使用户可以更灵活地管理主题,并不会给 ZooKeeper 带来额外负担。</p>
+<p>您可以通过如下配置来开启<code>TopicLevelPolicy</code>：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">systemTopicEnabled=true</span><br><span class="line">topicLevelPoliciesEnabled=true</span><br></pre></td></tr></table></figure>
+
+<p>然后通过<code>set-backlog-quota</code>命令来设置您想要的老化时间和老化大小</p>
+<p>PS: 完整的一些功能，如命令行<code>set-backlog-quota</code>，在3.0.0版本中支持</p>
+<h2><span id="fang-an-er-tong-guo-zi-ding-yi-dai-ma-lai-shi-xian">方案二：通过自定义代码来实现</span><a href="#fang-an-er-tong-guo-zi-ding-yi-dai-ma-lai-shi-xian" class="header-anchor">#</a></h2><p><code>Pulsar</code>的<code>TopicLevelPolicy</code>实现需要通过topic存储策略配置，而不是通过<code>ZooKeeper</code>来存储。在实际的极端场景下，<code>Topic</code>中存储的内容可能会丢失（因为未开启<code>Bookkeeper</code>立即落盘或磁盘文件损坏等原因），这将导致策略配置丢失，从而导致策略失效。因此，我们可以通过自定义代码来实现topic级别的策略配置，这样可以避免策略配置丢失的问题。</p>
+<p>举个例子，业务可以将策略存放在<code>Mysql</code>中，然后通过<code>Pulsar</code>的<code>Admin API</code>来让策略生效</p>
+<h3><span id="zi-ding-yi-dai-ma-shi-xian-backlog-shi-jian-ce-lue">自定义代码实现Backlog时间策略</span><a href="#zi-ding-yi-dai-ma-shi-xian-backlog-shi-jian-ce-lue" class="header-anchor">#</a></h3><pre class="mermaid">sequenceDiagram
+    participant C as Client
+    participant B as Broker
+    loop
+        C ->> B: expire-messages-all-subscriptions Request
+        B -->> C: expire-messages-all-subscriptions Response
+    end</pre>
+
+<h3><span id="zi-ding-yi-dai-ma-shi-xian-backlog-da-xiao-ce-lue">自定义代码实现Backlog大小策略</span><a href="#zi-ding-yi-dai-ma-shi-xian-backlog-da-xiao-ce-lue" class="header-anchor">#</a></h3><pre class="mermaid">sequenceDiagram
+    participant C as Client
+    participant B as Broker
+    loop
+        C ->> B: stats-internal Request
+        B -->> C: stats-internal Response
+        alt messageBacklogSize < maxMessageBacklogSize
+        else messageBacklogSize >= maxMessageBacklogSize
+            Note over B,C: estimate the backlog position
+            C ->> B: get-message-by-id Request
+            B -->> C: get-message-by-id
+            Note over B,C: get the timestamp of the message
+            C ->> B: expire-messages-all-subscriptions Request
+            B -->> C: expire-messages-all-subscriptions Response
+        end
+    end</pre>
+
+
+<script type="module"> import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.esm.min.mjs';	mermaid.initialize({startOnLoad: true, flowchart: {curve: 'linear'}}); </script>]]></content>
+      <tags>
+        <tag>Pulsar</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>如果不是公有云的供应商，能提供什么样的Pulsar服务体验</title>
+    <url>/pulsar/pulsar-third-vendor/</url>
+    <content><![CDATA[<h1><span id="xu-yao-liao-jie-de-gai-nian">需要了解的概念</span><a href="#xu-yao-liao-jie-de-gai-nian" class="header-anchor">#</a></h1><ul>
+<li>VPC：用户的私有网段</li>
+<li>peering：多个VPC之间打通的方式，可跨用户</li>
+</ul>
+<h1><span id="qian-yan">前言</span><a href="#qian-yan" class="header-anchor">#</a></h1><p>今天微信推送Pulsar社区有个Hackathon比赛, 开始想的idea就是，实现<code>pulsar</code>在华为云上提供服务。因为是社区的比赛，是以一个三方系统的方式在华为云上提供服务，而非是以华为云的名义提供服务。分析了下可行性和能达到的效果，对比了<code>StreamNative</code>的官网上提供的<code>pulsar</code>服务在阿里云托管的能力，能提供的能力差不多，最多只不过是实现了在华为云托管的能力，没有从0到1的突破。</p>
+<p>现在，在公有云上买<code>redis</code>和<code>kafka</code>这类组件已经变得非常普遍，由公有云供应商提供的中间件往往能给你带来良好的体验，相比三方厂家在云上进行托管，我个人认为云厂商的优势主要在以下三点</p>
+<h2><span id="wang-luo-da-tong-rong-yi">网络打通容易</span><a href="#wang-luo-da-tong-rong-yi" class="header-anchor">#</a></h2><p>下文说一下不是公有云的供应商能以什么样的方式暴露自己的服务。云厂商可以把中间件的ip地址申请在你的vpc内，对任何应用程序来说，连接都是最方便的。无论是容器化部署、虚拟机部署、和其他vpc peering打通的场景，都可以通信。</p>
+<h2><span id="di-lian-de-cheng-ben">低廉的成本</span><a href="#di-lian-de-cheng-ben" class="header-anchor">#</a></h2><p>不考虑人力成本，云厂商自运营的价格要低于三方厂家。</p>
+<h2><span id="jian-kong-xi-tong-dui-jie">监控系统对接</span><a href="#jian-kong-xi-tong-dui-jie" class="header-anchor">#</a></h2><p>方便地和云厂商的告警、统计系统对接，接收告警通知和报表等。</p>
+<p>其中<strong>网络打通</strong>和<strong>成本</strong>尤为重要，三方厂家好好做监控统计系统，也能给用户较为良好的体验。</p>
+<h1><span id="san-fang-han-jia-neng-ti-gong-shi-me-yang-de-pulsar-jie-ru">三方厂家能提供什么样的Pulsar接入</span><a href="#san-fang-han-jia-neng-ti-gong-shi-me-yang-de-pulsar-jie-ru" class="header-anchor">#</a></h1><h2><span id="tong-yi-jie-ru">统一接入</span><a href="#tong-yi-jie-ru" class="header-anchor">#</a></h2><p>三方厂家自己作为公有云上一个用户，无论这个Region上有多少个租户，都用这一个用户提供服务，这也就意味着无法与每个用户进行私网通信。如果在华为云，利用华为云推出的<strong>VPCEP</strong>服务（此处应有链接），倒是可以给每个用户提供私网通信，不过这个是做了DNAT地址转换的，跟做了DNAT转换的中间件连接，是非常麻烦的。（懂的自然懂。如果有人想详细了解，可以留言，我可以写一个文章介绍里面的坑）</p>
+<p>如果使用公网，又想避免扩容的时候动态申请EIP，动态申请EIP并不复杂，问题是EIP是有配额限制的，这才是关键。那么就需要一个统一的接入点，就需要部署pulsar proxy。到这一步，是每个用户申请一个EIP的，如果还想继续节省EIP，那么可以统一域名接入，后端通过SNI的方式转发，个别流量大的客户，单独把域名指向单独的集群。</p>
+<p><img src="/pulsar/pulsar-third-vendor/pulsar-third-vendor1.png" alt="pulsar-third-vendor1"></p>
+<h2><span id="peering-da-tong">Peering打通</span><a href="#peering-da-tong" class="header-anchor">#</a></h2><p>Peering打通可以给用户不错的私网体验，需要用户预留一个网段，网段不需要太大，能容纳pulsar所在的vm就行。采用peering打通一般绝不会选择容器化部署，想要两个容器化的集群互通，对网设的要求很高，暂且忽略Service的存在，这要求用户的vpc网段和pod网段和三方厂商的vpc网段和pod网段都不重叠！而且peering打通，给用户私有，再搭建一个k8s集群，对成本影响比较大。主要有如下两个问题</p>
+<h3><span id="zi-dong-hua">自动化</span><a href="#zi-dong-hua" class="header-anchor">#</a></h3><p>和客户peering打通，需要较大的权限，如何自动化，最大程度的减少需要的权限。</p>
+<h3><span id="ke-hu-wang-duan-he-qi-ta-wang-duan-you-zuo-liao-peering">客户网段和其他网段又做了peering</span><a href="#ke-hu-wang-duan-he-qi-ta-wang-duan-you-zuo-liao-peering" class="header-anchor">#</a></h3><p><img src="/pulsar/pulsar-third-vendor/pulsar-third-vendor2.png" alt="pulsar-third-vendor2"></p>
+<p>这个问题其实还好，就是路由规则配置麻烦</p>
+<h1><span id="zong-jie">总结</span><a href="#zong-jie" class="header-anchor">#</a></h1><p>Peering打通对用户来说已经比较方便了，相信做到自动化也没有太大的技术难度，只是时间和人力投入的问题。统一接入因为网络打通的原因，不好使用<code>kop</code>、<code>mop</code>这些高级特性，此外还有不小的公网带宽成本，羊毛出在羊身上，比较大量的用户也会倾向于Peering打通的模式吧。</p>
+]]></content>
+      <tags>
+        <tag>pulsar</tag>
       </tags>
   </entry>
   <entry>
@@ -1972,6 +1932,25 @@
       </tags>
   </entry>
   <entry>
+    <title>Go Http SDK设计</title>
+    <url>/code/go/go-http-sdk-design/</url>
+    <content><![CDATA[<p>根据Go项目的需求和特性，可以为Go的Http SDK项目选择以下命名方式：</p>
+<ul>
+<li><code>xxx-client-go</code>：如果这个项目只有Http SDK，没有其他协议的SDK，推荐使用这个命名方式。</li>
+<li><code>xxx-http-client-go</code>：当存在其他协议的SDK时，可以使用这个命名方式，以区分不同协议的SDK。</li>
+<li><code>xxx-admin-go</code>：当项目使用其他协议作为数据通道，使用HTTP协议作为管理通道时，可以使用这个命名方式。</li>
+</ul>
+<p>由于Go语言的调用方式是<code>包名.结构体名.方法名</code>，所以在设计SDK时，需要考虑包名、结构体名、方法名的设计。</p>
+<p>以xxx业务为例，假设业务名为<code>xxx</code>，推荐包名也为<code>xxx</code>，结构体名为<code>Client</code>。</p>
+<p>目录布局可以是这样子的：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">xxx-client-go/</span><br><span class="line">|-- xxx/</span><br><span class="line">|   |-- client.go</span><br></pre></td></tr></table></figure>
+]]></content>
+      <tags>
+        <tag>SDK</tag>
+        <tag>Go</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Apache ZooKeeper在华为云IoT服务产品部的使用</title>
     <url>/zookeeper/zookeeper-huaweicloud-usage/</url>
     <content><![CDATA[<div class="toc">
@@ -2074,25 +2053,6 @@
 ]]></content>
       <tags>
         <tag>ZooKeeper</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Go Http SDK设计</title>
-    <url>/code/go/go-http-sdk-design/</url>
-    <content><![CDATA[<p>根据Go项目的需求和特性，可以为Go的Http SDK项目选择以下命名方式：</p>
-<ul>
-<li><code>xxx-client-go</code>：如果这个项目只有Http SDK，没有其他协议的SDK，推荐使用这个命名方式。</li>
-<li><code>xxx-http-client-go</code>：当存在其他协议的SDK时，可以使用这个命名方式，以区分不同协议的SDK。</li>
-<li><code>xxx-admin-go</code>：当项目使用其他协议作为数据通道，使用HTTP协议作为管理通道时，可以使用这个命名方式。</li>
-</ul>
-<p>由于Go语言的调用方式是<code>包名.结构体名.方法名</code>，所以在设计SDK时，需要考虑包名、结构体名、方法名的设计。</p>
-<p>以xxx业务为例，假设业务名为<code>xxx</code>，推荐包名也为<code>xxx</code>，结构体名为<code>Client</code>。</p>
-<p>目录布局可以是这样子的：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">xxx-client-go/</span><br><span class="line">|-- xxx/</span><br><span class="line">|   |-- client.go</span><br></pre></td></tr></table></figure>
-]]></content>
-      <tags>
-        <tag>SDK</tag>
-        <tag>Go</tag>
       </tags>
   </entry>
   <entry>
@@ -2224,7 +2184,7 @@ reactor --> common</pre>
       </tags>
   </entry>
   <entry>
-    <title>java-metrics-statistic</title>
+    <title>java指标统计方案及代码</title>
     <url>/code/java/java-metrics-statistic/</url>
     <content><![CDATA[<h1><span id="java-gen-ju-xian-cheng-tong-ji-cpu">java 根据线程统计CPU</span><a href="#java-gen-ju-xian-cheng-tong-ji-cpu" class="header-anchor">#</a></h1><h2><span id="she-ji-si-lu">设计思路</span><a href="#she-ji-si-lu" class="header-anchor">#</a></h2><p>java的ThreadMXBean可以获取每个线程CPU执行的nanoTime，那么可以以这个为基础，除以中间系统经过的纳秒数，就获得了该线程的<code>CPU</code>占比</p>
 <h2><span id="bian-ma">编码</span><a href="#bian-ma" class="header-anchor">#</a></h2><p>首先，我们定义一个结构体，用来存放一个线程上次统计时的纳秒数和当时的系统纳秒数</p>
@@ -2423,19 +2383,22 @@ springIgnite --> util</pre>
       </tags>
   </entry>
   <entry>
-    <title>Python Http SDK设计</title>
-    <url>/code/python/python-http-sdk-design/</url>
-    <content><![CDATA[<p>根据Python项目的需求和特性，可以为Python的Http SDK项目选择以下命名方式：</p>
-<ul>
-<li><code>xxx-client-python</code>：如果这个项目只有Http SDK，没有其他协议的SDK，推荐使用这个命名方式。</li>
-<li><code>xxx-http-client-python</code>：当存在其他协议的SDK时，可以使用这个命名方式，以区分不同协议的SDK。</li>
-<li><code>xxx-admin-python</code>：当项目使用其他协议作为数据通道，使用HTTP协议作为管理通道时，可以使用这个命名方式。</li>
-</ul>
-<p>由于Python的调用方式通常是<code>模块名.类名.方法名</code>。</p>
+    <title>Spring记录数据库操作时间的几种方式</title>
+    <url>/code/java/spring-database-audit-time/</url>
+    <content><![CDATA[<p>Spring记录数据库操作时间的几种方式</p>
+<h1><span id="spring-jpa">Spring Jpa</span><a href="#spring-jpa" class="header-anchor">#</a></h1><p>@EnableJpaAuditing注解开启Jpa的审计功能，然后在实体类上使用@CreatedDate和@LastModifiedDate注解即可</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Column(name = &quot;create_time&quot;)</span></span><br><span class="line"><span class="meta">@CreatedDate</span></span><br><span class="line"><span class="keyword">private</span> LocalDateTime createTime;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Column(name = &quot;update_time&quot;)</span></span><br><span class="line"><span class="meta">@LastModifiedDate</span></span><br><span class="line"><span class="keyword">private</span> LocalDateTime updateTime;</span><br></pre></td></tr></table></figure>
+
+<h1><span id="spring-r2dbc">Spring R2dbc</span><a href="#spring-r2dbc" class="header-anchor">#</a></h1><p>Spring R2dbc可以使用@CreatedDate和@LastModifiedDate注解来实现。但是需要在Application上开启<code>@EnableR2dbcAuditing</code></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Column(&quot;created_time&quot;)</span></span><br><span class="line"><span class="meta">@CreatedDate</span></span><br><span class="line"><span class="keyword">private</span> LocalDateTime createdTime;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Column(&quot;updated_time&quot;)</span></span><br><span class="line"><span class="meta">@LastModifiedDate</span></span><br><span class="line"><span class="keyword">private</span> LocalDateTime updatedTime;</span><br></pre></td></tr></table></figure>
+
+<h1><span id="ying-yong-cheng-xu-xiu-gai">应用程序修改</span><a href="#ying-yong-cheng-xu-xiu-gai" class="header-anchor">#</a></h1><p>应用程序修改就比较简单，简单设置一下即可,以PersonPo类为例</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="type">PersonPo</span> <span class="variable">personPo</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">PersonPo</span>();</span><br><span class="line">personPo.setCreateTime(LocalDateTime.now());</span><br><span class="line">personPo.setUpdateTime(LocalDateTime.now());</span><br></pre></td></tr></table></figure>
+
+<h1><span id="mysql-chang-jing-xia-li-yong-timestamp-neng-li">Mysql场景下利用TIMESTAMP能力</span><a href="#mysql-chang-jing-xia-li-yong-timestamp-neng-li" class="header-anchor">#</a></h1><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> person (</span><br><span class="line">    id <span class="type">INT</span> <span class="keyword">PRIMARY</span> KEY,</span><br><span class="line">    <span class="operator">/</span><span class="operator">/</span> ... 其他字段 ...</span><br><span class="line">    create_time <span class="type">TIMESTAMP</span> <span class="keyword">DEFAULT</span> <span class="built_in">CURRENT_TIMESTAMP</span>,</span><br><span class="line">    update_time <span class="type">TIMESTAMP</span> <span class="keyword">DEFAULT</span> <span class="built_in">CURRENT_TIMESTAMP</span> <span class="keyword">ON</span> <span class="keyword">UPDATE</span> <span class="built_in">CURRENT_TIMESTAMP</span></span><br><span class="line">);</span><br></pre></td></tr></table></figure>
 ]]></content>
       <tags>
-        <tag>SDK</tag>
-        <tag>Python</tag>
+        <tag>Java</tag>
       </tags>
   </entry>
   <entry>
@@ -2454,6 +2417,22 @@ springIgnite --> util</pre>
       <tags>
         <tag>SDK</tag>
         <tag>TypeScript</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Python Http SDK设计</title>
+    <url>/code/python/python-http-sdk-design/</url>
+    <content><![CDATA[<p>根据Python项目的需求和特性，可以为Python的Http SDK项目选择以下命名方式：</p>
+<ul>
+<li><code>xxx-client-python</code>：如果这个项目只有Http SDK，没有其他协议的SDK，推荐使用这个命名方式。</li>
+<li><code>xxx-http-client-python</code>：当存在其他协议的SDK时，可以使用这个命名方式，以区分不同协议的SDK。</li>
+<li><code>xxx-admin-python</code>：当项目使用其他协议作为数据通道，使用HTTP协议作为管理通道时，可以使用这个命名方式。</li>
+</ul>
+<p>由于Python的调用方式通常是<code>模块名.类名.方法名</code>。</p>
+]]></content>
+      <tags>
+        <tag>SDK</tag>
+        <tag>Python</tag>
       </tags>
   </entry>
   <entry>

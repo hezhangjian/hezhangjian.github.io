@@ -21,13 +21,13 @@
 
     <meta name="description" content="在本篇文章中，我们将探讨如何在容器内指定特定域名解析结果的几种方式。为了方便演示，首先我们创建一个演示用的Deployment配置文件。 1234567891011121314151617181920212223apiVersion: apps&#x2F;v1kind: Deploymentmetadata:  name: busybox-deployment  labels:    app: busybo">
 <meta property="og:type" content="article">
-<meta property="og:title" content="kubernetes-domain-specify-result">
+<meta property="og:title" content="容器内指定特定域名解析结果的几种方式">
 <meta property="og:url" content="https://shoothzj.github.io/kubernetes/kubernetes-domain-specify-result/index.html">
 <meta property="og:site_name" content="张俭的博客">
 <meta property="og:description" content="在本篇文章中，我们将探讨如何在容器内指定特定域名解析结果的几种方式。为了方便演示，首先我们创建一个演示用的Deployment配置文件。 1234567891011121314151617181920212223apiVersion: apps&#x2F;v1kind: Deploymentmetadata:  name: busybox-deployment  labels:    app: busybo">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2023-07-10T18:07:43.000Z">
-<meta property="article:modified_time" content="2023-12-10T04:13:56.238Z">
+<meta property="article:published_time" content="2023-07-10T16:37:33.000Z">
+<meta property="article:modified_time" content="2023-12-15T15:57:27.384Z">
 <meta property="article:author" content="shoothzj">
 <meta property="article:tag" content="Kubernetes">
 <meta name="twitter:card" content="summary">
@@ -37,10 +37,10 @@
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://shoothzj.github.io/kubernetes/kubernetes-domain-specify-result/","path":"kubernetes/kubernetes-domain-specify-result/","title":"kubernetes-domain-specify-result"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://shoothzj.github.io/kubernetes/kubernetes-domain-specify-result/","path":"kubernetes/kubernetes-domain-specify-result/","title":"容器内指定特定域名解析结果的几种方式"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>kubernetes-domain-specify-result | 张俭的博客</title>
+<title>容器内指定特定域名解析结果的几种方式 | 张俭的博客</title>
   
 
 
@@ -152,13 +152,13 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">61</span>
+          <span class="site-state-item-count">62</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">31</span>
+        <span class="site-state-item-count">33</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -206,12 +206,12 @@
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="kubernetes-domain-specify-result | 张俭的博客">
+      <meta itemprop="name" content="容器内指定特定域名解析结果的几种方式 | 张俭的博客">
       <meta itemprop="description" content="">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          kubernetes-domain-specify-result
+          容器内指定特定域名解析结果的几种方式
         </h1>
 
         <div class="post-meta-container">
@@ -222,14 +222,14 @@
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2023-07-10 18:07:43" itemprop="dateCreated datePublished" datetime="2023-07-10T18:07:43+00:00">2023-07-10</time>
+      <time title="创建时间：2023-07-10 16:37:33" itemprop="dateCreated datePublished" datetime="2023-07-10T16:37:33+00:00">2023-07-10</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-10 04:13:56" itemprop="dateModified" datetime="2023-12-10T04:13:56+00:00">2023-12-10</time>
+      <time title="修改时间：2023-12-15 15:57:27" itemprop="dateModified" datetime="2023-12-15T15:57:27+00:00">2023-12-15</time>
     </span>
 
   
@@ -329,8 +329,8 @@
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/%E5%AE%B9%E5%99%A8%E5%86%85%E6%8C%87%E5%AE%9A%E7%89%B9%E5%AE%9A%E5%9F%9F%E5%90%8D%E8%A7%A3%E6%9E%90%E7%BB%93%E6%9E%9C%E7%9A%84%E5%87%A0%E7%A7%8D%E6%96%B9%E5%BC%8F/" rel="prev" title="容器内指定特定域名解析结果的几种方式">
-                  <i class="fa fa-angle-left"></i> 容器内指定特定域名解析结果的几种方式
+                <a href="/%E7%BA%BF%E7%A8%8B%E9%94%81%E5%AF%BC%E8%87%B4%E7%9A%84kafka%E5%AE%A2%E6%88%B7%E7%AB%AF%E8%B6%85%E6%97%B6%E9%97%AE%E9%A2%98/" rel="prev" title="线程锁导致的kafka客户端超时问题">
+                  <i class="fa fa-angle-left"></i> 线程锁导致的kafka客户端超时问题
                 </a>
             </div>
             <div class="post-nav-item">

@@ -21,7 +21,7 @@
 
     <meta name="description" content="Kubernetes pod内调用API的流程总体分为以下步骤  创建role 创建serviceaccount 绑定role到serviceaccount 指定pod使用serviceaccount  我们以查pod为例，演示一下整个流程 创建role#12345678910# role.yamlapiVersion: rbac.authorization.k8s.io&#x2F;v1kind: Role">
 <meta property="og:type" content="article">
-<meta property="og:title" content="kubernetes-pod-api">
+<meta property="og:title" content="Kubernetes pod内调用API">
 <meta property="og:url" content="https://shoothzj.github.io/kubernetes/kubernetes-pod-api/index.html">
 <meta property="og:site_name" content="张俭的博客">
 <meta property="og:description" content="Kubernetes pod内调用API的流程总体分为以下步骤  创建role 创建serviceaccount 绑定role到serviceaccount 指定pod使用serviceaccount  我们以查pod为例，演示一下整个流程 创建role#12345678910# role.yamlapiVersion: rbac.authorization.k8s.io&#x2F;v1kind: Role">
@@ -30,7 +30,7 @@
 <meta property="og:image" content="https://shoothzj.github.io/kubernetes/kubernetes-pod-api/kubernetes-pod-api2.png">
 <meta property="og:image" content="https://shoothzj.github.io/kubernetes/kubernetes-pod-api/kubernetes-pod-api3.png">
 <meta property="article:published_time" content="2021-04-13T21:17:20.000Z">
-<meta property="article:modified_time" content="2023-12-10T04:13:56.246Z">
+<meta property="article:modified_time" content="2023-12-15T15:57:27.392Z">
 <meta property="article:author" content="shoothzj">
 <meta property="article:tag" content="Kubernetes">
 <meta name="twitter:card" content="summary">
@@ -41,10 +41,10 @@
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://shoothzj.github.io/kubernetes/kubernetes-pod-api/","path":"kubernetes/kubernetes-pod-api/","title":"kubernetes-pod-api"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://shoothzj.github.io/kubernetes/kubernetes-pod-api/","path":"kubernetes/kubernetes-pod-api/","title":"Kubernetes pod内调用API"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>kubernetes-pod-api | 张俭的博客</title>
+<title>Kubernetes pod内调用API | 张俭的博客</title>
   
 
 
@@ -156,13 +156,13 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">61</span>
+          <span class="site-state-item-count">62</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">31</span>
+        <span class="site-state-item-count">33</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -210,12 +210,12 @@
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="kubernetes-pod-api | 张俭的博客">
+      <meta itemprop="name" content="Kubernetes pod内调用API | 张俭的博客">
       <meta itemprop="description" content="">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          kubernetes-pod-api
+          Kubernetes pod内调用API
         </h1>
 
         <div class="post-meta-container">
@@ -233,7 +233,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-10 04:13:56" itemprop="dateModified" datetime="2023-12-10T04:13:56+00:00">2023-12-10</time>
+      <time title="修改时间：2023-12-15 15:57:27" itemprop="dateModified" datetime="2023-12-15T15:57:27+00:00">2023-12-15</time>
     </span>
 
   
@@ -299,8 +299,8 @@
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/pulsar/pulsar-third-vendor/" rel="next" title="pulsar-third-vendor">
-                  pulsar-third-vendor <i class="fa fa-angle-right"></i>
+                <a href="/pulsar/pulsar-third-vendor/" rel="next" title="如果不是公有云的供应商，能提供什么样的Pulsar服务体验">
+                  如果不是公有云的供应商，能提供什么样的Pulsar服务体验 <i class="fa fa-angle-right"></i>
                 </a>
             </div>
           </div>

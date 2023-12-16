@@ -19,23 +19,31 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"shoothzj.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.19.1","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"style":null,"show_result":false},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
 
-    <meta property="og:type" content="website">
-<meta property="og:title" content="张俭的博客">
-<meta property="og:url" content="https://shoothzj.github.io/archives/2022/index.html">
+    <meta name="description" content="在软件开发中，分页没有统一的规范，实现方式也各不相同，有的会返回总页数，有的会返回总条数，有的可以任意翻页。本文对比一下几种常见的分页方式。 总体来说，分页的实现方案分为四种：  后端全部返回，由前端分页 limit offset方案 cursor方案 cursor方案与offset结合  后端全部返回，由前端分页#sequenceDiagram     participant 前端     pa">
+<meta property="og:type" content="article">
+<meta property="og:title" content="分页实践：前后端多种分页方式实现对比">
+<meta property="og:url" content="https://shoothzj.github.io/pagination-practice/index.html">
 <meta property="og:site_name" content="张俭的博客">
+<meta property="og:description" content="在软件开发中，分页没有统一的规范，实现方式也各不相同，有的会返回总页数，有的会返回总条数，有的可以任意翻页。本文对比一下几种常见的分页方式。 总体来说，分页的实现方案分为四种：  后端全部返回，由前端分页 limit offset方案 cursor方案 cursor方案与offset结合  后端全部返回，由前端分页#sequenceDiagram     participant 前端     pa">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://shoothzj.github.io/pagination-practice/cursor_preload.png">
+<meta property="og:image" content="https://shoothzj.github.io/pagination-practice/cursor_offset.png">
+<meta property="article:published_time" content="2023-12-16T12:27:25.000Z">
+<meta property="article:modified_time" content="2023-12-16T08:20:00.035Z">
 <meta property="article:author" content="shoothzj">
+<meta property="article:tag" content="Pagination">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://shoothzj.github.io/pagination-practice/cursor_preload.png">
 
 
-<link rel="canonical" href="https://shoothzj.github.io/archives/2022/">
+<link rel="canonical" href="https://shoothzj.github.io/pagination-practice/">
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":false,"lang":"zh-CN","comments":"","permalink":"","path":"archives/2022/index.html","title":""}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://shoothzj.github.io/pagination-practice/","path":"pagination-practice/","title":"分页实践：前后端多种分页方式实现对比"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>归档 | 张俭的博客</title>
+<title>分页实践：前后端多种分页方式实现对比 | 张俭的博客</title>
   
 
 
@@ -68,7 +76,7 @@
 
     <a href="/" class="brand" rel="start">
       <i class="logo-line"></i>
-      <h1 class="site-title">张俭的博客</h1>
+      <p class="site-title">张俭的博客</p>
       <i class="logo-line"></i>
     </a>
   </div>
@@ -121,7 +129,7 @@
   
   <aside class="sidebar">
 
-    <div class="sidebar-inner sidebar-overview-active">
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
       <ul class="sidebar-nav">
         <li class="sidebar-nav-toc">
           文章目录
@@ -134,6 +142,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">1.</span> <span class="nav-text">后端全部返回，由前端分页</span></a></li><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">2.</span> <span class="nav-text">limit offset方案</span></a></li><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">3.</span> <span class="nav-text">cursor方案</span></a></li><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">4.</span> <span class="nav-text">cursor方案与offset结合</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -176,151 +185,217 @@
 
     </div>
 
-    <div class="main-inner archive posts-collapse">
+    <div class="main-inner post posts-expand">
 
 
   
+
+
+<div class="post-block">
   
   
-  <div class="post-block">
-    <div class="post-content">
-      <div class="collection-title">
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/pagination-practice/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="shoothzj">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="分页实践：前后端多种分页方式实现对比 | 张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          分页实践：前后端多种分页方式实现对比
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2023-12-16 12:27:25 / 修改时间：08:20:00" itemprop="dateCreated datePublished" datetime="2023-12-16T12:27:25+00:00">2023-12-16</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>在软件开发中，分页没有统一的规范，实现方式也各不相同，有的会返回总页数，有的会返回总条数，有的可以任意翻页。本文对比一下几种常见的分页方式。</p>
+<p>总体来说，分页的实现方案分为四种：</p>
+<ul>
+<li>后端全部返回，由前端分页</li>
+<li>limit offset方案</li>
+<li>cursor方案</li>
+<li>cursor方案与offset结合</li>
+</ul>
+<h1><span id="hou-duan-quan-bu-fan-hui-you-qian-duan-fen-ye">后端全部返回，由前端分页</span><a href="#hou-duan-quan-bu-fan-hui-you-qian-duan-fen-ye" class="header-anchor">#</a></h1><pre class="mermaid">sequenceDiagram
+    participant 前端
+    participant 后端
+    前端 ->> 后端: 请求资源集数据
+    后端 -->> 前端: 返回全部数据</pre>
+
+<table>
+<thead>
+<tr>
+<th>前端功能</th>
+<th>支持情况</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>显示总页</td>
+<td>🙂</td>
+</tr>
+<tr>
+<td>任意页码跳转</td>
+<td>🙂</td>
+</tr>
+<tr>
+<td>跳转附近数页</td>
+<td>🙂</td>
+</tr>
+<tr>
+<td>大量数据集</td>
+<td>😭完全不可用</td>
+</tr>
+<tr>
+<td>实现难度</td>
+<td>简单</td>
+</tr>
+</tbody></table>
+<h1><span id="limit-offset-fang-an">limit offset方案</span><a href="#limit-offset-fang-an" class="header-anchor">#</a></h1><pre class="mermaid">sequenceDiagram
+    participant 前端
+    participant 后端
+    前端 ->> 后端: 请求满足条件的资源总数
+    后端 -->> 前端: 返回满足条件的资源总数
+    前端 ->> 后端: 请求资源集数据、PageNo
+    后端 -->> 前端: 部分数据</pre>
+
+<table>
+<thead>
+<tr>
+<th>前端功能</th>
+<th>支持情况</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>显示总页</td>
+<td>🙂</td>
+</tr>
+<tr>
+<td>任意页码跳转</td>
+<td>🙂</td>
+</tr>
+<tr>
+<td>跳转附近数页</td>
+<td>🙂</td>
+</tr>
+<tr>
+<td>大量数据集</td>
+<td>😭海量数据集下性能差</td>
+</tr>
+<tr>
+<td>实现难度</td>
+<td>相对简单</td>
+</tr>
+</tbody></table>
+<h1><span id="cursor-fang-an">cursor方案</span><a href="#cursor-fang-an" class="header-anchor">#</a></h1><pre class="mermaid">sequenceDiagram
+    participant 前端
+    participant 后端
+    前端 ->> 后端: 请求满足条件的资源总数
+    后端 -->> 前端: 返回满足条件的资源总数
+    前端 ->> 后端: 请求资源集数据、cursor、limit
+    后端 -->> 前端: 部分数据、prevCursor、nextCursor</pre>
+
+<table>
+<thead>
+<tr>
+<th>前端功能</th>
+<th>支持情况</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>显示总页</td>
+<td>🙂</td>
+</tr>
+<tr>
+<td>任意页码跳转</td>
+<td>😭</td>
+</tr>
+<tr>
+<td>跳转附近数页</td>
+<td>🙂</td>
+</tr>
+<tr>
+<td>大量数据集</td>
+<td>🙂</td>
+</tr>
+<tr>
+<td>实现难度</td>
+<td>相对复杂</td>
+</tr>
+</tbody></table>
+<p>如果每一次翻页都返回总页数的话，对性能来讲也是不小的开销。</p>
+<p>相对动态的数据来说，如果不一直翻到没有数据为止，也不好确定是否到了最后一页。为了解决这个问题，以及跳转附近数页的问题，可以演进为这样的方案。</p>
+<p>假定前端最多显示最近6页，每页50条数据，那么前端可以直接尝试预读300条数据，根据返回的数据来做局部的分页。一言以蔽之：读取更多的数据来进行局部分页。</p>
+<p><img src="/pagination-practice/cursor_preload.png" alt="cursor_preload"></p>
+<p>这里可以再简化一下前端的实现，添加offset参数，这样子前端只需要判断当前页前后数据条数是否足够，附近页的跳转可以通过携带offset字段请求得到。</p>
+<h1><span id="cursor-fang-an-yu-offset-jie-he">cursor方案与offset结合</span><a href="#cursor-fang-an-yu-offset-jie-he" class="header-anchor">#</a></h1><p><img src="/pagination-practice/cursor_offset.png" alt="cursor_offset"></p>
+<script type="module"> import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.esm.min.mjs';	mermaid.initialize({startOnLoad: true, flowchart: {curve: 'linear'}}); </script>
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Pagination/" rel="tag"># Pagination</a>
+          </div>
+
         
-        <span class="collection-header">不错! 目前共计 63 篇日志。 继续努力。</span>
-      </div>
 
-      
-    <div class="collection-year">
-      <span class="collection-header">2022</span>
-    </div>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-      <div class="post-meta-container">
-        <time itemprop="dateCreated"
-              datetime="2022-11-15T12:00:44+00:00"
-              content="2022-11-15">
-          11-15
-        </time>
-      </div>
-
-      <div class="post-title">
-        <a class="post-title-link" href="/kubernetes/kubernetes-internal-ip-error/" itemprop="url">
-          <span itemprop="name">记一次kubernetes获取internal Ip错误流程</span>
-        </a>
-      </div>
-
-      
-    </header>
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/code/java/spring-database-audit-time/" rel="prev" title="Spring记录数据库操作时间的几种方式">
+                  <i class="fa fa-angle-left"></i> Spring记录数据库操作时间的几种方式
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
   </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-      <div class="post-meta-container">
-        <time itemprop="dateCreated"
-              datetime="2022-11-08T19:20:53+00:00"
-              content="2022-11-08">
-          11-08
-        </time>
-      </div>
-
-      <div class="post-title">
-        <a class="post-title-link" href="/linux/linux-umask-analyze/" itemprop="url">
-          <span itemprop="name">linux umask 解析</span>
-        </a>
-      </div>
-
-      
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-      <div class="post-meta-container">
-        <time itemprop="dateCreated"
-              datetime="2022-09-26T22:51:07+00:00"
-              content="2022-09-26">
-          09-26
-        </time>
-      </div>
-
-      <div class="post-title">
-        <a class="post-title-link" href="/calcite/calcite-parser-code-generate/" itemprop="url">
-          <span itemprop="name">calcite parser代码生成详解</span>
-        </a>
-      </div>
-
-      
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-      <div class="post-meta-container">
-        <time itemprop="dateCreated"
-              datetime="2022-08-01T21:37:08+00:00"
-              content="2022-08-01">
-          08-01
-        </time>
-      </div>
-
-      <div class="post-title">
-        <a class="post-title-link" href="/lvs/lvs-performance-manual/" itemprop="url">
-          <span itemprop="name">lvs 性能手册</span>
-        </a>
-      </div>
-
-      
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-      <div class="post-meta-container">
-        <time itemprop="dateCreated"
-              datetime="2022-07-18T16:48:38+00:00"
-              content="2022-07-18">
-          07-18
-        </time>
-      </div>
-
-      <div class="post-title">
-        <a class="post-title-link" href="/prometheus/prometheus-tsdb-index/" itemprop="url">
-          <span itemprop="name">prometheus tsdb索引布局及查询流程</span>
-        </a>
-      </div>
-
-      
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-      <div class="post-meta-container">
-        <time itemprop="dateCreated"
-              datetime="2022-03-31T08:45:32+00:00"
-              content="2022-03-31">
-          03-31
-        </time>
-      </div>
-
-      <div class="post-title">
-        <a class="post-title-link" href="/kubernetes/kubernetes-sidecar/" itemprop="url">
-          <span itemprop="name">一步一步教你写kubernetes sidecar</span>
-        </a>
-      </div>
-
-      
-    </header>
-  </article>
+</div>
 
 
-    </div>
+
+
+
+
+    
+  
+  <div class="comments giscus-container">
   </div>
   
   
-  
-
 </div>
   </main>
 

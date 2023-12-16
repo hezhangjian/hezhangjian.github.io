@@ -146,13 +146,13 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">62</span>
+          <span class="site-state-item-count">63</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-count">34</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -177,6 +177,99 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/pulsar/pulsar-third-vendor/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="shoothzj">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/pulsar/pulsar-third-vendor/" class="post-title-link" itemprop="url">如果不是公有云的供应商，能提供什么样的Pulsar服务体验</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-04-20 20:45:22" itemprop="dateCreated datePublished" datetime="2021-04-20T20:45:22+00:00">2021-04-20</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-12-16 08:20:00" itemprop="dateModified" datetime="2023-12-16T08:20:00+00:00">2023-12-16</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1><span id="xu-yao-liao-jie-de-gai-nian">需要了解的概念</span><a href="#xu-yao-liao-jie-de-gai-nian" class="header-anchor">#</a></h1><ul>
+<li>VPC：用户的私有网段</li>
+<li>peering：多个VPC之间打通的方式，可跨用户</li>
+</ul>
+<h1><span id="qian-yan">前言</span><a href="#qian-yan" class="header-anchor">#</a></h1><p>今天微信推送Pulsar社区有个Hackathon比赛, 开始想的idea就是，实现<code>pulsar</code>在华为云上提供服务。因为是社区的比赛，是以一个三方系统的方式在华为云上提供服务，而非是以华为云的名义提供服务。分析了下可行性和能达到的效果，对比了<code>StreamNative</code>的官网上提供的<code>pulsar</code>服务在阿里云托管的能力，能提供的能力差不多，最多只不过是实现了在华为云托管的能力，没有从0到1的突破。</p>
+<p>现在，在公有云上买<code>redis</code>和<code>kafka</code>这类组件已经变得非常普遍，由公有云供应商提供的中间件往往能给你带来良好的体验，相比三方厂家在云上进行托管，我个人认为云厂商的优势主要在以下三点</p>
+<h2><span id="wang-luo-da-tong-rong-yi">网络打通容易</span><a href="#wang-luo-da-tong-rong-yi" class="header-anchor">#</a></h2><p>下文说一下不是公有云的供应商能以什么样的方式暴露自己的服务。云厂商可以把中间件的ip地址申请在你的vpc内，对任何应用程序来说，连接都是最方便的。无论是容器化部署、虚拟机部署、和其他vpc peering打通的场景，都可以通信。</p>
+<h2><span id="di-lian-de-cheng-ben">低廉的成本</span><a href="#di-lian-de-cheng-ben" class="header-anchor">#</a></h2><p>不考虑人力成本，云厂商自运营的价格要低于三方厂家。</p>
+<h2><span id="jian-kong-xi-tong-dui-jie">监控系统对接</span><a href="#jian-kong-xi-tong-dui-jie" class="header-anchor">#</a></h2><p>方便地和云厂商的告警、统计系统对接，接收告警通知和报表等。</p>
+<p>其中<strong>网络打通</strong>和<strong>成本</strong>尤为重要，三方厂家好好做监控统计系统，也能给用户较为良好的体验。</p>
+<h1><span id="san-fang-han-jia-neng-ti-gong-shi-me-yang-de-pulsar-jie-ru">三方厂家能提供什么样的Pulsar接入</span><a href="#san-fang-han-jia-neng-ti-gong-shi-me-yang-de-pulsar-jie-ru" class="header-anchor">#</a></h1><h2><span id="tong-yi-jie-ru">统一接入</span><a href="#tong-yi-jie-ru" class="header-anchor">#</a></h2><p>三方厂家自己作为公有云上一个用户，无论这个Region上有多少个租户，都用这一个用户提供服务，这也就意味着无法与每个用户进行私网通信。如果在华为云，利用华为云推出的<strong>VPCEP</strong>服务（此处应有链接），倒是可以给每个用户提供私网通信，不过这个是做了DNAT地址转换的，跟做了DNAT转换的中间件连接，是非常麻烦的。（懂的自然懂。如果有人想详细了解，可以留言，我可以写一个文章介绍里面的坑）</p>
+<p>如果使用公网，又想避免扩容的时候动态申请EIP，动态申请EIP并不复杂，问题是EIP是有配额限制的，这才是关键。那么就需要一个统一的接入点，就需要部署pulsar proxy。到这一步，是每个用户申请一个EIP的，如果还想继续节省EIP，那么可以统一域名接入，后端通过SNI的方式转发，个别流量大的客户，单独把域名指向单独的集群。</p>
+<p><img src="/pulsar/pulsar-third-vendor/pulsar-third-vendor1.png" alt="pulsar-third-vendor1"></p>
+<h2><span id="peering-da-tong">Peering打通</span><a href="#peering-da-tong" class="header-anchor">#</a></h2><p>Peering打通可以给用户不错的私网体验，需要用户预留一个网段，网段不需要太大，能容纳pulsar所在的vm就行。采用peering打通一般绝不会选择容器化部署，想要两个容器化的集群互通，对网设的要求很高，暂且忽略Service的存在，这要求用户的vpc网段和pod网段和三方厂商的vpc网段和pod网段都不重叠！而且peering打通，给用户私有，再搭建一个k8s集群，对成本影响比较大。主要有如下两个问题</p>
+<h3><span id="zi-dong-hua">自动化</span><a href="#zi-dong-hua" class="header-anchor">#</a></h3><p>和客户peering打通，需要较大的权限，如何自动化，最大程度的减少需要的权限。</p>
+<h3><span id="ke-hu-wang-duan-he-qi-ta-wang-duan-you-zuo-liao-peering">客户网段和其他网段又做了peering</span><a href="#ke-hu-wang-duan-he-qi-ta-wang-duan-you-zuo-liao-peering" class="header-anchor">#</a></h3><p><img src="/pulsar/pulsar-third-vendor/pulsar-third-vendor2.png" alt="pulsar-third-vendor2"></p>
+<p>这个问题其实还好，就是路由规则配置麻烦</p>
+<h1><span id="zong-jie">总结</span><a href="#zong-jie" class="header-anchor">#</a></h1><p>Peering打通对用户来说已经比较方便了，相信做到自动化也没有太大的技术难度，只是时间和人力投入的问题。统一接入因为网络打通的原因，不好使用<code>kop</code>、<code>mop</code>这些高级特性，此外还有不小的公网带宽成本，羊毛出在羊身上，比较大量的用户也会倾向于Peering打通的模式吧。</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -222,7 +315,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-15 15:57:27" itemprop="dateModified" datetime="2023-12-15T15:57:27+00:00">2023-12-15</time>
+      <time title="修改时间：2023-12-16 08:19:59" itemprop="dateModified" datetime="2023-12-16T08:19:59+00:00">2023-12-16</time>
     </span>
 
   
@@ -330,7 +423,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-15 15:57:27" itemprop="dateModified" datetime="2023-12-15T15:57:27+00:00">2023-12-15</time>
+      <time title="修改时间：2023-12-16 08:20:00" itemprop="dateModified" datetime="2023-12-16T08:20:00+00:00">2023-12-16</time>
     </span>
 
   
@@ -502,7 +595,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-15 15:57:27" itemprop="dateModified" datetime="2023-12-15T15:57:27+00:00">2023-12-15</time>
+      <time title="修改时间：2023-12-16 08:20:00" itemprop="dateModified" datetime="2023-12-16T08:20:00+00:00">2023-12-16</time>
     </span>
 
   
@@ -592,7 +685,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-15 15:57:27" itemprop="dateModified" datetime="2023-12-15T15:57:27+00:00">2023-12-15</time>
+      <time title="修改时间：2023-12-16 08:20:00" itemprop="dateModified" datetime="2023-12-16T08:20:00+00:00">2023-12-16</time>
     </span>
 
   
@@ -679,7 +772,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-15 15:57:27" itemprop="dateModified" datetime="2023-12-15T15:57:27+00:00">2023-12-15</time>
+      <time title="修改时间：2023-12-16 08:19:59" itemprop="dateModified" datetime="2023-12-16T08:19:59+00:00">2023-12-16</time>
     </span>
 
   
@@ -781,7 +874,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-15 15:57:27" itemprop="dateModified" datetime="2023-12-15T15:57:27+00:00">2023-12-15</time>
+      <time title="修改时间：2023-12-16 08:19:59" itemprop="dateModified" datetime="2023-12-16T08:19:59+00:00">2023-12-16</time>
     </span>
 
   
@@ -871,7 +964,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-15 15:57:27" itemprop="dateModified" datetime="2023-12-15T15:57:27+00:00">2023-12-15</time>
+      <time title="修改时间：2023-12-16 08:20:00" itemprop="dateModified" datetime="2023-12-16T08:20:00+00:00">2023-12-16</time>
     </span>
 
   
@@ -964,7 +1057,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-15 15:57:27" itemprop="dateModified" datetime="2023-12-15T15:57:27+00:00">2023-12-15</time>
+      <time title="修改时间：2023-12-16 08:20:00" itemprop="dateModified" datetime="2023-12-16T08:20:00+00:00">2023-12-16</time>
     </span>
 
   
@@ -1060,7 +1153,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-15 15:57:27" itemprop="dateModified" datetime="2023-12-15T15:57:27+00:00">2023-12-15</time>
+      <time title="修改时间：2023-12-16 08:19:59" itemprop="dateModified" datetime="2023-12-16T08:19:59+00:00">2023-12-16</time>
     </span>
 
   
@@ -1090,99 +1183,6 @@
 <p>使用<a target="_blank" rel="noopener" href="https://askubuntu.com/questions/334365/how-to-add-a-directory-to-linker-command-line-in-linux%E8%A7%84%E9%81%BF%E6%B7%BB%E5%8A%A0so%E6%96%87%E4%BB%B6%E6%9D%83%E9%99%90">https://askubuntu.com/questions/334365/how-to-add-a-directory-to-linker-command-line-in-linux规避添加so文件权限</a></p>
 <p>随后抓包,发现还是发送了ping命令,达到了我们预期的效果</p>
 <h1><span id="zong-jie">总结</span><a href="#zong-jie" class="header-anchor">#</a></h1><p>本文通过一系列测试得出结论，root用户权限下的Java程序会使用ping命令进行探测。若普通用户不具备相应权限，则会尝试探测TCP端口7，但在安全组未开启该端口的情况下会导致预期结果不一致。推荐赋予java程序特权,使得InetAddress类能够使用ping命令进行探测</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/wireshark/wireshark-display-filter/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="shoothzj">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/wireshark/wireshark-display-filter/" class="post-title-link" itemprop="url">WireShark 显示过滤器</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2018-09-09 09:55:09" itemprop="dateCreated datePublished" datetime="2018-09-09T09:55:09+00:00">2018-09-09</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-15 15:57:27" itemprop="dateModified" datetime="2023-12-15T15:57:27+00:00">2023-12-15</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1><span id="ru-he-shi-yong-xian-shi-guo-lu-qi">如何使用显示过滤器</span><a href="#ru-he-shi-yong-xian-shi-guo-lu-qi" class="header-anchor">#</a></h1><p><img src="/wireshark/wireshark-display-filter/wireshark-display-filter1.png" alt="wireshark-display-filter1"><br>或者按住 CTRL + F，输入显示过滤器<br><img src="/wireshark/wireshark-display-filter/wireshark-display-filter2.png" alt="wireshark-display-filter2"></p>
-<h2><span id="er-ceng-xian-shi-guo-lu-qi-ju-li">二层显示过滤器举例</span><a href="#er-ceng-xian-shi-guo-lu-qi-ju-li" class="header-anchor">#</a></h2><h3><span id="chang-du-xiao-yu-128-zi-jie-de-shu-ju-bao">长度小于128字节的数据包</span><a href="#chang-du-xiao-yu-128-zi-jie-de-shu-ju-bao" class="header-anchor">#</a></h3><p>frame.len&lt;&#x3D;128</p>
-<h3><span id="pai-chu-arp-liu-liang">排除ARP流量</span><a href="#pai-chu-arp-liu-liang" class="header-anchor">#</a></h3><p>!arp</p>
-<h2><span id="san-ceng-xian-shi-guo-lu-qi-ju-li">三层显示过滤器举例</span><a href="#san-ceng-xian-shi-guo-lu-qi-ju-li" class="header-anchor">#</a></h2><h3><span id="zhi-xian-shi-192-168-0-1-ip-xiang-guan-shu-ju-bao">只显示192.168.0.1 IP相关数据包</span><a href="#zhi-xian-shi-192-168-0-1-ip-xiang-guan-shu-ju-bao" class="header-anchor">#</a></h3><p>ip.addr&#x3D;&#x3D;192.168.0.1</p>
-<h2><span id="si-ceng-xian-shi-guo-lu-qi-ju-li">四层显示过滤器举例</span><a href="#si-ceng-xian-shi-guo-lu-qi-ju-li" class="header-anchor">#</a></h2><h3><span id="pai-chu-rdp-liu-liang">排除RDP流量</span><a href="#pai-chu-rdp-liu-liang" class="header-anchor">#</a></h3><p>!tcp.port&#x3D;&#x3D;3389</p>
-<h3><span id="ju-you-syn-biao-zhi-de-tcp-shu-ju-bao">具有SYN标志的TCP数据包</span><a href="#ju-you-syn-biao-zhi-de-tcp-shu-ju-bao" class="header-anchor">#</a></h3><p>tcp.flags.syn&#x3D;&#x3D;1</p>
-<h3><span id="ju-you-rst-biao-zhi-de-tcp-shu-ju-bao">具有RST标志的TCP数据包</span><a href="#ju-you-rst-biao-zhi-de-tcp-shu-ju-bao" class="header-anchor">#</a></h3><p>tcp.flags.rst&#x3D;&#x3D;1</p>
-<h3><span id="tcp-que-ren-shi-jian-jiao-jiu">TCP确认时间较久</span><a href="#tcp-que-ren-shi-jian-jiao-jiu" class="header-anchor">#</a></h3><p>tcp.analysis.ack_rtt &gt; 0.2 and tcp.len &#x3D;&#x3D; 0<br>###启用TCP Relative Sequence Number的情况<br>如何启用?<br>Edit -&gt; Preferences -&gt; Protocols -&gt; TCP Relative Sequence Numbers</p>
-<h3><span id="wo-shou-bei-dui-fang-ju-jue-de-bao">握手被对方拒绝的包</span><a href="#wo-shou-bei-dui-fang-ju-jue-de-bao" class="header-anchor">#</a></h3><p>tcp.flags.reset &#x3D;&#x3D; 1 &amp;&amp; tcp.seq &#x3D;&#x3D; 1</p>
-<h3><span id="ke-hu-duan-chong-chuan">客户端重传</span><a href="#ke-hu-duan-chong-chuan" class="header-anchor">#</a></h3><p>tcp.flags.syn &#x3D;&#x3D; 1 &amp;&amp; tcp.analysis.retransmission</p>
-<h3><span id="tcp-bao-han">Tcp包含</span><a href="#tcp-bao-han" class="header-anchor">#</a></h3><p>tcp contains {str}</p>
-<h2><span id="ying-yong-ceng-xian-shi-guo-lu-qi-ju-li">应用层显示过滤器举例</span><a href="#ying-yong-ceng-xian-shi-guo-lu-qi-ju-li" class="header-anchor">#</a></h2><h3><span id="suo-you-http-liu-liang">所有http流量</span><a href="#suo-you-http-liu-liang" class="header-anchor">#</a></h3><p>http</p>
-<h3><span id="wen-ben-guan-li-liu-liang">文本管理流量</span><a href="#wen-ben-guan-li-liu-liang" class="header-anchor">#</a></h3><p>tcp.port &#x3D;&#x3D; 23 || tcp.port &#x3D;&#x3D; 21</p>
-<h3><span id="wen-ben-email-liu-liang">文本email流量</span><a href="#wen-ben-email-liu-liang" class="header-anchor">#</a></h3><p>email || pop || imap</p>
-<h3><span id="zhi-xian-shi-fang-wen-mou-zhi-ding-zhu-ji-ming-de-http-xie-yi-shu-ju-bao">只显示访问某指定主机名的HTTP协议数据包</span><a href="#zhi-xian-shi-fang-wen-mou-zhi-ding-zhu-ji-ming-de-http-xie-yi-shu-ju-bao" class="header-anchor">#</a></h3><p>http.host &#x3D;&#x3D; &lt;”hostname”&gt;</p>
-<h3><span id="zhi-xian-shi-bao-han-http-get-fang-fa-de-http-xie-yi-shu-ju-bao">只显示包含HTTP GET方法的HTTP协议数据包</span><a href="#zhi-xian-shi-bao-han-http-get-fang-fa-de-http-xie-yi-shu-ju-bao" class="header-anchor">#</a></h3><p>http.request.method &#x3D;&#x3D; ‘GET’</p>
-<h3><span id="zhi-xian-shi-http-ke-hu-duan-fa-qi-de-bao-han-zhi-ding-uri-qing-qiu-de-http-xie-yi-shu-ju-bao">只显示HTTP 客户端发起的包含指定URI请求的HTTP协议数据包</span><a href="#zhi-xian-shi-http-ke-hu-duan-fa-qi-de-bao-han-zhi-ding-uri-qing-qiu-de-http-xie-yi-shu-ju-bao" class="header-anchor">#</a></h3><p>http.request.uri &#x3D;&#x3D; &lt;”Full request URI”&gt;</p>
-<h3><span id="zhi-xian-shi-bao-han-zip-wen-jian-de-shu-ju-bao">只显示包含ZIP文件的数据包</span><a href="#zhi-xian-shi-bao-han-zip-wen-jian-de-shu-ju-bao" class="header-anchor">#</a></h3><p>http matches “.zip” &amp;&amp; http.request.method &#x3D;&#x3D; ‘GET’</p>
 
       
     </div>

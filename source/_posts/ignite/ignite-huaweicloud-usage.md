@@ -16,7 +16,7 @@ Ignite的核心竞争力包括：
 
 同时，为了便于开发，除了jdbc、odbc、restful方式外，Ignite还官方提供了Java、C++、.Net、Python、Node.js、PHP等语言的客户端，可以方便的与Ignite进行交互。
 
-![ignite-storage-access](ignite-storage-access)
+![ignite-storage-access](ignite-storage-access.png)
 
 # Apache Ignite的问题
 

@@ -146,13 +146,13 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">63</span>
+          <span class="site-state-item-count">64</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">34</span>
+        <span class="site-state-item-count">35</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -177,6 +177,104 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/mysql/mysql-ps-password/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="shoothzj">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/mysql/mysql-ps-password/" class="post-title-link" itemprop="url">Mysql是如何隐藏ps命令行中的密码的</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-04-26 19:35:38" itemprop="dateCreated datePublished" datetime="2021-04-26T19:35:38+00:00">2021-04-26</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-12-25 00:59:54" itemprop="dateModified" datetime="2023-12-25T00:59:54+00:00">2023-12-25</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2><span id="can-kao">参考</span><a href="#can-kao" class="header-anchor">#</a></h2><ul>
+<li><a target="_blank" rel="noopener" href="http://northernmost.org/blog/how-does-mysql-hide-the-command-line-password-in-ps/index.html">http://northernmost.org/blog/how-does-mysql-hide-the-command-line-password-in-ps/index.html</a></li>
+</ul>
+<p>之前就在环境上<code>ps -ef</code>看到过<code>xxxxxx</code>的密码，一直没搞明白怎么回事，今天整理了一下，核心内容均来自于上述连接，作了一些额外的测试和查阅资料。</p>
+<h2><span id="ce-shi">测试</span><a href="#ce-shi" class="header-anchor">#</a></h2><h3><span id="yun-xing-mysql-shi-li">运行Mysql实例</span><a href="#yun-xing-mysql-shi-li" class="header-anchor">#</a></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 自己做的Mysql8的镜像</span></span><br><span class="line">docker run ttbb/mysql:stand-alone</span><br></pre></td></tr></table></figure>
+
+<h3><span id="shi-yong-mi-ma-lian-jie-mysql-fu-wu-qi">使用密码连接Mysql服务器</span><a href="#shi-yong-mi-ma-lian-jie-mysql-fu-wu-qi" class="header-anchor">#</a></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql -u hzj -p Mysql@123 -e <span class="string">&quot;select 1&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h3><span id="ps-ef-cha-kan">ps -ef查看</span><a href="#ps-ef-cha-kan" class="header-anchor">#</a></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@91bcbd15a82e mysql]# ps -ef</span><br><span class="line">UID        PID  PPID  C STIME TTY          TIME CMD</span><br><span class="line">root         1     0  0 07:34 ?        00:00:00 /usr/local/bin/dumb-init bash -vx /opt/sh/mysql/hzj/scripts/start.sh</span><br><span class="line">root         8     1  0 07:34 ?        00:00:00 bash -vx /opt/sh/mysql/hzj/scripts/start.sh</span><br><span class="line">root        17     1  0 07:34 ?        00:00:00 mysqld --daemonize --user=root</span><br><span class="line">root        62     8  0 07:34 ?        00:00:00 tail -f /dev/null</span><br><span class="line">root        63     0  0 07:34 pts/0    00:00:00 bash</span><br><span class="line">root        98    63  0 07:37 pts/0    00:00:00 mysql -h 127.0.0.1 -u hzj -px xxxxxxx</span><br><span class="line">root        99     0  1 07:37 pts/1    00:00:00 bash</span><br><span class="line">root       122    99  0 07:37 pts/1    00:00:00 ps -ef</span><br></pre></td></tr></table></figure>
+
+<h2><span id="mysql-yin-cang-mi-ma-yuan-li">Mysql隐藏密码原理</span><a href="#mysql-yin-cang-mi-ma-yuan-li" class="header-anchor">#</a></h2><p>改写了<code>args</code>系统参数，demo如下</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// Created by 张俭 on 2021/4/26.</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> *argv[])</span> &#123;</span><br><span class="line">    <span class="type">int</span> i = <span class="number">0</span>;</span><br><span class="line">    <span class="type">pid_t</span> mypid = getpid();</span><br><span class="line">    <span class="keyword">if</span> (argc == <span class="number">1</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;argc = %d and arguments are:\n&quot;</span>, argc);</span><br><span class="line">    <span class="keyword">for</span> (i; i &lt; argc; i++) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;%d = %s\n&quot;</span>, i, argv[i]);</span><br><span class="line">    &#125;</span><br><span class="line">    fflush(<span class="built_in">stdout</span>);</span><br><span class="line">    sleep(<span class="number">30</span>);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Replacing first argument with x:es... Now open another terminal and run: ps p %d\n&quot;</span>, (<span class="type">int</span>)mypid);</span><br><span class="line">    <span class="built_in">memset</span>(argv[<span class="number">1</span>], <span class="string">&#x27;x&#x27;</span>, <span class="built_in">strlen</span>(argv[<span class="number">1</span>]));</span><br><span class="line">    getc(<span class="built_in">stdin</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>编译并运行</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">gcc password_hide.c</span><br><span class="line">[root@c77dc365cd1a sh]<span class="comment"># ./a.out abcd</span></span><br><span class="line">argc = 2 and arguments are:</span><br><span class="line">0 = ./a.out</span><br><span class="line">1 = abcd</span><br><span class="line">Replacing first argument with x:es... Now open another terminal and run: ps p 55</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>观测结果，开始看的确有明文密码</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@c77dc365cd1a sh]# ps -ef</span><br><span class="line">UID        PID  PPID  C STIME TTY          TIME CMD</span><br><span class="line">root         1     0  0 07:49 pts/0    00:00:00 bash</span><br><span class="line">root        32     0  0 07:51 pts/1    00:00:00 bash</span><br><span class="line">root        64     1  0 07:56 pts/0    00:00:00 ./a.out abcd</span><br><span class="line">root        66    32  0 07:56 pts/1    00:00:00 ps -ef</span><br></pre></td></tr></table></figure>
+<p>经过30秒后，已经被复写</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@c77dc365cd1a sh]# ps p 55</span><br><span class="line">  PID TTY      STAT   TIME COMMAND</span><br><span class="line">   55 pts/0    S+     0:00 ./a.out xxxx</span><br></pre></td></tr></table></figure>
+<h2><span id="mysql-yuan-ma-di-zhi">Mysql源码地址</span><a href="#mysql-yuan-ma-di-zhi" class="header-anchor">#</a></h2><p>mysql-server&#x2F;client&#x2F;mysql.cc line 2054</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">if (argument) &#123;</span><br><span class="line">  char *start = argument;</span><br><span class="line">  my_free(opt_password);</span><br><span class="line">  opt_password = my_strdup(PSI_NOT_INSTRUMENTED, argument, MYF(MY_FAE));</span><br><span class="line">  while (*argument) *argument++ = &#x27;x&#x27;;  // Destroy argument</span><br><span class="line">  if (*start) start[1] = 0;</span><br><span class="line">  tty_password = false;</span><br><span class="line">&#125; else</span><br><span class="line">  tty_password = true;</span><br></pre></td></tr></table></figure>
+
+<p>PS: 后面，我还在OSX上用go程序尝试修改参数，估摸go程序的args传入是值拷贝，修改完成之后args没有生效，看来这个黑科技只有c程序能使用呀。</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -222,7 +320,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-23 09:31:49" itemprop="dateModified" datetime="2023-12-23T09:31:49+00:00">2023-12-23</time>
+      <time title="修改时间：2023-12-25 00:59:54" itemprop="dateModified" datetime="2023-12-25T00:59:54+00:00">2023-12-25</time>
     </span>
 
   
@@ -315,7 +413,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-23 09:31:49" itemprop="dateModified" datetime="2023-12-23T09:31:49+00:00">2023-12-23</time>
+      <time title="修改时间：2023-12-25 00:59:54" itemprop="dateModified" datetime="2023-12-25T00:59:54+00:00">2023-12-25</time>
     </span>
 
   
@@ -423,7 +521,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-23 09:31:49" itemprop="dateModified" datetime="2023-12-23T09:31:49+00:00">2023-12-23</time>
+      <time title="修改时间：2023-12-25 00:59:54" itemprop="dateModified" datetime="2023-12-25T00:59:54+00:00">2023-12-25</time>
     </span>
 
   
@@ -595,7 +693,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-23 09:31:49" itemprop="dateModified" datetime="2023-12-23T09:31:49+00:00">2023-12-23</time>
+      <time title="修改时间：2023-12-25 00:59:54" itemprop="dateModified" datetime="2023-12-25T00:59:54+00:00">2023-12-25</time>
     </span>
 
   
@@ -685,7 +783,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-23 09:31:49" itemprop="dateModified" datetime="2023-12-23T09:31:49+00:00">2023-12-23</time>
+      <time title="修改时间：2023-12-25 00:59:54" itemprop="dateModified" datetime="2023-12-25T00:59:54+00:00">2023-12-25</time>
     </span>
 
   
@@ -772,7 +870,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-23 09:31:49" itemprop="dateModified" datetime="2023-12-23T09:31:49+00:00">2023-12-23</time>
+      <time title="修改时间：2023-12-25 00:59:54" itemprop="dateModified" datetime="2023-12-25T00:59:54+00:00">2023-12-25</time>
     </span>
 
   
@@ -874,7 +972,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-23 09:31:49" itemprop="dateModified" datetime="2023-12-23T09:31:49+00:00">2023-12-23</time>
+      <time title="修改时间：2023-12-25 00:59:54" itemprop="dateModified" datetime="2023-12-25T00:59:54+00:00">2023-12-25</time>
     </span>
 
   
@@ -964,7 +1062,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-23 09:31:49" itemprop="dateModified" datetime="2023-12-23T09:31:49+00:00">2023-12-23</time>
+      <time title="修改时间：2023-12-25 00:59:54" itemprop="dateModified" datetime="2023-12-25T00:59:54+00:00">2023-12-25</time>
     </span>
 
   
@@ -1057,7 +1155,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-23 09:31:49" itemprop="dateModified" datetime="2023-12-23T09:31:49+00:00">2023-12-23</time>
+      <time title="修改时间：2023-12-25 00:59:54" itemprop="dateModified" datetime="2023-12-25T00:59:54+00:00">2023-12-25</time>
     </span>
 
   
@@ -1091,98 +1189,6 @@
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl https://127.0.0.1:12346</span><br></pre></td></tr></table></figure>
 
 <p><img src="/nginx/nginx-sni/nginx-sni-127.png" alt="nginx-sni-127"></p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/code/java/java-ping/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="shoothzj">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/code/java/java-ping/" class="post-title-link" itemprop="url">JAVA Ping命令心跳探测 InetAddress isReachable分析</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-01-12 09:35:09" itemprop="dateCreated datePublished" datetime="2020-01-12T09:35:09+00:00">2020-01-12</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-23 09:31:49" itemprop="dateModified" datetime="2023-12-23T09:31:49+00:00">2023-12-23</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1><span id="ye-wu-xu-qiu-fen-xi-yu-jie-jue-fang-an">业务需求分析与解决方案</span><a href="#ye-wu-xu-qiu-fen-xi-yu-jie-jue-fang-an" class="header-anchor">#</a></h1><p>在业务场景中，当需要利用ping命令对主机进行心跳探测时，直接在代码中fork进程执行ping命令虽然可行，但这种方法开销较大，并且处理流程易出错，与使用标准库相比缺乏优雅性。因此，本文探讨了使用Java的InetAddress类的isReachable方法作为替代方案。</p>
-<p>根据资料指出，Java的InetAddress类在root用户权限下通过执行ping命令进行探测，在非root用户权限下则通过访问TCP端口7进行探测。为验证这一点，本文撰写了相应的demo代码并进行了测试（详见：<a target="_blank" rel="noopener" href="https://github.com/shoothzj/heart-beat">GitHub - heart-beat</a>）。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">import lombok.extern.slf4j.Slf4j;</span><br><span class="line"></span><br><span class="line">import java.net.InetAddress;</span><br><span class="line"></span><br><span class="line">@Slf4j</span><br><span class="line">public class PingTestMain &#123;</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) throws Exception &#123;</span><br><span class="line">        String testIp = System.getProperty(&quot;TestIp&quot;);</span><br><span class="line">        InetAddress inetAddress = InetAddress.getByName(testIp);</span><br><span class="line">        boolean addressReachable = inetAddress.isReachable(500);</span><br><span class="line">        log.info(&quot;address is reachable is &#123;&#125;&quot;, addressReachable);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h1><span id="ce-shi-shi-yan">测试实验</span><a href="#ce-shi-shi-yan" class="header-anchor">#</a></h1><h2><span id="root-yong-hu-xia-zhi-xing-cheng-xu">root用户下执行程序</span><a href="#root-yong-hu-xia-zhi-xing-cheng-xu" class="header-anchor">#</a></h2><p><img src="/code/java/java-ping/java-ping-root-success.png" alt="java-ping-root-success.png"></p>
-<p>java程序打印结果也是true</p>
-<h2><span id="zai-pu-tong-yong-hu-quan-xian-xia-de-ce-shi">在普通用户权限下的测试</span><a href="#zai-pu-tong-yong-hu-quan-xian-xia-de-ce-shi" class="header-anchor">#</a></h2><p><img src="/code/java/java-ping/java-ping-user-fail.png" alt="java-ping-user-fail.png"></p>
-<p>此时可以看到,我们的客户端程序向目标tcp7端口发送了一个报文,虽然java程序打印结果为true,但是因为收到了RST包导致的.在当今的网络安全要求下,7端口往往不会开放</p>
-<h2><span id="zai-mu-biao-wang-luo-ping-bi-tcp-duan-kou-7-de-qing-kuang-xia-zhi-xing-cheng-xu">在目标网络屏蔽TCP端口7的情况下执行程序</span><a href="#zai-mu-biao-wang-luo-ping-bi-tcp-duan-kou-7-de-qing-kuang-xia-zhi-xing-cheng-xu" class="header-anchor">#</a></h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iptables -A INPUT -p tcp --dport 7 -j DROP</span><br></pre></td></tr></table></figure>
-
-<p>发送的报文没有收到RST包,此时java程序返回false.不是我们预期的结果</p>
-<h2><span id="pu-tong-yong-hu-quan-xian-xia-xi-dai-te-quan-de-ce-shi">普通用户权限下携带特权的测试</span><a href="#pu-tong-yong-hu-quan-xian-xia-xi-dai-te-quan-de-ce-shi" class="header-anchor">#</a></h2><p>进一步的研究发现，Java程序发送ping命令需要创建raw socket，这要求程序具有root权限或cap_net_raw权限。赋予Java程序创建raw socket的权限后重新测试，发现程序能够正确发送ping命令，达到预期效果。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">setcap cap_net_raw+ep /usr/java/jdk-13.0.1/bin/java</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>发现如下报错</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java: error while loading shared libraries: libjli.so: cannot open shared object file: No such file or directory</span><br></pre></td></tr></table></figure>
-<p>使用<a target="_blank" rel="noopener" href="https://askubuntu.com/questions/334365/how-to-add-a-directory-to-linker-command-line-in-linux%E8%A7%84%E9%81%BF%E6%B7%BB%E5%8A%A0so%E6%96%87%E4%BB%B6%E6%9D%83%E9%99%90">https://askubuntu.com/questions/334365/how-to-add-a-directory-to-linker-command-line-in-linux规避添加so文件权限</a></p>
-<p>随后抓包,发现还是发送了ping命令,达到了我们预期的效果</p>
-<h1><span id="zong-jie">总结</span><a href="#zong-jie" class="header-anchor">#</a></h1><p>本文通过一系列测试得出结论，root用户权限下的Java程序会使用ping命令进行探测。若普通用户不具备相应权限，则会尝试探测TCP端口7，但在安全组未开启该端口的情况下会导致预期结果不一致。推荐赋予java程序特权,使得InetAddress类能够使用ping命令进行探测</p>
 
       
     </div>

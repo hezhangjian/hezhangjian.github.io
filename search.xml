@@ -1557,35 +1557,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Nginx支持SNI转发</title>
-    <url>/nginx/nginx-sni/</url>
-    <content><![CDATA[<p>SNI是一个TLS的扩展字段，经常用于访问域名跳转到不同的后端地址。</p>
-<p>配置方式如下：打开nginx.conf文件，以ttbb&#x2F;nginx:nake镜像为例&#x2F;usr&#x2F;local&#x2F;openresty&#x2F;nginx&#x2F;conf&#x2F;nginx.conf</p>
-<p>如下为默认的nginx.conf配置</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">#user  nobody;</span><br><span class="line">worker_processes  1;</span><br><span class="line"></span><br><span class="line">#error_log  logs/error.log;</span><br><span class="line">#error_log  logs/error.log  notice;</span><br><span class="line">#error_log  logs/error.log  info;</span><br><span class="line"></span><br><span class="line">#pid        logs/nginx.pid;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">events &#123;</span><br><span class="line">    worker_connections  1024;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">http &#123;</span><br><span class="line">    include       mime.types;</span><br><span class="line">    default_type  application/octet-stream;</span><br><span class="line"></span><br><span class="line">    #log_format  main  &#x27;$remote_addr - $remote_user [$time_local] &quot;$request&quot; &#x27;</span><br><span class="line">    #                  &#x27;$status $body_bytes_sent &quot;$http_referer&quot; &#x27;</span><br><span class="line">    #                  &#x27;&quot;$http_user_agent&quot; &quot;$http_x_forwarded_for&quot;&#x27;;</span><br><span class="line"></span><br><span class="line">    #access_log  logs/access.log  main;</span><br><span class="line"></span><br><span class="line">    sendfile        on;</span><br><span class="line">    #tcp_nopush     on;</span><br><span class="line"></span><br><span class="line">    #keepalive_timeout  0;</span><br><span class="line">    keepalive_timeout  65;</span><br><span class="line"></span><br><span class="line">    #gzip  on;</span><br><span class="line"></span><br><span class="line">    server &#123;</span><br><span class="line">        listen       80;</span><br><span class="line">        server_name  localhost;</span><br><span class="line"></span><br><span class="line">        #charset koi8-r;</span><br><span class="line"></span><br><span class="line">        #access_log  logs/host.access.log  main;</span><br><span class="line"></span><br><span class="line">        location / &#123;</span><br><span class="line">            root   html;</span><br><span class="line">            index  index.html index.htm;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        #error_page  404              /404.html;</span><br><span class="line"></span><br><span class="line">        # redirect server error pages to the static page /50x.html</span><br><span class="line">        #</span><br><span class="line">        error_page   500 502 503 504  /50x.html;</span><br><span class="line">        location = /50x.html &#123;</span><br><span class="line">            root   html;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        # proxy the PHP scripts to Apache listening on 127.0.0.1:80</span><br><span class="line">        #</span><br><span class="line">        #location ~ \.php$ &#123;</span><br><span class="line">        #    proxy_pass   http://127.0.0.1;</span><br><span class="line">        #&#125;</span><br><span class="line"></span><br><span class="line">        # pass the PHP scripts to FastCGI server listening on 127.0.0.1:9000</span><br><span class="line">        #</span><br><span class="line">        #location ~ \.php$ &#123;</span><br><span class="line">        #    root           html;</span><br><span class="line">        #    fastcgi_pass   127.0.0.1:9000;</span><br><span class="line">        #    fastcgi_index  index.php;</span><br><span class="line">        #    fastcgi_param  SCRIPT_FILENAME  /scripts$fastcgi_script_name;</span><br><span class="line">        #    include        fastcgi_params;</span><br><span class="line">        #&#125;</span><br><span class="line"></span><br><span class="line">        # deny access to .htaccess files, if Apache&#x27;s document root</span><br><span class="line">        # concurs with nginx&#x27;s one</span><br><span class="line">        #</span><br><span class="line">        #location ~ /\.ht &#123;</span><br><span class="line">        #    deny  all;</span><br><span class="line">        #&#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    # another virtual host using mix of IP-, name-, and port-based configuration</span><br><span class="line">    #</span><br><span class="line">    #server &#123;</span><br><span class="line">    #    listen       8000;</span><br><span class="line">    #    listen       somename:8080;</span><br><span class="line">    #    server_name  somename  alias  another.alias;</span><br><span class="line"></span><br><span class="line">    #    location / &#123;</span><br><span class="line">    #        root   html;</span><br><span class="line">    #        index  index.html index.htm;</span><br><span class="line">    #    &#125;</span><br><span class="line">    #&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    # HTTPS server</span><br><span class="line">    #</span><br><span class="line">    #server &#123;</span><br><span class="line">    #    listen       443 ssl;</span><br><span class="line">    #    server_name  localhost;</span><br><span class="line"></span><br><span class="line">    #    ssl_certificate      cert.pem;</span><br><span class="line">    #    ssl_certificate_key  cert.key;</span><br><span class="line"></span><br><span class="line">    #    ssl_session_cache    shared:SSL:1m;</span><br><span class="line">    #    ssl_session_timeout  5m;</span><br><span class="line"></span><br><span class="line">    #    ssl_ciphers  HIGH:!aNULL:!MD5;</span><br><span class="line">    #    ssl_prefer_server_ciphers  on;</span><br><span class="line"></span><br><span class="line">    #    location / &#123;</span><br><span class="line">    #        root   html;</span><br><span class="line">    #        index  index.html index.htm;</span><br><span class="line">    #    &#125;</span><br><span class="line">    #&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>在最后面添加上</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">stream &#123;</span><br><span class="line"></span><br><span class="line">map $ssl_preread_server_name $name &#123;</span><br><span class="line">    backend.example.com      backend;</span><br><span class="line">    default                  backend2;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">upstream backend &#123;</span><br><span class="line">    server 192.168.0.3:12345;</span><br><span class="line">    server 192.168.0.4:12345;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">upstream backend2 &#123;</span><br><span class="line">    server 127.0.0.1:8071;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">server &#123;</span><br><span class="line">    listen      12346;</span><br><span class="line">    proxy_pass  $name;</span><br><span class="line">    ssl_preread on;</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>这个时候，我们已经开启了SNI转发的功能，如果你使用backend.example.com的域名访问服务器，就会转发到backend，如果使用其他域名，就会转发到backend2</p>
-<p>测试的时候，让我们在&#x2F;etc&#x2F;hosts里进行设置，添加</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">127.0.0.1 backend.example.com</span><br></pre></td></tr></table></figure>
-
-<p>然后进行请求</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl https://backend.example.com:12346</span><br></pre></td></tr></table></figure>
-
-<p>这里注意请求要使用https，http协议或者是tcp可没有SNI的说法</p>
-<p><img src="/nginx/nginx-sni/nginx-sni-backend.png" alt="nginx-sni-backend"></p>
-<p>发现请求的确实是backend</p>
-<p>然后测试请求127.0.0.1:12346</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl https://127.0.0.1:12346</span><br></pre></td></tr></table></figure>
-
-<p><img src="/nginx/nginx-sni/nginx-sni-127.png" alt="nginx-sni-127"></p>
-]]></content>
-      <tags>
-        <tag>nginx</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>有些事你只有抓包才知道之mysql tls会话</title>
     <url>/mysql/mysql-default-tls/</url>
     <content><![CDATA[<p>你的mysql客户端和服务端之间开启tls了吗？你的回答可能是No，我根本没开启mysql的tls。</p>
@@ -1632,6 +1603,35 @@
 ]]></content>
       <tags>
         <tag>mysql</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Nginx支持SNI转发</title>
+    <url>/nginx/nginx-sni/</url>
+    <content><![CDATA[<p>SNI是一个TLS的扩展字段，经常用于访问域名跳转到不同的后端地址。</p>
+<p>配置方式如下：打开nginx.conf文件，以ttbb&#x2F;nginx:nake镜像为例&#x2F;usr&#x2F;local&#x2F;openresty&#x2F;nginx&#x2F;conf&#x2F;nginx.conf</p>
+<p>如下为默认的nginx.conf配置</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">#user  nobody;</span><br><span class="line">worker_processes  1;</span><br><span class="line"></span><br><span class="line">#error_log  logs/error.log;</span><br><span class="line">#error_log  logs/error.log  notice;</span><br><span class="line">#error_log  logs/error.log  info;</span><br><span class="line"></span><br><span class="line">#pid        logs/nginx.pid;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">events &#123;</span><br><span class="line">    worker_connections  1024;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">http &#123;</span><br><span class="line">    include       mime.types;</span><br><span class="line">    default_type  application/octet-stream;</span><br><span class="line"></span><br><span class="line">    #log_format  main  &#x27;$remote_addr - $remote_user [$time_local] &quot;$request&quot; &#x27;</span><br><span class="line">    #                  &#x27;$status $body_bytes_sent &quot;$http_referer&quot; &#x27;</span><br><span class="line">    #                  &#x27;&quot;$http_user_agent&quot; &quot;$http_x_forwarded_for&quot;&#x27;;</span><br><span class="line"></span><br><span class="line">    #access_log  logs/access.log  main;</span><br><span class="line"></span><br><span class="line">    sendfile        on;</span><br><span class="line">    #tcp_nopush     on;</span><br><span class="line"></span><br><span class="line">    #keepalive_timeout  0;</span><br><span class="line">    keepalive_timeout  65;</span><br><span class="line"></span><br><span class="line">    #gzip  on;</span><br><span class="line"></span><br><span class="line">    server &#123;</span><br><span class="line">        listen       80;</span><br><span class="line">        server_name  localhost;</span><br><span class="line"></span><br><span class="line">        #charset koi8-r;</span><br><span class="line"></span><br><span class="line">        #access_log  logs/host.access.log  main;</span><br><span class="line"></span><br><span class="line">        location / &#123;</span><br><span class="line">            root   html;</span><br><span class="line">            index  index.html index.htm;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        #error_page  404              /404.html;</span><br><span class="line"></span><br><span class="line">        # redirect server error pages to the static page /50x.html</span><br><span class="line">        #</span><br><span class="line">        error_page   500 502 503 504  /50x.html;</span><br><span class="line">        location = /50x.html &#123;</span><br><span class="line">            root   html;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        # proxy the PHP scripts to Apache listening on 127.0.0.1:80</span><br><span class="line">        #</span><br><span class="line">        #location ~ \.php$ &#123;</span><br><span class="line">        #    proxy_pass   http://127.0.0.1;</span><br><span class="line">        #&#125;</span><br><span class="line"></span><br><span class="line">        # pass the PHP scripts to FastCGI server listening on 127.0.0.1:9000</span><br><span class="line">        #</span><br><span class="line">        #location ~ \.php$ &#123;</span><br><span class="line">        #    root           html;</span><br><span class="line">        #    fastcgi_pass   127.0.0.1:9000;</span><br><span class="line">        #    fastcgi_index  index.php;</span><br><span class="line">        #    fastcgi_param  SCRIPT_FILENAME  /scripts$fastcgi_script_name;</span><br><span class="line">        #    include        fastcgi_params;</span><br><span class="line">        #&#125;</span><br><span class="line"></span><br><span class="line">        # deny access to .htaccess files, if Apache&#x27;s document root</span><br><span class="line">        # concurs with nginx&#x27;s one</span><br><span class="line">        #</span><br><span class="line">        #location ~ /\.ht &#123;</span><br><span class="line">        #    deny  all;</span><br><span class="line">        #&#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    # another virtual host using mix of IP-, name-, and port-based configuration</span><br><span class="line">    #</span><br><span class="line">    #server &#123;</span><br><span class="line">    #    listen       8000;</span><br><span class="line">    #    listen       somename:8080;</span><br><span class="line">    #    server_name  somename  alias  another.alias;</span><br><span class="line"></span><br><span class="line">    #    location / &#123;</span><br><span class="line">    #        root   html;</span><br><span class="line">    #        index  index.html index.htm;</span><br><span class="line">    #    &#125;</span><br><span class="line">    #&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    # HTTPS server</span><br><span class="line">    #</span><br><span class="line">    #server &#123;</span><br><span class="line">    #    listen       443 ssl;</span><br><span class="line">    #    server_name  localhost;</span><br><span class="line"></span><br><span class="line">    #    ssl_certificate      cert.pem;</span><br><span class="line">    #    ssl_certificate_key  cert.key;</span><br><span class="line"></span><br><span class="line">    #    ssl_session_cache    shared:SSL:1m;</span><br><span class="line">    #    ssl_session_timeout  5m;</span><br><span class="line"></span><br><span class="line">    #    ssl_ciphers  HIGH:!aNULL:!MD5;</span><br><span class="line">    #    ssl_prefer_server_ciphers  on;</span><br><span class="line"></span><br><span class="line">    #    location / &#123;</span><br><span class="line">    #        root   html;</span><br><span class="line">    #        index  index.html index.htm;</span><br><span class="line">    #    &#125;</span><br><span class="line">    #&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在最后面添加上</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">stream &#123;</span><br><span class="line"></span><br><span class="line">map $ssl_preread_server_name $name &#123;</span><br><span class="line">    backend.example.com      backend;</span><br><span class="line">    default                  backend2;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">upstream backend &#123;</span><br><span class="line">    server 192.168.0.3:12345;</span><br><span class="line">    server 192.168.0.4:12345;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">upstream backend2 &#123;</span><br><span class="line">    server 127.0.0.1:8071;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">server &#123;</span><br><span class="line">    listen      12346;</span><br><span class="line">    proxy_pass  $name;</span><br><span class="line">    ssl_preread on;</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个时候，我们已经开启了SNI转发的功能，如果你使用backend.example.com的域名访问服务器，就会转发到backend，如果使用其他域名，就会转发到backend2</p>
+<p>测试的时候，让我们在&#x2F;etc&#x2F;hosts里进行设置，添加</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">127.0.0.1 backend.example.com</span><br></pre></td></tr></table></figure>
+
+<p>然后进行请求</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl https://backend.example.com:12346</span><br></pre></td></tr></table></figure>
+
+<p>这里注意请求要使用https，http协议或者是tcp可没有SNI的说法</p>
+<p><img src="/nginx/nginx-sni/nginx-sni-backend.png" alt="nginx-sni-backend"></p>
+<p>发现请求的确实是backend</p>
+<p>然后测试请求127.0.0.1:12346</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl https://127.0.0.1:12346</span><br></pre></td></tr></table></figure>
+
+<p><img src="/nginx/nginx-sni/nginx-sni-127.png" alt="nginx-sni-127"></p>
+]]></content>
+      <tags>
+        <tag>nginx</tag>
       </tags>
   </entry>
   <entry>
@@ -2228,6 +2228,38 @@
       </tags>
   </entry>
   <entry>
+    <title>java进行数据库操作的并发控制</title>
+    <url>/code/java/find-save-concurrent/</url>
+    <content><![CDATA[<p>在现代应用编码中，从数据库里面find出来，进行一些业务逻辑操作，最后再save回去。即：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="type">Person</span> <span class="variable">person</span> <span class="operator">=</span> personRepo.findById(id);</span><br><span class="line">person.setAge(<span class="number">18</span>);</span><br><span class="line">personRepo.save(person);</span><br></pre></td></tr></table></figure>
+
+<p>但是这样的业务操作，如果一个线程修改年龄，另一个线程修改昵称，最后save回去，可能会导致年龄&#x2F;昵称某一个的修改被覆盖。</p>
+<pre class="mermaid">sequenceDiagram
+    participant A as Thread A
+    participant B as Thread B
+    participant DB as Database
+
+    A->>DB: find person by id
+    Note over A: person.setAge(18)
+    B->>DB: find person by id
+    Note over B: person.setNickname("NewName")
+
+    A->>DB: save person
+    B->>DB: save person
+
+    Note over DB: Potential Overwrite Issue</pre>
+
+<p>常见的解决方案有两种</p>
+<h1><span id="zhi-xing-qian-tian-jia-bei-guan-suo">执行前添加悲观锁</span><a href="#zhi-xing-qian-tian-jia-bei-guan-suo" class="header-anchor">#</a></h1><p>通过分布式锁等方式，保证同一时间只有一个线程能够对数据进行修改。</p>
+<h1><span id="le-guan-suo-si-lu-shi-xian">乐观锁思路实现</span><a href="#le-guan-suo-si-lu-shi-xian" class="header-anchor">#</a></h1><p>版本控制是另一种流行的处理并发问题的方法。它通过在每次更新记录时递增版本号来确保数据的一致性。</p>
+<p>这在JPA中，可以通过在field上添加<code>@Version</code>注解来实现，但这也就要求①数据库中必须有version字段，②对于查找后更新类操作，必须使用JPA的save方法来进行更新。</p>
+<p>当然也可以通过<code>update_time</code>来模拟乐观锁实现，这可能需要你在更新的时候添加<code>update_time</code>的条件，并且，<code>update_time</code>在极端场景下，理论正确性没那么严谨。</p>
+<script type="module"> import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.esm.min.mjs';	mermaid.initialize({startOnLoad: true, flowchart: {curve: 'linear'}}); </script>]]></content>
+      <tags>
+        <tag>database</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Java Http SDK设计</title>
     <url>/code/java/java-http-sdk-design/</url>
     <content><![CDATA[<div class="toc">
@@ -2488,25 +2520,6 @@ springIgnite --> util</pre>
       </tags>
   </entry>
   <entry>
-    <title>Spring记录数据库操作时间的几种方式</title>
-    <url>/code/java/spring-database-audit-time/</url>
-    <content><![CDATA[<p>Spring记录数据库操作时间的几种方式</p>
-<h1><span id="spring-jpa">Spring Jpa</span><a href="#spring-jpa" class="header-anchor">#</a></h1><p>@EnableJpaAuditing注解开启Jpa的审计功能，然后在实体类上使用@CreatedDate和@LastModifiedDate注解即可</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Column(name = &quot;create_time&quot;)</span></span><br><span class="line"><span class="meta">@CreatedDate</span></span><br><span class="line"><span class="keyword">private</span> LocalDateTime createTime;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Column(name = &quot;update_time&quot;)</span></span><br><span class="line"><span class="meta">@LastModifiedDate</span></span><br><span class="line"><span class="keyword">private</span> LocalDateTime updateTime;</span><br></pre></td></tr></table></figure>
-
-<h1><span id="spring-r2dbc">Spring R2dbc</span><a href="#spring-r2dbc" class="header-anchor">#</a></h1><p>Spring R2dbc可以使用@CreatedDate和@LastModifiedDate注解来实现。但是需要在Application上开启<code>@EnableR2dbcAuditing</code></p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Column(&quot;created_time&quot;)</span></span><br><span class="line"><span class="meta">@CreatedDate</span></span><br><span class="line"><span class="keyword">private</span> LocalDateTime createdTime;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Column(&quot;updated_time&quot;)</span></span><br><span class="line"><span class="meta">@LastModifiedDate</span></span><br><span class="line"><span class="keyword">private</span> LocalDateTime updatedTime;</span><br></pre></td></tr></table></figure>
-
-<h1><span id="ying-yong-cheng-xu-xiu-gai">应用程序修改</span><a href="#ying-yong-cheng-xu-xiu-gai" class="header-anchor">#</a></h1><p>应用程序修改就比较简单，简单设置一下即可,以PersonPo类为例</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="type">PersonPo</span> <span class="variable">personPo</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">PersonPo</span>();</span><br><span class="line">personPo.setCreateTime(LocalDateTime.now());</span><br><span class="line">personPo.setUpdateTime(LocalDateTime.now());</span><br></pre></td></tr></table></figure>
-
-<h1><span id="mysql-chang-jing-xia-li-yong-timestamp-neng-li">Mysql场景下利用TIMESTAMP能力</span><a href="#mysql-chang-jing-xia-li-yong-timestamp-neng-li" class="header-anchor">#</a></h1><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> person (</span><br><span class="line">    id <span class="type">INT</span> <span class="keyword">PRIMARY</span> KEY,</span><br><span class="line">    <span class="operator">/</span><span class="operator">/</span> ... 其他字段 ...</span><br><span class="line">    create_time <span class="type">TIMESTAMP</span> <span class="keyword">DEFAULT</span> <span class="built_in">CURRENT_TIMESTAMP</span>,</span><br><span class="line">    update_time <span class="type">TIMESTAMP</span> <span class="keyword">DEFAULT</span> <span class="built_in">CURRENT_TIMESTAMP</span> <span class="keyword">ON</span> <span class="keyword">UPDATE</span> <span class="built_in">CURRENT_TIMESTAMP</span></span><br><span class="line">);</span><br></pre></td></tr></table></figure>
-]]></content>
-      <tags>
-        <tag>Java</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Java依赖不同版本冲突解决方案之shade包</title>
     <url>/code/java/java-shade-package/</url>
     <content><![CDATA[<p>我们在很多场景下会碰到java包冲突的问题：</p>
@@ -2524,6 +2537,25 @@ springIgnite --> util</pre>
 <p>通过上面的配置，artifactSet选择要修改的pom依赖，通过relocation修改包名，达到不冲突的效果。<strong>mvn clean package</strong> 后查看效果</p>
 <p><img src="/code/java/java-shade-package/java-shade-package-result.png" alt="java-shade-package-result"></p>
 <p>可以发现，包名已经被修改完成,达到了避免冲突的目的。</p>
+]]></content>
+      <tags>
+        <tag>Java</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Spring记录数据库操作时间的几种方式</title>
+    <url>/code/java/spring-database-audit-time/</url>
+    <content><![CDATA[<p>Spring记录数据库操作时间的几种方式</p>
+<h1><span id="spring-jpa">Spring Jpa</span><a href="#spring-jpa" class="header-anchor">#</a></h1><p>@EnableJpaAuditing注解开启Jpa的审计功能，然后在实体类上使用@CreatedDate和@LastModifiedDate注解即可</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Column(name = &quot;create_time&quot;)</span></span><br><span class="line"><span class="meta">@CreatedDate</span></span><br><span class="line"><span class="keyword">private</span> LocalDateTime createTime;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Column(name = &quot;update_time&quot;)</span></span><br><span class="line"><span class="meta">@LastModifiedDate</span></span><br><span class="line"><span class="keyword">private</span> LocalDateTime updateTime;</span><br></pre></td></tr></table></figure>
+
+<h1><span id="spring-r2dbc">Spring R2dbc</span><a href="#spring-r2dbc" class="header-anchor">#</a></h1><p>Spring R2dbc可以使用@CreatedDate和@LastModifiedDate注解来实现。但是需要在Application上开启<code>@EnableR2dbcAuditing</code></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Column(&quot;created_time&quot;)</span></span><br><span class="line"><span class="meta">@CreatedDate</span></span><br><span class="line"><span class="keyword">private</span> LocalDateTime createdTime;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Column(&quot;updated_time&quot;)</span></span><br><span class="line"><span class="meta">@LastModifiedDate</span></span><br><span class="line"><span class="keyword">private</span> LocalDateTime updatedTime;</span><br></pre></td></tr></table></figure>
+
+<h1><span id="ying-yong-cheng-xu-xiu-gai">应用程序修改</span><a href="#ying-yong-cheng-xu-xiu-gai" class="header-anchor">#</a></h1><p>应用程序修改就比较简单，简单设置一下即可,以PersonPo类为例</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="type">PersonPo</span> <span class="variable">personPo</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">PersonPo</span>();</span><br><span class="line">personPo.setCreateTime(LocalDateTime.now());</span><br><span class="line">personPo.setUpdateTime(LocalDateTime.now());</span><br></pre></td></tr></table></figure>
+
+<h1><span id="mysql-chang-jing-xia-li-yong-timestamp-neng-li">Mysql场景下利用TIMESTAMP能力</span><a href="#mysql-chang-jing-xia-li-yong-timestamp-neng-li" class="header-anchor">#</a></h1><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> person (</span><br><span class="line">    id <span class="type">INT</span> <span class="keyword">PRIMARY</span> KEY,</span><br><span class="line">    <span class="operator">/</span><span class="operator">/</span> ... 其他字段 ...</span><br><span class="line">    create_time <span class="type">TIMESTAMP</span> <span class="keyword">DEFAULT</span> <span class="built_in">CURRENT_TIMESTAMP</span>,</span><br><span class="line">    update_time <span class="type">TIMESTAMP</span> <span class="keyword">DEFAULT</span> <span class="built_in">CURRENT_TIMESTAMP</span> <span class="keyword">ON</span> <span class="keyword">UPDATE</span> <span class="built_in">CURRENT_TIMESTAMP</span></span><br><span class="line">);</span><br></pre></td></tr></table></figure>
 ]]></content>
       <tags>
         <tag>Java</tag>

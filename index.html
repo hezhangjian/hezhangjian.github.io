@@ -146,13 +146,13 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">63</span>
+          <span class="site-state-item-count">64</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">34</span>
+        <span class="site-state-item-count">35</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -177,6 +177,99 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/code/java/find-save-concurrent/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="shoothzj">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/code/java/find-save-concurrent/" class="post-title-link" itemprop="url">java进行数据库操作的并发控制</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2023-12-25 08:44:38 / 修改时间：00:59:54" itemprop="dateCreated datePublished" datetime="2023-12-25T08:44:38+00:00">2023-12-25</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>在现代应用编码中，从数据库里面find出来，进行一些业务逻辑操作，最后再save回去。即：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Person</span> <span class="variable">person</span> <span class="operator">=</span> personRepo.findById(id);</span><br><span class="line">person.setAge(<span class="number">18</span>);</span><br><span class="line">personRepo.save(person);</span><br></pre></td></tr></table></figure>
+
+<p>但是这样的业务操作，如果一个线程修改年龄，另一个线程修改昵称，最后save回去，可能会导致年龄&#x2F;昵称某一个的修改被覆盖。</p>
+<pre class="mermaid">sequenceDiagram
+    participant A as Thread A
+    participant B as Thread B
+    participant DB as Database
+
+    A->>DB: find person by id
+    Note over A: person.setAge(18)
+    B->>DB: find person by id
+    Note over B: person.setNickname("NewName")
+
+    A->>DB: save person
+    B->>DB: save person
+
+    Note over DB: Potential Overwrite Issue</pre>
+
+<p>常见的解决方案有两种</p>
+<h1><span id="zhi-xing-qian-tian-jia-bei-guan-suo">执行前添加悲观锁</span><a href="#zhi-xing-qian-tian-jia-bei-guan-suo" class="header-anchor">#</a></h1><p>通过分布式锁等方式，保证同一时间只有一个线程能够对数据进行修改。</p>
+<h1><span id="le-guan-suo-si-lu-shi-xian">乐观锁思路实现</span><a href="#le-guan-suo-si-lu-shi-xian" class="header-anchor">#</a></h1><p>版本控制是另一种流行的处理并发问题的方法。它通过在每次更新记录时递增版本号来确保数据的一致性。</p>
+<p>这在JPA中，可以通过在field上添加<code>@Version</code>注解来实现，但这也就要求①数据库中必须有version字段，②对于查找后更新类操作，必须使用JPA的save方法来进行更新。</p>
+<p>当然也可以通过<code>update_time</code>来模拟乐观锁实现，这可能需要你在更新的时候添加<code>update_time</code>的条件，并且，<code>update_time</code>在极端场景下，理论正确性没那么严谨。</p>
+<script type="module"> import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.esm.min.mjs';	mermaid.initialize({startOnLoad: true, flowchart: {curve: 'linear'}}); </script>
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -222,7 +315,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-23 09:31:49" itemprop="dateModified" datetime="2023-12-23T09:31:49+00:00">2023-12-23</time>
+      <time title="修改时间：2023-12-25 00:59:54" itemprop="dateModified" datetime="2023-12-25T00:59:54+00:00">2023-12-25</time>
     </span>
 
   
@@ -417,7 +510,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-23 09:31:49" itemprop="dateModified" datetime="2023-12-23T09:31:49+00:00">2023-12-23</time>
+      <time title="修改时间：2023-12-25 00:59:54" itemprop="dateModified" datetime="2023-12-25T00:59:54+00:00">2023-12-25</time>
     </span>
 
   
@@ -503,7 +596,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-23 09:31:49" itemprop="dateModified" datetime="2023-12-23T09:31:49+00:00">2023-12-23</time>
+      <time title="修改时间：2023-12-25 00:59:54" itemprop="dateModified" datetime="2023-12-25T00:59:54+00:00">2023-12-25</time>
     </span>
 
   
@@ -599,7 +692,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-23 09:31:49" itemprop="dateModified" datetime="2023-12-23T09:31:49+00:00">2023-12-23</time>
+      <time title="修改时间：2023-12-25 00:59:54" itemprop="dateModified" datetime="2023-12-25T00:59:54+00:00">2023-12-25</time>
     </span>
 
   
@@ -690,7 +783,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-23 09:31:49" itemprop="dateModified" datetime="2023-12-23T09:31:49+00:00">2023-12-23</time>
+      <time title="修改时间：2023-12-25 00:59:54" itemprop="dateModified" datetime="2023-12-25T00:59:54+00:00">2023-12-25</time>
     </span>
 
   
@@ -816,7 +909,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-23 09:31:49" itemprop="dateModified" datetime="2023-12-23T09:31:49+00:00">2023-12-23</time>
+      <time title="修改时间：2023-12-25 00:59:54" itemprop="dateModified" datetime="2023-12-25T00:59:54+00:00">2023-12-25</time>
     </span>
 
   
@@ -946,7 +1039,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-23 09:31:49" itemprop="dateModified" datetime="2023-12-23T09:31:49+00:00">2023-12-23</time>
+      <time title="修改时间：2023-12-25 00:59:54" itemprop="dateModified" datetime="2023-12-25T00:59:54+00:00">2023-12-25</time>
     </span>
 
   
@@ -1042,7 +1135,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-23 09:31:49" itemprop="dateModified" datetime="2023-12-23T09:31:49+00:00">2023-12-23</time>
+      <time title="修改时间：2023-12-25 00:59:54" itemprop="dateModified" datetime="2023-12-25T00:59:54+00:00">2023-12-25</time>
     </span>
 
   
@@ -1135,7 +1228,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-23 09:31:49" itemprop="dateModified" datetime="2023-12-23T09:31:49+00:00">2023-12-23</time>
+      <time title="修改时间：2023-12-25 00:59:54" itemprop="dateModified" datetime="2023-12-25T00:59:54+00:00">2023-12-25</time>
     </span>
 
   
@@ -1275,163 +1368,6 @@
 
 
 <script type="module"> import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.esm.min.mjs';	mermaid.initialize({startOnLoad: true, flowchart: {curve: 'linear'}}); </script>
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/code/multi-lang-paradigm-tls-config-design/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="shoothzj">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/code/multi-lang-paradigm-tls-config-design/" class="post-title-link" itemprop="url">多语言编程 TLS配置参数设计</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2023-11-06 10:11:35" itemprop="dateCreated datePublished" datetime="2023-11-06T10:11:35+00:00">2023-11-06</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-23 09:31:49" itemprop="dateModified" datetime="2023-12-23T09:31:49+00:00">2023-12-23</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <div class="toc">
-
-<!-- toc -->
-
-<ul>
-<li><a href="#bei-jing">背景</a></li>
-<li><a href="#tong-yong-can-shu">通用参数</a></li>
-<li><a href="#go">Go</a></li>
-<li><a href="#java">Java</a></li>
-<li><a href="#kotlin">Kotlin</a></li>
-<li><a href="#python">Python</a></li>
-<li><a href="#rust">Rust</a></li>
-</ul>
-<!-- tocstop -->
-
-</div>
-
-<h1><span id="bei-jing">背景</span><a href="#bei-jing" class="header-anchor">#</a></h1><p>TLS(Transport Layer Security)是一种安全协议，用于在两个通信应用程序之间提供保密性和数据完整性。TLS是SSL(Secure Sockets Layer)的继任者。</p>
-<p>不同的编程语言处理TLS配置的方式各有千秋, 本文针对TLS配置参数的设计进行探讨。</p>
-<p>代码配置中，建议使用反映状态的参数名。</p>
-<h1><span id="tong-yong-can-shu">通用参数</span><a href="#tong-yong-can-shu" class="header-anchor">#</a></h1><ul>
-<li>tlsEnable: 是否启用TLS</li>
-</ul>
-<h1><span id="go">Go</span><a href="#go" class="header-anchor">#</a></h1><p>推荐使用方式一</p>
-<p>方式一：</p>
-<ul>
-<li>tlsConfig *tls.Config: Go标准库的内置TLS结构体</li>
-</ul>
-<p>方式二：</p>
-<p>由于Go不支持加密的私钥文件，推荐使用文件内容，而不是文件路径，避免敏感信息泄露。</p>
-<ul>
-<li>tlsCertContent []byte: 证书文件内容</li>
-<li>tlsPrivateKeyContent []byte: 私钥文件内容</li>
-<li>tlsMinVersion uint16: TLS最低版本</li>
-<li>tlsMaxVersion uint16: TLS最高版本</li>
-<li>tlsCipherSuites []uint16: TLS加密套件列表</li>
-</ul>
-<h1><span id="java">Java</span><a href="#java" class="header-anchor">#</a></h1><p>Java的TLS参数基本上都是基于keystore和truststore来配置的。一般常见设计如下参数：</p>
-<ul>
-<li>keyStorePath: keystore文件路径</li>
-<li>keyStorePassword: keystore密码</li>
-<li>trustStorePath: truststore文件路径</li>
-<li>trustStorePassword: truststore密码</li>
-<li>tlsVerificationDisabled: 是否禁用TLS校验</li>
-<li>tlsHostnameVerificationDisabled: 是否禁用TLS主机名校验，仅部分框架支持。</li>
-<li>tlsVersions: TLS版本列表</li>
-<li>tlsCipherSuites: TLS加密套件列表</li>
-</ul>
-<h1><span id="kotlin">Kotlin</span><a href="#kotlin" class="header-anchor">#</a></h1><p>kotlin的Tls与Java相同：</p>
-<ul>
-<li>keyStorePath: keystore文件路径</li>
-<li>keyStorePassword: keystore密码</li>
-<li>trustStorePath: truststore文件路径</li>
-<li>trustStorePassword: truststore密码</li>
-<li>tlsVerificationDisabled: 是否禁用TLS校验</li>
-<li>tlsHostnameVerificationDisabled: 是否禁用TLS主机名校验，仅部分框架支持。</li>
-<li>tlsVersions: TLS版本列表</li>
-<li>tlsCipherSuites: TLS加密套件列表</li>
-</ul>
-<h1><span id="python">Python</span><a href="#python" class="header-anchor">#</a></h1><p>推荐使用方式一</p>
-<p>方式一</p>
-<ul>
-<li>tlsContext: Python标准库的内置TLS结构体</li>
-</ul>
-<p>方式二</p>
-<p>Python可以使用文件路径以及加密的私钥文件。</p>
-<ul>
-<li>tlsCertPath: 证书文件路径</li>
-<li>tlsPrivateKeyPath: 私钥文件路径</li>
-<li>tlsPrivateKeyPassword: 私钥密码</li>
-<li>tlsMinVersion: TLS最低版本</li>
-<li>tlsMaxVersion: TLS最高版本</li>
-<li>tlsCipherSuites: TLS加密套件列表</li>
-</ul>
-<h1><span id="rust">Rust</span><a href="#rust" class="header-anchor">#</a></h1><p>由于常见的Rust TLS实现不支持加密的私钥文件，推荐使用文件内容，而不是文件路径，避免敏感信息泄露。 一般常见如下设计参数:</p>
-<ul>
-<li>tls_cert_content Vec<u8>: 证书内容</u8></li>
-<li>tsl_private_key_content Vec<u8>: 私钥内容</u8></li>
-<li>tls_versions: TLS版本列表</li>
-<li>tls_cipher_suites: TLS加密套件列表</li>
-<li>tls_verification_disabled: 是否禁用TLS校验</li>
-</ul>
-
       
     </div>
 

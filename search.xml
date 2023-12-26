@@ -617,6 +617,31 @@
       </tags>
   </entry>
   <entry>
+    <title>CRUD接口的api yaml心得</title>
+    <url>/code/crud-yaml-example/</url>
+    <content><![CDATA[<p>在写swagger的时候，经常碰到增删改查的简单接口，我将增删改查简单接口总结如下：</p>
+<p>一般来说，增删改查有如下几个接口</p>
+<ul>
+<li>创建资源，operationId为createXxx</li>
+<li>删除资源</li>
+<li>更新资源</li>
+<li>查询单个资源</li>
+<li>查询资源列表（可能不会查询出所有字段），operationId为listXxx</li>
+</ul>
+<p>根据接口，一般可以设计如下的实体类</p>
+<ul>
+<li>CreateXxxReq 创建资源请求，包含除资源id之外的所有字段，有些变种里面可能会包含id字段。</li>
+<li>UpdateXxxReq 更新资源请求，包含除资源id之外支持更新的所有字段。</li>
+<li>XxxResp 资源响应，可用于Crate、Update接口的返回，包含所有字段。</li>
+<li>ListXxxResp 资源列表响应，包含资源列表。</li>
+<li>List<briefxxxresp> 资源列表响应，包含资源列表，每个资源包含部分字段，一般是id、name、createdTime、updatedTime等。</briefxxxresp></li>
+</ul>
+]]></content>
+      <tags>
+        <tag>openapi</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>文件编解码代码设计</title>
     <url>/code/file-codec-design/</url>
     <content><![CDATA[<div class="toc">
@@ -2060,6 +2085,25 @@
       </tags>
   </entry>
   <entry>
+    <title>Go Http SDK设计</title>
+    <url>/code/go/go-http-sdk-design/</url>
+    <content><![CDATA[<p>根据Go项目的需求和特性，可以为Go的Http SDK项目选择以下命名方式：</p>
+<ul>
+<li><code>xxx-client-go</code>：如果这个项目只有Http SDK，没有其他协议的SDK，推荐使用这个命名方式。</li>
+<li><code>xxx-http-client-go</code>：当存在其他协议的SDK时，可以使用这个命名方式，以区分不同协议的SDK。</li>
+<li><code>xxx-admin-go</code>：当项目使用其他协议作为数据通道，使用HTTP协议作为管理通道时，可以使用这个命名方式。</li>
+</ul>
+<p>由于Go语言的调用方式是<code>包名.结构体名.方法名</code>，所以在设计SDK时，需要考虑包名、结构体名、方法名的设计。</p>
+<p>以xxx业务为例，假设业务名为<code>xxx</code>，推荐包名也为<code>xxx</code>，结构体名为<code>Client</code>。</p>
+<p>目录布局可以是这样子的：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">xxx-client-go/</span><br><span class="line">|-- xxx/</span><br><span class="line">|   |-- client.go</span><br></pre></td></tr></table></figure>
+]]></content>
+      <tags>
+        <tag>SDK</tag>
+        <tag>Go</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Apache ZooKeeper在华为云IoT服务产品部的使用</title>
     <url>/zookeeper/zookeeper-huaweicloud-usage/</url>
     <content><![CDATA[<div class="toc">
@@ -2162,25 +2206,6 @@
 ]]></content>
       <tags>
         <tag>ZooKeeper</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Go Http SDK设计</title>
-    <url>/code/go/go-http-sdk-design/</url>
-    <content><![CDATA[<p>根据Go项目的需求和特性，可以为Go的Http SDK项目选择以下命名方式：</p>
-<ul>
-<li><code>xxx-client-go</code>：如果这个项目只有Http SDK，没有其他协议的SDK，推荐使用这个命名方式。</li>
-<li><code>xxx-http-client-go</code>：当存在其他协议的SDK时，可以使用这个命名方式，以区分不同协议的SDK。</li>
-<li><code>xxx-admin-go</code>：当项目使用其他协议作为数据通道，使用HTTP协议作为管理通道时，可以使用这个命名方式。</li>
-</ul>
-<p>由于Go语言的调用方式是<code>包名.结构体名.方法名</code>，所以在设计SDK时，需要考虑包名、结构体名、方法名的设计。</p>
-<p>以xxx业务为例，假设业务名为<code>xxx</code>，推荐包名也为<code>xxx</code>，结构体名为<code>Client</code>。</p>
-<p>目录布局可以是这样子的：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">xxx-client-go/</span><br><span class="line">|-- xxx/</span><br><span class="line">|   |-- client.go</span><br></pre></td></tr></table></figure>
-]]></content>
-      <tags>
-        <tag>SDK</tag>
-        <tag>Go</tag>
       </tags>
   </entry>
   <entry>
@@ -2344,6 +2369,31 @@ reactor --> common</pre>
       </tags>
   </entry>
   <entry>
+    <title>JAVA Ping命令心跳探测 InetAddress isReachable分析</title>
+    <url>/code/java/java-ping/</url>
+    <content><![CDATA[<h1><span id="ye-wu-xu-qiu-fen-xi-yu-jie-jue-fang-an">业务需求分析与解决方案</span><a href="#ye-wu-xu-qiu-fen-xi-yu-jie-jue-fang-an" class="header-anchor">#</a></h1><p>在业务场景中，当需要利用ping命令对主机进行心跳探测时，直接在代码中fork进程执行ping命令虽然可行，但这种方法开销较大，并且处理流程易出错，与使用标准库相比缺乏优雅性。因此，本文探讨了使用Java的InetAddress类的isReachable方法作为替代方案。</p>
+<p>根据资料指出，Java的InetAddress类在root用户权限下通过执行ping命令进行探测，在非root用户权限下则通过访问TCP端口7进行探测。为验证这一点，本文撰写了相应的demo代码并进行了测试（详见：<a href="https://github.com/shoothzj/heart-beat">GitHub - heart-beat</a>）。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">import lombok.extern.slf4j.Slf4j;</span><br><span class="line"></span><br><span class="line">import java.net.InetAddress;</span><br><span class="line"></span><br><span class="line">@Slf4j</span><br><span class="line">public class PingTestMain &#123;</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) throws Exception &#123;</span><br><span class="line">        String testIp = System.getProperty(&quot;TestIp&quot;);</span><br><span class="line">        InetAddress inetAddress = InetAddress.getByName(testIp);</span><br><span class="line">        boolean addressReachable = inetAddress.isReachable(500);</span><br><span class="line">        log.info(&quot;address is reachable is &#123;&#125;&quot;, addressReachable);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1><span id="ce-shi-shi-yan">测试实验</span><a href="#ce-shi-shi-yan" class="header-anchor">#</a></h1><h2><span id="root-yong-hu-xia-zhi-xing-cheng-xu">root用户下执行程序</span><a href="#root-yong-hu-xia-zhi-xing-cheng-xu" class="header-anchor">#</a></h2><p><img src="/code/java/java-ping/java-ping-root-success.png" alt="java-ping-root-success.png"></p>
+<p>java程序打印结果也是true</p>
+<h2><span id="zai-pu-tong-yong-hu-quan-xian-xia-de-ce-shi">在普通用户权限下的测试</span><a href="#zai-pu-tong-yong-hu-quan-xian-xia-de-ce-shi" class="header-anchor">#</a></h2><p><img src="/code/java/java-ping/java-ping-user-fail.png" alt="java-ping-user-fail.png"></p>
+<p>此时可以看到,我们的客户端程序向目标tcp7端口发送了一个报文,虽然java程序打印结果为true,但是因为收到了RST包导致的.在当今的网络安全要求下,7端口往往不会开放</p>
+<h2><span id="zai-mu-biao-wang-luo-ping-bi-tcp-duan-kou-7-de-qing-kuang-xia-zhi-xing-cheng-xu">在目标网络屏蔽TCP端口7的情况下执行程序</span><a href="#zai-mu-biao-wang-luo-ping-bi-tcp-duan-kou-7-de-qing-kuang-xia-zhi-xing-cheng-xu" class="header-anchor">#</a></h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">iptables -A INPUT -p tcp --dport 7 -j DROP</span><br></pre></td></tr></table></figure>
+
+<p>发送的报文没有收到RST包,此时java程序返回false.不是我们预期的结果</p>
+<h2><span id="pu-tong-yong-hu-quan-xian-xia-xi-dai-te-quan-de-ce-shi">普通用户权限下携带特权的测试</span><a href="#pu-tong-yong-hu-quan-xian-xia-xi-dai-te-quan-de-ce-shi" class="header-anchor">#</a></h2><p>进一步的研究发现，Java程序发送ping命令需要创建raw socket，这要求程序具有root权限或cap_net_raw权限。赋予Java程序创建raw socket的权限后重新测试，发现程序能够正确发送ping命令，达到预期效果。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">setcap cap_net_raw+ep /usr/java/jdk-13.0.1/bin/java</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>发现如下报错</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">java: error while loading shared libraries: libjli.so: cannot open shared object file: No such file or directory</span><br></pre></td></tr></table></figure>
+<p>使用<a href="https://askubuntu.com/questions/334365/how-to-add-a-directory-to-linker-command-line-in-linux%E8%A7%84%E9%81%BF%E6%B7%BB%E5%8A%A0so%E6%96%87%E4%BB%B6%E6%9D%83%E9%99%90">https://askubuntu.com/questions/334365/how-to-add-a-directory-to-linker-command-line-in-linux规避添加so文件权限</a></p>
+<p>随后抓包,发现还是发送了ping命令,达到了我们预期的效果</p>
+<h1><span id="zong-jie">总结</span><a href="#zong-jie" class="header-anchor">#</a></h1><p>本文通过一系列测试得出结论，root用户权限下的Java程序会使用ping命令进行探测。若普通用户不具备相应权限，则会尝试探测TCP端口7，但在安全组未开启该端口的情况下会导致预期结果不一致。推荐赋予java程序特权,使得InetAddress类能够使用ping命令进行探测</p>
+]]></content>
+      <tags>
+        <tag>Java</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>java指标统计方案及代码</title>
     <url>/code/java/java-metrics-statistic/</url>
     <content><![CDATA[<h1><span id="java-gen-ju-xian-cheng-tong-ji-cpu">java 根据线程统计CPU</span><a href="#java-gen-ju-xian-cheng-tong-ji-cpu" class="header-anchor">#</a></h1><h2><span id="she-ji-si-lu">设计思路</span><a href="#she-ji-si-lu" class="header-anchor">#</a></h2><p>java的ThreadMXBean可以获取每个线程CPU执行的nanoTime，那么可以以这个为基础，除以中间系统经过的纳秒数，就获得了该线程的<code>CPU</code>占比</p>
@@ -2387,31 +2437,6 @@ reactor --> common</pre>
 ]]></content>
       <tags>
         <tag>java</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>JAVA Ping命令心跳探测 InetAddress isReachable分析</title>
-    <url>/code/java/java-ping/</url>
-    <content><![CDATA[<h1><span id="ye-wu-xu-qiu-fen-xi-yu-jie-jue-fang-an">业务需求分析与解决方案</span><a href="#ye-wu-xu-qiu-fen-xi-yu-jie-jue-fang-an" class="header-anchor">#</a></h1><p>在业务场景中，当需要利用ping命令对主机进行心跳探测时，直接在代码中fork进程执行ping命令虽然可行，但这种方法开销较大，并且处理流程易出错，与使用标准库相比缺乏优雅性。因此，本文探讨了使用Java的InetAddress类的isReachable方法作为替代方案。</p>
-<p>根据资料指出，Java的InetAddress类在root用户权限下通过执行ping命令进行探测，在非root用户权限下则通过访问TCP端口7进行探测。为验证这一点，本文撰写了相应的demo代码并进行了测试（详见：<a href="https://github.com/shoothzj/heart-beat">GitHub - heart-beat</a>）。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">import lombok.extern.slf4j.Slf4j;</span><br><span class="line"></span><br><span class="line">import java.net.InetAddress;</span><br><span class="line"></span><br><span class="line">@Slf4j</span><br><span class="line">public class PingTestMain &#123;</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) throws Exception &#123;</span><br><span class="line">        String testIp = System.getProperty(&quot;TestIp&quot;);</span><br><span class="line">        InetAddress inetAddress = InetAddress.getByName(testIp);</span><br><span class="line">        boolean addressReachable = inetAddress.isReachable(500);</span><br><span class="line">        log.info(&quot;address is reachable is &#123;&#125;&quot;, addressReachable);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h1><span id="ce-shi-shi-yan">测试实验</span><a href="#ce-shi-shi-yan" class="header-anchor">#</a></h1><h2><span id="root-yong-hu-xia-zhi-xing-cheng-xu">root用户下执行程序</span><a href="#root-yong-hu-xia-zhi-xing-cheng-xu" class="header-anchor">#</a></h2><p><img src="/code/java/java-ping/java-ping-root-success.png" alt="java-ping-root-success.png"></p>
-<p>java程序打印结果也是true</p>
-<h2><span id="zai-pu-tong-yong-hu-quan-xian-xia-de-ce-shi">在普通用户权限下的测试</span><a href="#zai-pu-tong-yong-hu-quan-xian-xia-de-ce-shi" class="header-anchor">#</a></h2><p><img src="/code/java/java-ping/java-ping-user-fail.png" alt="java-ping-user-fail.png"></p>
-<p>此时可以看到,我们的客户端程序向目标tcp7端口发送了一个报文,虽然java程序打印结果为true,但是因为收到了RST包导致的.在当今的网络安全要求下,7端口往往不会开放</p>
-<h2><span id="zai-mu-biao-wang-luo-ping-bi-tcp-duan-kou-7-de-qing-kuang-xia-zhi-xing-cheng-xu">在目标网络屏蔽TCP端口7的情况下执行程序</span><a href="#zai-mu-biao-wang-luo-ping-bi-tcp-duan-kou-7-de-qing-kuang-xia-zhi-xing-cheng-xu" class="header-anchor">#</a></h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">iptables -A INPUT -p tcp --dport 7 -j DROP</span><br></pre></td></tr></table></figure>
-
-<p>发送的报文没有收到RST包,此时java程序返回false.不是我们预期的结果</p>
-<h2><span id="pu-tong-yong-hu-quan-xian-xia-xi-dai-te-quan-de-ce-shi">普通用户权限下携带特权的测试</span><a href="#pu-tong-yong-hu-quan-xian-xia-xi-dai-te-quan-de-ce-shi" class="header-anchor">#</a></h2><p>进一步的研究发现，Java程序发送ping命令需要创建raw socket，这要求程序具有root权限或cap_net_raw权限。赋予Java程序创建raw socket的权限后重新测试，发现程序能够正确发送ping命令，达到预期效果。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">setcap cap_net_raw+ep /usr/java/jdk-13.0.1/bin/java</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>发现如下报错</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">java: error while loading shared libraries: libjli.so: cannot open shared object file: No such file or directory</span><br></pre></td></tr></table></figure>
-<p>使用<a href="https://askubuntu.com/questions/334365/how-to-add-a-directory-to-linker-command-line-in-linux%E8%A7%84%E9%81%BF%E6%B7%BB%E5%8A%A0so%E6%96%87%E4%BB%B6%E6%9D%83%E9%99%90">https://askubuntu.com/questions/334365/how-to-add-a-directory-to-linker-command-line-in-linux规避添加so文件权限</a></p>
-<p>随后抓包,发现还是发送了ping命令,达到了我们预期的效果</p>
-<h1><span id="zong-jie">总结</span><a href="#zong-jie" class="header-anchor">#</a></h1><p>本文通过一系列测试得出结论，root用户权限下的Java程序会使用ping命令进行探测。若普通用户不具备相应权限，则会尝试探测TCP端口7，但在安全组未开启该端口的情况下会导致预期结果不一致。推荐赋予java程序特权,使得InetAddress类能够使用ping命令进行探测</p>
-]]></content>
-      <tags>
-        <tag>Java</tag>
       </tags>
   </entry>
   <entry>

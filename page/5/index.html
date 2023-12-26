@@ -146,13 +146,13 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">64</span>
+          <span class="site-state-item-count">65</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">35</span>
+        <span class="site-state-item-count">36</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -177,6 +177,134 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/prometheus/prometheus-tsdb-index/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="shoothzj">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/prometheus/prometheus-tsdb-index/" class="post-title-link" itemprop="url">prometheus tsdb索引布局及查询流程</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-07-18 16:48:38" itemprop="dateCreated datePublished" datetime="2022-07-18T16:48:38+00:00">2022-07-18</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-12-26 05:55:03" itemprop="dateModified" datetime="2023-12-26T05:55:03+00:00">2023-12-26</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1><span id="prometheus-ci-pan-bu-ju">prometheus 磁盘布局</span><a href="#prometheus-ci-pan-bu-ju" class="header-anchor">#</a></h1><p>采集到的数据每两个小时形成一个block。每个block由一个目录组成，并存放在data路径下。该目录包含一个包含该时间窗口的所有时间序列样本的块子目录、一个元数据文件和一个索引文件（将metric_name和label索引到目录下的时间序列）。 chunks 目录中的样本默认组合成一个或多个段文件，每个段文件最大为 512MB。 当通过 API 删除系列时，删除记录存储在单独的 tombstone 文件中（而不是立即从块段中删除数据）。</p>
+<p>当前正在写入的块保存在内存中，没有完全持久化。通过WAL日志来防止崩溃丢失数据。预写日志分为数节(segments)保存在wal文件夹中。这些文件包含尚未压缩的原始数据； 因此它们比常规块文件大得多。 Prometheus 将至少保留三个预写日志文件。在高流量下，会保留三个以上的 WAL 文件，以便保留至少两个小时的原始数据。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">./data</span><br><span class="line">├── 01BKGV7JBM69T2G1BGBGM6KB12</span><br><span class="line">│   └── meta.json</span><br><span class="line">├── 01BKGTZQ1SYQJTR4PB43C8PD98</span><br><span class="line">│   ├── chunks</span><br><span class="line">│   │   └── 000001</span><br><span class="line">│   ├── tombstones</span><br><span class="line">│   ├── index</span><br><span class="line">│   └── meta.json</span><br><span class="line">├── 01BKGTZQ1HHWHV8FBJXW1Y3W0K</span><br><span class="line">│   └── meta.json</span><br><span class="line">├── 01BKGV7JC0RY8A6MACW02A2PJD</span><br><span class="line">│   ├── chunks</span><br><span class="line">│   │   └── 000001</span><br><span class="line">│   ├── tombstones</span><br><span class="line">│   ├── index</span><br><span class="line">│   └── meta.json</span><br><span class="line">├── chunks_head</span><br><span class="line">│   └── 000001</span><br><span class="line">└── wal</span><br><span class="line">    ├── 000000002</span><br><span class="line">    └── checkpoint.00000001</span><br><span class="line">        └── 00000000</span><br></pre></td></tr></table></figure>
+
+<h2><span id="prometheus-gai-nian">prometheus概念</span><a href="#prometheus-gai-nian" class="header-anchor">#</a></h2><ul>
+<li>Label: 标签，string格式的kv组合</li>
+<li>series: 时间序列，label的组合</li>
+<li>chunk: 时间，value的数据</li>
+</ul>
+<h2><span id="prometheus-suo-yin-ge-shi">prometheus索引格式</span><a href="#prometheus-suo-yin-ge-shi" class="header-anchor">#</a></h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">┌────────────────────────────┬─────────────────────┐</span><br><span class="line">│ magic(0xBAAAD700) &lt;4b&gt;     │ version(1) &lt;1 byte&gt; │</span><br><span class="line">├────────────────────────────┴─────────────────────┤</span><br><span class="line">│ ┌──────────────────────────────────────────────┐ │</span><br><span class="line">│ │                 Symbol Table                 │ │</span><br><span class="line">│ ├──────────────────────────────────────────────┤ │</span><br><span class="line">│ │                    Series                    │ │</span><br><span class="line">│ ├──────────────────────────────────────────────┤ │</span><br><span class="line">│ │                   Postings 1                 │ │</span><br><span class="line">│ ├──────────────────────────────────────────────┤ │</span><br><span class="line">│ │                      ...                     │ │</span><br><span class="line">│ ├──────────────────────────────────────────────┤ │</span><br><span class="line">│ │                   Postings N                 │ │</span><br><span class="line">│ ├──────────────────────────────────────────────┤ │</span><br><span class="line">│ │             Postings Offset Table            │ │</span><br><span class="line">│ ├──────────────────────────────────────────────┤ │</span><br><span class="line">│ │                      TOC                     │ │</span><br><span class="line">│ └──────────────────────────────────────────────┘ │</span><br><span class="line">└──────────────────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
+
+<p>写入索引时，可以在上面列出的主要部分之间添加任意数量的0字节作为填充。顺序扫描文件时，必须跳过部分间的任意0字节。</p>
+<p>下面描述的大部分部分都以 len 字段开头。 它总是指定就在尾随 CRC32 校验和之前的字节数。 校验和就计算这些字节的校验和（不包含len字段）</p>
+<h3><span id="fu-hao-biao">符号表</span><a href="#fu-hao-biao" class="header-anchor">#</a></h3><p>符号表包含已存储序列的标签对中出现的重复数据删除字符串的排序列表。 它们可以从后续部分中引用，并显着减少总索引大小。</p>
+<p>该部分包含一系列字符串entry，每个entry都以字符串的原始字节长度为前缀。 所有字符串均采用 utf-8 编码。 字符串由顺序索引引用。 字符串按字典顺序升序排序。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">┌────────────────────┬─────────────────────┐</span><br><span class="line">│ len &lt;4b&gt;           │ #symbols &lt;4b&gt;       │</span><br><span class="line">├────────────────────┴─────────────────────┤</span><br><span class="line">│ ┌──────────────────────┬───────────────┐ │</span><br><span class="line">│ │ len(str_1) &lt;uvarint&gt; │ str_1 &lt;bytes&gt; │ │</span><br><span class="line">│ ├──────────────────────┴───────────────┤ │</span><br><span class="line">│ │                . . .                 │ │</span><br><span class="line">│ ├──────────────────────┬───────────────┤ │</span><br><span class="line">│ │ len(str_n) &lt;uvarint&gt; │ str_n &lt;bytes&gt; │ │</span><br><span class="line">│ └──────────────────────┴───────────────┘ │</span><br><span class="line">├──────────────────────────────────────────┤</span><br><span class="line">│ CRC32 &lt;4b&gt;                               │</span><br><span class="line">└──────────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
+<h3><span id="xu-lie-series">序列 series</span><a href="#xu-lie-series" class="header-anchor">#</a></h3><p>保存一个具体的时间序列，其中包含系列的label集合和block中的chunks。</p>
+<p>每个series都是16字节对齐。series的id为偏移量除以16。series ID 的排序列表也就是series label的字典排序列表。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">┌───────────────────────────────────────┐</span><br><span class="line">│ ┌───────────────────────────────────┐ │</span><br><span class="line">│ │   series_1                        │ │</span><br><span class="line">│ ├───────────────────────────────────┤ │</span><br><span class="line">│ │                 . . .             │ │</span><br><span class="line">│ ├───────────────────────────────────┤ │</span><br><span class="line">│ │   series_n                        │ │</span><br><span class="line">│ └───────────────────────────────────┘ │</span><br><span class="line">└───────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
+
+<p>每一个series先保存label的数量，然后是包含label键值对的引用。 标签对按字典顺序排序。然后是series涉及的索引块的个数，然后是一系列元数据条目，其中包含块的最小 (mint) 和最大 (maxt) 时间戳以及对其在块文件中位置的引用。<code>mint</code> 是第一个样本的时间，<code>maxt</code> 是块中最后一个样本的时间。 在索引中保存时间范围数据, 允许按照时间范围删除数据时，如果时间范围匹配，不需要直接访问时间数据。</p>
+<p>空间大小优化: 第一个块的 <code>mint</code> 被存储，它的 <code>maxt</code> 被存储为一个增量，并且 <code>mint</code> 和 <code>maxt</code> 被编码为后续块的前一个时间的增量。 类似的，第一个chunk的引用被存储，下一个引用被存储为前一个chunk的增量。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">┌──────────────────────────────────────────────────────────────────────────┐</span><br><span class="line">│ len &lt;uvarint&gt;                                                            │</span><br><span class="line">├──────────────────────────────────────────────────────────────────────────┤</span><br><span class="line">│ ┌──────────────────────────────────────────────────────────────────────┐ │</span><br><span class="line">│ │                     labels count &lt;uvarint64&gt;                         │ │</span><br><span class="line">│ ├──────────────────────────────────────────────────────────────────────┤ │</span><br><span class="line">│ │              ┌────────────────────────────────────────────┐          │ │</span><br><span class="line">│ │              │ ref(l_i.name) &lt;uvarint32&gt;                  │          │ │</span><br><span class="line">│ │              ├────────────────────────────────────────────┤          │ │</span><br><span class="line">│ │              │ ref(l_i.value) &lt;uvarint32&gt;                 │          │ │</span><br><span class="line">│ │              └────────────────────────────────────────────┘          │ │</span><br><span class="line">│ │                             ...                                      │ │</span><br><span class="line">│ ├──────────────────────────────────────────────────────────────────────┤ │</span><br><span class="line">│ │                     chunks count &lt;uvarint64&gt;                         │ │</span><br><span class="line">│ ├──────────────────────────────────────────────────────────────────────┤ │</span><br><span class="line">│ │              ┌────────────────────────────────────────────┐          │ │</span><br><span class="line">│ │              │ c_0.mint &lt;varint64&gt;                        │          │ │</span><br><span class="line">│ │              ├────────────────────────────────────────────┤          │ │</span><br><span class="line">│ │              │ c_0.maxt - c_0.mint &lt;uvarint64&gt;            │          │ │</span><br><span class="line">│ │              ├────────────────────────────────────────────┤          │ │</span><br><span class="line">│ │              │ ref(c_0.data) &lt;uvarint64&gt;                  │          │ │</span><br><span class="line">│ │              └────────────────────────────────────────────┘          │ │</span><br><span class="line">│ │              ┌────────────────────────────────────────────┐          │ │</span><br><span class="line">│ │              │ c_i.mint - c_i-1.maxt &lt;uvarint64&gt;          │          │ │</span><br><span class="line">│ │              ├────────────────────────────────────────────┤          │ │</span><br><span class="line">│ │              │ c_i.maxt - c_i.mint &lt;uvarint64&gt;            │          │ │</span><br><span class="line">│ │              ├────────────────────────────────────────────┤          │ │</span><br><span class="line">│ │              │ ref(c_i.data) - ref(c_i-1.data) &lt;varint64&gt; │          │ │</span><br><span class="line">│ │              └────────────────────────────────────────────┘          │ │</span><br><span class="line">│ │                             ...                                      │ │</span><br><span class="line">│ └──────────────────────────────────────────────────────────────────────┘ │</span><br><span class="line">├──────────────────────────────────────────────────────────────────────────┤</span><br><span class="line">│ CRC32 &lt;4b&gt;                                                               │</span><br><span class="line">└──────────────────────────────────────────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
+
+<h3><span id="posting">Posting</span><a href="#posting" class="header-anchor">#</a></h3><p>Posting这一节存放着关于series引用的单调递增列表，简单来说就是存放id和时间序列的对应关系</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">┌────────────────────┬────────────────────┐</span><br><span class="line">│ len &lt;4b&gt;           │ #entries &lt;4b&gt;      │</span><br><span class="line">├────────────────────┴────────────────────┤</span><br><span class="line">│ ┌─────────────────────────────────────┐ │</span><br><span class="line">│ │ ref(series_1) &lt;4b&gt;                  │ │</span><br><span class="line">│ ├─────────────────────────────────────┤ │</span><br><span class="line">│ │ ...                                 │ │</span><br><span class="line">│ ├─────────────────────────────────────┤ │</span><br><span class="line">│ │ ref(series_n) &lt;4b&gt;                  │ │</span><br><span class="line">│ └─────────────────────────────────────┘ │</span><br><span class="line">├─────────────────────────────────────────┤</span><br><span class="line">│ CRC32 &lt;4b&gt;                              │</span><br><span class="line">└─────────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
+
+<p>Posting sections的顺序由<code>postings offset table</code>决定。</p>
+<h3><span id="posting-offset-table">Posting Offset Table</span><a href="#posting-offset-table" class="header-anchor">#</a></h3><p><code>postings offset table</code>包含着一系列<code>posting offset entry</code>，根据label的名称和值排序。每一个<code>posting offset entry</code>存放着label的键值对以及在<code>posting sections</code>中其series列表的偏移量。用来跟踪<code>posting sections</code>。当index文件加载时，它们将部分加载到内存中。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">┌─────────────────────┬──────────────────────┐</span><br><span class="line">│ len &lt;4b&gt;            │ #entries &lt;4b&gt;        │</span><br><span class="line">├─────────────────────┴──────────────────────┤</span><br><span class="line">│ ┌────────────────────────────────────────┐ │</span><br><span class="line">│ │  n = 2 &lt;1b&gt;                            │ │</span><br><span class="line">│ ├──────────────────────┬─────────────────┤ │</span><br><span class="line">│ │ len(name) &lt;uvarint&gt;  │ name &lt;bytes&gt;    │ │</span><br><span class="line">│ ├──────────────────────┼─────────────────┤ │</span><br><span class="line">│ │ len(value) &lt;uvarint&gt; │ value &lt;bytes&gt;   │ │</span><br><span class="line">│ ├──────────────────────┴─────────────────┤ │</span><br><span class="line">│ │  offset &lt;uvarint64&gt;                    │ │</span><br><span class="line">│ └────────────────────────────────────────┘ │</span><br><span class="line">│                    . . .                   │</span><br><span class="line">├────────────────────────────────────────────┤</span><br><span class="line">│  CRC32 &lt;4b&gt;                                │</span><br><span class="line">└────────────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
+
+<h3><span id="toc">TOC</span><a href="#toc" class="header-anchor">#</a></h3><p><code>table of contents</code>是整个索引的入口点，并指向文件中的各个部分。 如果引用为零，则表示相应的部分不存在，查找时应返回空结果。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">┌─────────────────────────────────────────┐</span><br><span class="line">│ ref(symbols) &lt;8b&gt;                       │</span><br><span class="line">├─────────────────────────────────────────┤</span><br><span class="line">│ ref(series) &lt;8b&gt;                        │</span><br><span class="line">├─────────────────────────────────────────┤</span><br><span class="line">│ ref(label indices start) &lt;8b&gt;           │</span><br><span class="line">├─────────────────────────────────────────┤</span><br><span class="line">│ ref(label offset table) &lt;8b&gt;            │</span><br><span class="line">├─────────────────────────────────────────┤</span><br><span class="line">│ ref(postings start) &lt;8b&gt;                │</span><br><span class="line">├─────────────────────────────────────────┤</span><br><span class="line">│ ref(postings offset table) &lt;8b&gt;         │</span><br><span class="line">├─────────────────────────────────────────┤</span><br><span class="line">│ CRC32 &lt;4b&gt;                              │</span><br><span class="line">└─────────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
+
+<h2><span id="chunks-ci-pan-ge-shi">chunks 磁盘格式</span><a href="#chunks-ci-pan-ge-shi" class="header-anchor">#</a></h2><p>chunks文件创建在<strong>block</strong>中的<code>chunks/</code>目录中。 每个段文件的最大大小为 512MB。<br>文件中的chunk由uint64的索引组织，索引低四位为文件内偏移，高四位为段序列号。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">┌──────────────────────────────┐</span><br><span class="line">│  magic(0x85BD40DD) &lt;4 byte&gt;  │</span><br><span class="line">├──────────────────────────────┤</span><br><span class="line">│    version(1) &lt;1 byte&gt;       │</span><br><span class="line">├──────────────────────────────┤</span><br><span class="line">│    padding(0) &lt;3 byte&gt;       │</span><br><span class="line">├──────────────────────────────┤</span><br><span class="line">│ ┌──────────────────────────┐ │</span><br><span class="line">│ │         Chunk 1          │ │</span><br><span class="line">│ ├──────────────────────────┤ │</span><br><span class="line">│ │          ...             │ │</span><br><span class="line">│ ├──────────────────────────┤ │</span><br><span class="line">│ │         Chunk N          │ │</span><br><span class="line">│ └──────────────────────────┘ │</span><br><span class="line">└──────────────────────────────┘</span><br></pre></td></tr></table></figure>
+
+<h2><span id="chunks-zhong-de-chunk-ge-shi">chunks中的Chunk格式</span><a href="#chunks-zhong-de-chunk-ge-shi" class="header-anchor">#</a></h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">┌───────────────┬───────────────────┬──────────────┬────────────────┐</span><br><span class="line">│ len &lt;uvarint&gt; │ encoding &lt;1 byte&gt; │ data &lt;bytes&gt; │ CRC32 &lt;4 byte&gt; │</span><br><span class="line">└───────────────┴───────────────────┴──────────────┴────────────────┘</span><br></pre></td></tr></table></figure>
+
+<h1><span id="cha-xun-shu-ju">查询数据</span><a href="#cha-xun-shu-ju" class="header-anchor">#</a></h1><h2><span id="code">code</span><a href="#code" class="header-anchor">#</a></h2><p>查询的prometheus方法签名</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Select(sortSeries <span class="type">bool</span>, hints *SelectHints, matchers ...*labels.Matcher) SeriesSet</span><br></pre></td></tr></table></figure>
+
+<p>支持从block中，remote等各种地方查询获取数据</p>
+<p>prometheus会在内存中维护一个数据结构</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Map of LabelName to a list of some LabelValues&#x27;s position in the offset table.</span></span><br><span class="line"><span class="comment">// The first and last values for each name are always present.</span></span><br><span class="line">postings <span class="keyword">map</span>[<span class="type">string</span>][]postingOffset</span><br></pre></td></tr></table></figure>
+
+<p>在内存中，保留每个label name，并且每n个保存label值，降低内存的占用。但是第一个和最后一个值总是保存在内存中。</p>
+<h2><span id="cha-xun-shu-ju-liu-cheng">查询数据流程</span><a href="#cha-xun-shu-ju-liu-cheng" class="header-anchor">#</a></h2><p><img src="/prometheus/prometheus-tsdb-index/prometheus-tsdb-index.png" alt="prometheus-tsdb-index"></p>
+<h1><span id="can-kao-zi-liao">参考资料</span><a href="#can-kao-zi-liao" class="header-anchor">#</a></h1><ul>
+<li><a target="_blank" rel="noopener" href="https://prometheus.io/docs/prometheus/latest/storage/">https://prometheus.io/docs/prometheus/latest/storage/</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/prometheus/prometheus/blob/release-2.37/tsdb/docs/format/README.md">https://github.com/prometheus/prometheus/blob/release-2.37/tsdb/docs/format/README.md</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/prometheus/prometheus/blob/release-2.37/tsdb/docs/format/index.md">https://github.com/prometheus/prometheus/blob/release-2.37/tsdb/docs/format/index.md</a></li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -222,7 +350,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-25 00:59:54" itemprop="dateModified" datetime="2023-12-25T00:59:54+00:00">2023-12-25</time>
+      <time title="修改时间：2023-12-26 05:55:03" itemprop="dateModified" datetime="2023-12-26T05:55:03+00:00">2023-12-26</time>
     </span>
 
   
@@ -333,7 +461,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-25 00:59:54" itemprop="dateModified" datetime="2023-12-25T00:59:54+00:00">2023-12-25</time>
+      <time title="修改时间：2023-12-26 05:55:03" itemprop="dateModified" datetime="2023-12-26T05:55:03+00:00">2023-12-26</time>
     </span>
 
   
@@ -436,7 +564,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-25 00:59:54" itemprop="dateModified" datetime="2023-12-25T00:59:54+00:00">2023-12-25</time>
+      <time title="修改时间：2023-12-26 05:55:03" itemprop="dateModified" datetime="2023-12-26T05:55:03+00:00">2023-12-26</time>
     </span>
 
   
@@ -533,7 +661,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-25 00:59:54" itemprop="dateModified" datetime="2023-12-25T00:59:54+00:00">2023-12-25</time>
+      <time title="修改时间：2023-12-26 05:55:03" itemprop="dateModified" datetime="2023-12-26T05:55:03+00:00">2023-12-26</time>
     </span>
 
   
@@ -621,7 +749,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-25 00:59:54" itemprop="dateModified" datetime="2023-12-25T00:59:54+00:00">2023-12-25</time>
+      <time title="修改时间：2023-12-26 05:55:03" itemprop="dateModified" datetime="2023-12-26T05:55:03+00:00">2023-12-26</time>
     </span>
 
   
@@ -704,7 +832,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-25 00:59:54" itemprop="dateModified" datetime="2023-12-25T00:59:54+00:00">2023-12-25</time>
+      <time title="修改时间：2023-12-26 05:55:03" itemprop="dateModified" datetime="2023-12-26T05:55:03+00:00">2023-12-26</time>
     </span>
 
   
@@ -817,7 +945,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-25 00:59:54" itemprop="dateModified" datetime="2023-12-25T00:59:54+00:00">2023-12-25</time>
+      <time title="修改时间：2023-12-26 05:55:03" itemprop="dateModified" datetime="2023-12-26T05:55:03+00:00">2023-12-26</time>
     </span>
 
   
@@ -924,7 +1052,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-25 00:59:54" itemprop="dateModified" datetime="2023-12-25T00:59:54+00:00">2023-12-25</time>
+      <time title="修改时间：2023-12-26 05:55:03" itemprop="dateModified" datetime="2023-12-26T05:55:03+00:00">2023-12-26</time>
     </span>
 
   
@@ -1040,7 +1168,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-25 00:59:54" itemprop="dateModified" datetime="2023-12-25T00:59:54+00:00">2023-12-25</time>
+      <time title="修改时间：2023-12-26 05:55:03" itemprop="dateModified" datetime="2023-12-26T05:55:03+00:00">2023-12-26</time>
     </span>
 
   
@@ -1086,161 +1214,6 @@
 <p><img src="/security/cert-manager/cert-manager5.png" alt="cert-manager5"></p>
 <h2><span id="zu-zhi-jia-gou-xiang-guan">组织架构相关</span><a href="#zu-zhi-jia-gou-xiang-guan" class="header-anchor">#</a></h2><p>大型系统下，证书管理是一个必须的组件，且一定是由团队最底层的组织架构承接。如若不然，那么由底层组织架构维护的组件，因为依赖关系，无法基于证书管理来统一实现证书的更换和过期告警。除非不基于证书管理自己构筑一套能力。</p>
 <h2><span id="tldr">TLDR</span><a href="#tldr" class="header-anchor">#</a></h2><p>随着组件和使用加密场景的不断扩大，证书管理是一个必须的组件，通过抽象出场景的概念来复用证书，通过变更通知在微服务模式下快速更换所有微服务实例上的证书，并提供统一的证书过期告警功能来提醒管理员更换证书。</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/config/business-config-center-impl/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="shoothzj">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/config/business-config-center-impl/" class="post-title-link" itemprop="url">业务配置中心的实现</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-05-13 15:44:23" itemprop="dateCreated datePublished" datetime="2021-05-13T15:44:23+00:00">2021-05-13</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-25 00:59:54" itemprop="dateModified" datetime="2023-12-25T00:59:54+00:00">2023-12-25</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1><span id="qian-yan">前言</span><a href="#qian-yan" class="header-anchor">#</a></h1><p>之前在InfoQ的《华为云物联网四年配置中心实践》文章中分享了业务配置中心。</p>
-<p>本文讲述业务配置中心（下文简述为配置中心）的关键技术和实现方式。华为云物联网平台按照本文的实现方式实现了一个业务配置中心，该配置中心2020年1月上线，平稳运行至今。</p>
-<h1><span id="gai-nian">概念</span><a href="#gai-nian" class="header-anchor">#</a></h1><h2><span id="yun-wei-pei-zhi">运维配置</span><a href="#yun-wei-pei-zhi" class="header-anchor">#</a></h2><p>和用户无关，通常为集群界级别的配置，程序只会进行读取，如数据库配置、邮箱服务器配置、网卡配置、子网地址配置等。</p>
-<h2><span id="ye-wu-pei-zhi">业务配置</span><a href="#ye-wu-pei-zhi" class="header-anchor">#</a></h2><p>作为SaaS 服务，每个用户在上面都有一些业务配置。如用户的证书配置、用户服务器的流控配置等，这些业务配置相对<strong>运维配置</strong>来说更加复杂，且可能会有唯一性限制，如按用户 id 唯一。这部分配置数据一般由用户操作触发，代码动态写入，并且通知到各个微服务实例。通常，我们希望这些配置能在界面展示，且支持人为修改。上述逻辑如果由各微服务自己实现，会存在大量重复代码，并且质量无法保证。我们希望由一个公共组件来统一实现这个能力。开源或体量较小的项目就不会选择依赖一个配置中心，而是直接通过连接数据库或etcd来解决问题</p>
-<h2><span id="env">env</span><a href="#env" class="header-anchor">#</a></h2><p>代表一个部署环境。</p>
-<h2><span id="cluster">cluster</span><a href="#cluster" class="header-anchor">#</a></h2><p>代表环境下的集群。常见于单环境下蓝绿发布，蓝集群、绿集群、金丝雀集群等。</p>
-<h2><span id="pei-zhi">配置</span><a href="#pei-zhi" class="header-anchor">#</a></h2><p>配置名称，如用户证书配置、用户流控配置等。</p>
-<h2><span id="key">Key</span><a href="#key" class="header-anchor">#</a></h2><p>配置的唯一键，如用户id。</p>
-<h2><span id="value">Value</span><a href="#value" class="header-anchor">#</a></h2><p>配置唯一键对应的值。</p>
-<h1><span id="pei-zhi-zhong-xin-she-ji-geng-gai">配置中心设计梗概</span><a href="#pei-zhi-zhong-xin-she-ji-geng-gai" class="header-anchor">#</a></h1><h2><span id="ye-wu-pei-zhi-te-dian">业务配置特点</span><a href="#ye-wu-pei-zhi-te-dian" class="header-anchor">#</a></h2><ul>
-<li>虽然业务配置写入可能存在并发，但并发量不大，频率较低。</li>
-<li>业务配置常常以用户为id，单集群用户量有限，一般不超过5万。</li>
-</ul>
-<h2><span id="pei-zhi-zhong-xin-yao-jie-jue-de-wen-ti">配置中心要解决的问题</span><a href="#pei-zhi-zhong-xin-yao-jie-jue-de-wen-ti" class="header-anchor">#</a></h2><p><img src="/config/business-config-center-impl/business-config-center-impl1.png" alt="business-config-center-impl1"></p>
-<h2><span id="she-ji-yao-dian">设计要点</span><a href="#she-ji-yao-dian" class="header-anchor">#</a></h2><ul>
-<li>单配置要求有配置id，每个id上通过version的乐观并发控制来解决多版本冲突问题</li>
-<li>通知不追求可靠，应用程序和配置中心断链无法接收通知的场景下，通过定期同步数据来保证数据的可靠</li>
-<li>支持Schema的变更，因Schema变更不频繁，也采用version的乐观并发控制来解决多版本冲突问题</li>
-</ul>
-<h2><span id="tong-zhi-shi-fou-bao-han-xiao-xi-nei-rong">通知是否包含消息内容</span><a href="#tong-zhi-shi-fou-bao-han-xiao-xi-nei-rong" class="header-anchor">#</a></h2><p>我认为应该只通知Key，具体的数值让应用程序再去配置中心查询。仅通知Key实现简洁易懂。同时通知Key&amp;Value需要多考虑定期同步和通知两条通道并发，可能引起的竞态冲突。</p>
-<h1><span id="pei-zhi-zhong-xin-ye-wu-liu-cheng">配置中心业务流程</span><a href="#pei-zhi-zhong-xin-ye-wu-liu-cheng" class="header-anchor">#</a></h1><p>本小节描述业务配置中心的所有业务流程，并试图从交互中抽象出与具体实现无关的接口</p>
-<h2><span id="pei-zhi-de-zeng-shan-gai-cha">配置的增删改查</span><a href="#pei-zhi-de-zeng-shan-gai-cha" class="header-anchor">#</a></h2><p><img src="/config/business-config-center-impl/business-config-center-impl2.png" alt="business-config-center-impl2"></p>
-<h2><span id="pei-zhi-zhi-de-zeng-shan-gai-cha">配置值的增删改查</span><a href="#pei-zhi-zhi-de-zeng-shan-gai-cha" class="header-anchor">#</a></h2><p><img src="/config/business-config-center-impl/business-config-center-impl3.png" alt="business-config-center-impl3"></p>
-<h2><span id="ding-qi-tong-bu">定期同步</span><a href="#ding-qi-tong-bu" class="header-anchor">#</a></h2><p>分布式场景下，通知有可能无法送达，如程序陷入网络中断（或长gc），通知消息送达超时，待程序恢复后，数据不再准确。因此需要对数据做定期同步，提高可靠性。</p>
-<p><img src="/config/business-config-center-impl/business-config-center-impl4.png" alt="business-config-center-impl4"></p>
-<p>同步过程中，仅仅请求交互id和version，避免传输大量数据。应用程序接收到需要同步的数据后：</p>
-<ul>
-<li>删除操作，触发删除通知，从本地缓存中移除数据。</li>
-<li>添加、修改操作，向配置中心查询最新数据，触发通知并写入本地缓存。</li>
-</ul>
-<h2><span id="fu-wu-qi-dong">服务启动</span><a href="#fu-wu-qi-dong" class="header-anchor">#</a></h2><p>服务启动也可看做是一个同步的流程，只是需要同步大量的数据添加。为了避免向配置中心频繁大量的请求，引入批量操作来减轻压力</p>
-<p><img src="/config/business-config-center-impl/business-config-center-impl5.png" alt="business-config-center-impl5"></p>
-<h2><span id="xian-zhi">限制</span><a href="#xian-zhi" class="header-anchor">#</a></h2><p>该配置中心设计思路依赖客户端可把数据全量放入到内存中，如用户量太大，则不适合采用这种模式。</p>
-<p>注：一个节省内存的思路是，内存中只放置全量的id和version，数据只有当用到的时候再去查询。这个思路要求配置中心持久化一些老旧数据以供以下场景的查询使用</p>
-<ul>
-<li><p>业务流程中，需要使用该配置值的。</p>
-</li>
-<li><p>回调业务程序修改的时候，需要提供旧值的。</p>
-</li>
-</ul>
-<p>除此之外没有任何区别。</p>
-<h1><span id="ye-wu-pei-zhi-chou-xiang-shi-xian">业务配置抽象实现</span><a href="#ye-wu-pei-zhi-chou-xiang-shi-xian" class="header-anchor">#</a></h1><p>从上述描述的业务场景，我们抽象出业务配置中心的交互接口和抽象实现。接口的Swagger Yaml已上传到Github：<a target="_blank" rel="noopener" href="https://gist.github.com/Shoothzj/68c9c2ecae72cc2a125184e95b0a741e">https://gist.github.com/Shoothzj/68c9c2ecae72cc2a125184e95b0a741e</a></p>
-<h2><span id="pei-zhi-xiang-guan-jie-kou">配置相关接口</span><a href="#pei-zhi-xiang-guan-jie-kou" class="header-anchor">#</a></h2><ul>
-<li>提供env、cluster、配置名称、配置Schema、配置版本号添加配置</li>
-<li>提供env、cluster、配置名称删除配置</li>
-<li>提供env、cluster、配置名称、新Schema、新Version来修改配置</li>
-<li>提供env、cluster、配置名称来查询配置</li>
-</ul>
-<h2><span id="pei-zhi-zhi-xiang-guan-jie-kou">配置值相关接口</span><a href="#pei-zhi-zhi-xiang-guan-jie-kou" class="header-anchor">#</a></h2><ul>
-<li>提供env、cluster、配置名称、Key、Value来添加配置值</li>
-<li>提供env、cluster、Key、ValueVersion（可选）来删除配置值</li>
-<li>提供env、cluster、Key、Value、ValueVersion（可选）修改配置值</li>
-<li>提供env、cluster、Key查询配置值</li>
-<li>根据env、cluster、应用程序当前的配置数据来做定期同步</li>
-<li>根据Key列表批量查询配置值</li>
-</ul>
-<h2><span id="tong-zhi-xiang-guan-jie-kou">通知相关接口</span><a href="#tong-zhi-xiang-guan-jie-kou" class="header-anchor">#</a></h2><ul>
-<li>通知某env某cluster下，配置项中的一个Key发生变化，新增、修改或是删除。可选方式有HTTP长链接（Inspired by Apollo）、Mqtt、WebSocket等。</li>
-</ul>
-<h2><span id="pei-zhi-zhong-xin-cun-chu-ceng-chou-xiang-shi-xian">配置中心存储层抽象实现</span><a href="#pei-zhi-zhong-xin-cun-chu-ceng-chou-xiang-shi-xian" class="header-anchor">#</a></h2><p>配置中心存储层需要存储<strong>配置</strong>和<strong>配置值</strong>数据，支持UpdateByVersion，且需要捕捉数据的变化，用来通知到应用程序</p>
-<h2><span id="fu-wu-fa-xian-chou-xiang-shi-xian">服务发现抽象实现</span><a href="#fu-wu-fa-xian-chou-xiang-shi-xian" class="header-anchor">#</a></h2><p>为了使应用程序连接到配置中心，需要一个发现机制可以让应用程序感知到配置中心的地址。高可用的方式很多，如K8s发现、ZooKeeper、Etcd、ServiceComb、业务环境变量注入ELB地址（ELB后端挂载配置中心的地址）等。</p>
-<h2><span id="chou-xiang-zong-jie">抽象总结</span><a href="#chou-xiang-zong-jie" class="header-anchor">#</a></h2><p><img src="/config/business-config-center-impl/business-config-center-impl6.png" alt="business-config-center-impl6"></p>
-<p>根据这个抽象，我们可以进行关键技术点选型，来实现业务配置中心。</p>
-<h1><span id="pei-zhi-zhong-xin-shi-xian">配置中心实现</span><a href="#pei-zhi-zhong-xin-shi-xian" class="header-anchor">#</a></h1><h2><span id="hua-wei-yun-wu-lian-wang-pei-zhi-zhong-xin-shi-xian">华为云物联网配置中心实现</span><a href="#hua-wei-yun-wu-lian-wang-pei-zhi-zhong-xin-shi-xian" class="header-anchor">#</a></h2><p><img src="/config/business-config-center-impl/business-config-center-impl7.png" alt="business-config-center-impl7"></p>
-<ul>
-<li>env+cluster+config组成数据表的名称</li>
-<li>一个key、value对应一行数据</li>
-</ul>
-<h2><span id="ling-yi-chong-shi-xian-fang-shi">另一种实现方式</span><a href="#ling-yi-chong-shi-xian-fang-shi" class="header-anchor">#</a></h2><p>只要实现上述接口和抽象能力，都可以实现业务配置中心，也可以这么实现</p>
-<p><img src="/config/business-config-center-impl/business-config-center-impl8.png" alt="business-config-center-impl8"></p>
-<ul>
-<li>env+cluster+config+key 组合成etcd的key</li>
-<li>一个key、value对应一个键值对</li>
-</ul>
-<h2><span id="you-yi-chong-shi-xian-fang-shi">又一种实现方式</span><a href="#you-yi-chong-shi-xian-fang-shi" class="header-anchor">#</a></h2><p>当然也可以</p>
-<p><img src="/config/business-config-center-impl/business-config-center-impl9.png" alt="business-config-center-impl9"></p>
-<ul>
-<li>env+cluster+config+key 组合成RocksDB的key</li>
-<li>一个key、value对应一个键值对</li>
-</ul>
 
       
     </div>

@@ -146,13 +146,13 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">64</span>
+          <span class="site-state-item-count">65</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">35</span>
+        <span class="site-state-item-count">36</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -177,6 +177,161 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/config/business-config-center-impl/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="shoothzj">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/config/business-config-center-impl/" class="post-title-link" itemprop="url">业务配置中心的实现</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-05-13 15:44:23" itemprop="dateCreated datePublished" datetime="2021-05-13T15:44:23+00:00">2021-05-13</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-12-26 05:55:03" itemprop="dateModified" datetime="2023-12-26T05:55:03+00:00">2023-12-26</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1><span id="qian-yan">前言</span><a href="#qian-yan" class="header-anchor">#</a></h1><p>之前在InfoQ的《华为云物联网四年配置中心实践》文章中分享了业务配置中心。</p>
+<p>本文讲述业务配置中心（下文简述为配置中心）的关键技术和实现方式。华为云物联网平台按照本文的实现方式实现了一个业务配置中心，该配置中心2020年1月上线，平稳运行至今。</p>
+<h1><span id="gai-nian">概念</span><a href="#gai-nian" class="header-anchor">#</a></h1><h2><span id="yun-wei-pei-zhi">运维配置</span><a href="#yun-wei-pei-zhi" class="header-anchor">#</a></h2><p>和用户无关，通常为集群界级别的配置，程序只会进行读取，如数据库配置、邮箱服务器配置、网卡配置、子网地址配置等。</p>
+<h2><span id="ye-wu-pei-zhi">业务配置</span><a href="#ye-wu-pei-zhi" class="header-anchor">#</a></h2><p>作为SaaS 服务，每个用户在上面都有一些业务配置。如用户的证书配置、用户服务器的流控配置等，这些业务配置相对<strong>运维配置</strong>来说更加复杂，且可能会有唯一性限制，如按用户 id 唯一。这部分配置数据一般由用户操作触发，代码动态写入，并且通知到各个微服务实例。通常，我们希望这些配置能在界面展示，且支持人为修改。上述逻辑如果由各微服务自己实现，会存在大量重复代码，并且质量无法保证。我们希望由一个公共组件来统一实现这个能力。开源或体量较小的项目就不会选择依赖一个配置中心，而是直接通过连接数据库或etcd来解决问题</p>
+<h2><span id="env">env</span><a href="#env" class="header-anchor">#</a></h2><p>代表一个部署环境。</p>
+<h2><span id="cluster">cluster</span><a href="#cluster" class="header-anchor">#</a></h2><p>代表环境下的集群。常见于单环境下蓝绿发布，蓝集群、绿集群、金丝雀集群等。</p>
+<h2><span id="pei-zhi">配置</span><a href="#pei-zhi" class="header-anchor">#</a></h2><p>配置名称，如用户证书配置、用户流控配置等。</p>
+<h2><span id="key">Key</span><a href="#key" class="header-anchor">#</a></h2><p>配置的唯一键，如用户id。</p>
+<h2><span id="value">Value</span><a href="#value" class="header-anchor">#</a></h2><p>配置唯一键对应的值。</p>
+<h1><span id="pei-zhi-zhong-xin-she-ji-geng-gai">配置中心设计梗概</span><a href="#pei-zhi-zhong-xin-she-ji-geng-gai" class="header-anchor">#</a></h1><h2><span id="ye-wu-pei-zhi-te-dian">业务配置特点</span><a href="#ye-wu-pei-zhi-te-dian" class="header-anchor">#</a></h2><ul>
+<li>虽然业务配置写入可能存在并发，但并发量不大，频率较低。</li>
+<li>业务配置常常以用户为id，单集群用户量有限，一般不超过5万。</li>
+</ul>
+<h2><span id="pei-zhi-zhong-xin-yao-jie-jue-de-wen-ti">配置中心要解决的问题</span><a href="#pei-zhi-zhong-xin-yao-jie-jue-de-wen-ti" class="header-anchor">#</a></h2><p><img src="/config/business-config-center-impl/business-config-center-impl1.png" alt="business-config-center-impl1"></p>
+<h2><span id="she-ji-yao-dian">设计要点</span><a href="#she-ji-yao-dian" class="header-anchor">#</a></h2><ul>
+<li>单配置要求有配置id，每个id上通过version的乐观并发控制来解决多版本冲突问题</li>
+<li>通知不追求可靠，应用程序和配置中心断链无法接收通知的场景下，通过定期同步数据来保证数据的可靠</li>
+<li>支持Schema的变更，因Schema变更不频繁，也采用version的乐观并发控制来解决多版本冲突问题</li>
+</ul>
+<h2><span id="tong-zhi-shi-fou-bao-han-xiao-xi-nei-rong">通知是否包含消息内容</span><a href="#tong-zhi-shi-fou-bao-han-xiao-xi-nei-rong" class="header-anchor">#</a></h2><p>我认为应该只通知Key，具体的数值让应用程序再去配置中心查询。仅通知Key实现简洁易懂。同时通知Key&amp;Value需要多考虑定期同步和通知两条通道并发，可能引起的竞态冲突。</p>
+<h1><span id="pei-zhi-zhong-xin-ye-wu-liu-cheng">配置中心业务流程</span><a href="#pei-zhi-zhong-xin-ye-wu-liu-cheng" class="header-anchor">#</a></h1><p>本小节描述业务配置中心的所有业务流程，并试图从交互中抽象出与具体实现无关的接口</p>
+<h2><span id="pei-zhi-de-zeng-shan-gai-cha">配置的增删改查</span><a href="#pei-zhi-de-zeng-shan-gai-cha" class="header-anchor">#</a></h2><p><img src="/config/business-config-center-impl/business-config-center-impl2.png" alt="business-config-center-impl2"></p>
+<h2><span id="pei-zhi-zhi-de-zeng-shan-gai-cha">配置值的增删改查</span><a href="#pei-zhi-zhi-de-zeng-shan-gai-cha" class="header-anchor">#</a></h2><p><img src="/config/business-config-center-impl/business-config-center-impl3.png" alt="business-config-center-impl3"></p>
+<h2><span id="ding-qi-tong-bu">定期同步</span><a href="#ding-qi-tong-bu" class="header-anchor">#</a></h2><p>分布式场景下，通知有可能无法送达，如程序陷入网络中断（或长gc），通知消息送达超时，待程序恢复后，数据不再准确。因此需要对数据做定期同步，提高可靠性。</p>
+<p><img src="/config/business-config-center-impl/business-config-center-impl4.png" alt="business-config-center-impl4"></p>
+<p>同步过程中，仅仅请求交互id和version，避免传输大量数据。应用程序接收到需要同步的数据后：</p>
+<ul>
+<li>删除操作，触发删除通知，从本地缓存中移除数据。</li>
+<li>添加、修改操作，向配置中心查询最新数据，触发通知并写入本地缓存。</li>
+</ul>
+<h2><span id="fu-wu-qi-dong">服务启动</span><a href="#fu-wu-qi-dong" class="header-anchor">#</a></h2><p>服务启动也可看做是一个同步的流程，只是需要同步大量的数据添加。为了避免向配置中心频繁大量的请求，引入批量操作来减轻压力</p>
+<p><img src="/config/business-config-center-impl/business-config-center-impl5.png" alt="business-config-center-impl5"></p>
+<h2><span id="xian-zhi">限制</span><a href="#xian-zhi" class="header-anchor">#</a></h2><p>该配置中心设计思路依赖客户端可把数据全量放入到内存中，如用户量太大，则不适合采用这种模式。</p>
+<p>注：一个节省内存的思路是，内存中只放置全量的id和version，数据只有当用到的时候再去查询。这个思路要求配置中心持久化一些老旧数据以供以下场景的查询使用</p>
+<ul>
+<li><p>业务流程中，需要使用该配置值的。</p>
+</li>
+<li><p>回调业务程序修改的时候，需要提供旧值的。</p>
+</li>
+</ul>
+<p>除此之外没有任何区别。</p>
+<h1><span id="ye-wu-pei-zhi-chou-xiang-shi-xian">业务配置抽象实现</span><a href="#ye-wu-pei-zhi-chou-xiang-shi-xian" class="header-anchor">#</a></h1><p>从上述描述的业务场景，我们抽象出业务配置中心的交互接口和抽象实现。接口的Swagger Yaml已上传到Github：<a target="_blank" rel="noopener" href="https://gist.github.com/Shoothzj/68c9c2ecae72cc2a125184e95b0a741e">https://gist.github.com/Shoothzj/68c9c2ecae72cc2a125184e95b0a741e</a></p>
+<h2><span id="pei-zhi-xiang-guan-jie-kou">配置相关接口</span><a href="#pei-zhi-xiang-guan-jie-kou" class="header-anchor">#</a></h2><ul>
+<li>提供env、cluster、配置名称、配置Schema、配置版本号添加配置</li>
+<li>提供env、cluster、配置名称删除配置</li>
+<li>提供env、cluster、配置名称、新Schema、新Version来修改配置</li>
+<li>提供env、cluster、配置名称来查询配置</li>
+</ul>
+<h2><span id="pei-zhi-zhi-xiang-guan-jie-kou">配置值相关接口</span><a href="#pei-zhi-zhi-xiang-guan-jie-kou" class="header-anchor">#</a></h2><ul>
+<li>提供env、cluster、配置名称、Key、Value来添加配置值</li>
+<li>提供env、cluster、Key、ValueVersion（可选）来删除配置值</li>
+<li>提供env、cluster、Key、Value、ValueVersion（可选）修改配置值</li>
+<li>提供env、cluster、Key查询配置值</li>
+<li>根据env、cluster、应用程序当前的配置数据来做定期同步</li>
+<li>根据Key列表批量查询配置值</li>
+</ul>
+<h2><span id="tong-zhi-xiang-guan-jie-kou">通知相关接口</span><a href="#tong-zhi-xiang-guan-jie-kou" class="header-anchor">#</a></h2><ul>
+<li>通知某env某cluster下，配置项中的一个Key发生变化，新增、修改或是删除。可选方式有HTTP长链接（Inspired by Apollo）、Mqtt、WebSocket等。</li>
+</ul>
+<h2><span id="pei-zhi-zhong-xin-cun-chu-ceng-chou-xiang-shi-xian">配置中心存储层抽象实现</span><a href="#pei-zhi-zhong-xin-cun-chu-ceng-chou-xiang-shi-xian" class="header-anchor">#</a></h2><p>配置中心存储层需要存储<strong>配置</strong>和<strong>配置值</strong>数据，支持UpdateByVersion，且需要捕捉数据的变化，用来通知到应用程序</p>
+<h2><span id="fu-wu-fa-xian-chou-xiang-shi-xian">服务发现抽象实现</span><a href="#fu-wu-fa-xian-chou-xiang-shi-xian" class="header-anchor">#</a></h2><p>为了使应用程序连接到配置中心，需要一个发现机制可以让应用程序感知到配置中心的地址。高可用的方式很多，如K8s发现、ZooKeeper、Etcd、ServiceComb、业务环境变量注入ELB地址（ELB后端挂载配置中心的地址）等。</p>
+<h2><span id="chou-xiang-zong-jie">抽象总结</span><a href="#chou-xiang-zong-jie" class="header-anchor">#</a></h2><p><img src="/config/business-config-center-impl/business-config-center-impl6.png" alt="business-config-center-impl6"></p>
+<p>根据这个抽象，我们可以进行关键技术点选型，来实现业务配置中心。</p>
+<h1><span id="pei-zhi-zhong-xin-shi-xian">配置中心实现</span><a href="#pei-zhi-zhong-xin-shi-xian" class="header-anchor">#</a></h1><h2><span id="hua-wei-yun-wu-lian-wang-pei-zhi-zhong-xin-shi-xian">华为云物联网配置中心实现</span><a href="#hua-wei-yun-wu-lian-wang-pei-zhi-zhong-xin-shi-xian" class="header-anchor">#</a></h2><p><img src="/config/business-config-center-impl/business-config-center-impl7.png" alt="business-config-center-impl7"></p>
+<ul>
+<li>env+cluster+config组成数据表的名称</li>
+<li>一个key、value对应一行数据</li>
+</ul>
+<h2><span id="ling-yi-chong-shi-xian-fang-shi">另一种实现方式</span><a href="#ling-yi-chong-shi-xian-fang-shi" class="header-anchor">#</a></h2><p>只要实现上述接口和抽象能力，都可以实现业务配置中心，也可以这么实现</p>
+<p><img src="/config/business-config-center-impl/business-config-center-impl8.png" alt="business-config-center-impl8"></p>
+<ul>
+<li>env+cluster+config+key 组合成etcd的key</li>
+<li>一个key、value对应一个键值对</li>
+</ul>
+<h2><span id="you-yi-chong-shi-xian-fang-shi">又一种实现方式</span><a href="#you-yi-chong-shi-xian-fang-shi" class="header-anchor">#</a></h2><p>当然也可以</p>
+<p><img src="/config/business-config-center-impl/business-config-center-impl9.png" alt="business-config-center-impl9"></p>
+<ul>
+<li>env+cluster+config+key 组合成RocksDB的key</li>
+<li>一个key、value对应一个键值对</li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -222,7 +377,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-25 00:59:54" itemprop="dateModified" datetime="2023-12-25T00:59:54+00:00">2023-12-25</time>
+      <time title="修改时间：2023-12-26 05:55:03" itemprop="dateModified" datetime="2023-12-26T05:55:03+00:00">2023-12-26</time>
     </span>
 
   
@@ -320,7 +475,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-25 00:59:54" itemprop="dateModified" datetime="2023-12-25T00:59:54+00:00">2023-12-25</time>
+      <time title="修改时间：2023-12-26 05:55:03" itemprop="dateModified" datetime="2023-12-26T05:55:03+00:00">2023-12-26</time>
     </span>
 
   
@@ -413,7 +568,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-25 00:59:54" itemprop="dateModified" datetime="2023-12-25T00:59:54+00:00">2023-12-25</time>
+      <time title="修改时间：2023-12-26 05:55:03" itemprop="dateModified" datetime="2023-12-26T05:55:03+00:00">2023-12-26</time>
     </span>
 
   
@@ -521,7 +676,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-25 00:59:54" itemprop="dateModified" datetime="2023-12-25T00:59:54+00:00">2023-12-25</time>
+      <time title="修改时间：2023-12-26 05:55:03" itemprop="dateModified" datetime="2023-12-26T05:55:03+00:00">2023-12-26</time>
     </span>
 
   
@@ -693,7 +848,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-25 00:59:54" itemprop="dateModified" datetime="2023-12-25T00:59:54+00:00">2023-12-25</time>
+      <time title="修改时间：2023-12-26 05:55:03" itemprop="dateModified" datetime="2023-12-26T05:55:03+00:00">2023-12-26</time>
     </span>
 
   
@@ -783,7 +938,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-25 00:59:54" itemprop="dateModified" datetime="2023-12-25T00:59:54+00:00">2023-12-25</time>
+      <time title="修改时间：2023-12-26 05:55:03" itemprop="dateModified" datetime="2023-12-26T05:55:03+00:00">2023-12-26</time>
     </span>
 
   
@@ -870,7 +1025,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-25 00:59:54" itemprop="dateModified" datetime="2023-12-25T00:59:54+00:00">2023-12-25</time>
+      <time title="修改时间：2023-12-26 05:55:03" itemprop="dateModified" datetime="2023-12-26T05:55:03+00:00">2023-12-26</time>
     </span>
 
   
@@ -972,7 +1127,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-25 00:59:54" itemprop="dateModified" datetime="2023-12-25T00:59:54+00:00">2023-12-25</time>
+      <time title="修改时间：2023-12-26 05:55:03" itemprop="dateModified" datetime="2023-12-26T05:55:03+00:00">2023-12-26</time>
     </span>
 
   
@@ -1062,7 +1217,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-25 00:59:54" itemprop="dateModified" datetime="2023-12-25T00:59:54+00:00">2023-12-25</time>
+      <time title="修改时间：2023-12-26 05:55:03" itemprop="dateModified" datetime="2023-12-26T05:55:03+00:00">2023-12-26</time>
     </span>
 
   
@@ -1093,102 +1248,6 @@
 <p>配置ip 隧道倒也不难</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip tunnel add $tun_name mode ipip remote $remote_ip local $local_ip ttl 255</span><br></pre></td></tr></table></figure>
 <h1><span id="zong-jie">总结</span><a href="#zong-jie" class="header-anchor">#</a></h1><p>以上三种方案均没有单点问题，且都兼容tcp，udp协议。GateWay处的单点问题，通过zk选主、etcd选主，keepalive等 + 浮动IP迁移的方式均能解决。大家可以根据自己的网规网设自由选择</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/nginx/nginx-sni/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="shoothzj">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/nginx/nginx-sni/" class="post-title-link" itemprop="url">Nginx支持SNI转发</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-12-05 15:20:31" itemprop="dateCreated datePublished" datetime="2020-12-05T15:20:31+00:00">2020-12-05</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-25 00:59:54" itemprop="dateModified" datetime="2023-12-25T00:59:54+00:00">2023-12-25</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>SNI是一个TLS的扩展字段，经常用于访问域名跳转到不同的后端地址。</p>
-<p>配置方式如下：打开nginx.conf文件，以ttbb&#x2F;nginx:nake镜像为例&#x2F;usr&#x2F;local&#x2F;openresty&#x2F;nginx&#x2F;conf&#x2F;nginx.conf</p>
-<p>如下为默认的nginx.conf配置</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">#user  nobody;</span><br><span class="line">worker_processes  1;</span><br><span class="line"></span><br><span class="line">#error_log  logs/error.log;</span><br><span class="line">#error_log  logs/error.log  notice;</span><br><span class="line">#error_log  logs/error.log  info;</span><br><span class="line"></span><br><span class="line">#pid        logs/nginx.pid;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">events &#123;</span><br><span class="line">    worker_connections  1024;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">http &#123;</span><br><span class="line">    include       mime.types;</span><br><span class="line">    default_type  application/octet-stream;</span><br><span class="line"></span><br><span class="line">    #log_format  main  &#x27;$remote_addr - $remote_user [$time_local] &quot;$request&quot; &#x27;</span><br><span class="line">    #                  &#x27;$status $body_bytes_sent &quot;$http_referer&quot; &#x27;</span><br><span class="line">    #                  &#x27;&quot;$http_user_agent&quot; &quot;$http_x_forwarded_for&quot;&#x27;;</span><br><span class="line"></span><br><span class="line">    #access_log  logs/access.log  main;</span><br><span class="line"></span><br><span class="line">    sendfile        on;</span><br><span class="line">    #tcp_nopush     on;</span><br><span class="line"></span><br><span class="line">    #keepalive_timeout  0;</span><br><span class="line">    keepalive_timeout  65;</span><br><span class="line"></span><br><span class="line">    #gzip  on;</span><br><span class="line"></span><br><span class="line">    server &#123;</span><br><span class="line">        listen       80;</span><br><span class="line">        server_name  localhost;</span><br><span class="line"></span><br><span class="line">        #charset koi8-r;</span><br><span class="line"></span><br><span class="line">        #access_log  logs/host.access.log  main;</span><br><span class="line"></span><br><span class="line">        location / &#123;</span><br><span class="line">            root   html;</span><br><span class="line">            index  index.html index.htm;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        #error_page  404              /404.html;</span><br><span class="line"></span><br><span class="line">        # redirect server error pages to the static page /50x.html</span><br><span class="line">        #</span><br><span class="line">        error_page   500 502 503 504  /50x.html;</span><br><span class="line">        location = /50x.html &#123;</span><br><span class="line">            root   html;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        # proxy the PHP scripts to Apache listening on 127.0.0.1:80</span><br><span class="line">        #</span><br><span class="line">        #location ~ \.php$ &#123;</span><br><span class="line">        #    proxy_pass   http://127.0.0.1;</span><br><span class="line">        #&#125;</span><br><span class="line"></span><br><span class="line">        # pass the PHP scripts to FastCGI server listening on 127.0.0.1:9000</span><br><span class="line">        #</span><br><span class="line">        #location ~ \.php$ &#123;</span><br><span class="line">        #    root           html;</span><br><span class="line">        #    fastcgi_pass   127.0.0.1:9000;</span><br><span class="line">        #    fastcgi_index  index.php;</span><br><span class="line">        #    fastcgi_param  SCRIPT_FILENAME  /scripts$fastcgi_script_name;</span><br><span class="line">        #    include        fastcgi_params;</span><br><span class="line">        #&#125;</span><br><span class="line"></span><br><span class="line">        # deny access to .htaccess files, if Apache&#x27;s document root</span><br><span class="line">        # concurs with nginx&#x27;s one</span><br><span class="line">        #</span><br><span class="line">        #location ~ /\.ht &#123;</span><br><span class="line">        #    deny  all;</span><br><span class="line">        #&#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    # another virtual host using mix of IP-, name-, and port-based configuration</span><br><span class="line">    #</span><br><span class="line">    #server &#123;</span><br><span class="line">    #    listen       8000;</span><br><span class="line">    #    listen       somename:8080;</span><br><span class="line">    #    server_name  somename  alias  another.alias;</span><br><span class="line"></span><br><span class="line">    #    location / &#123;</span><br><span class="line">    #        root   html;</span><br><span class="line">    #        index  index.html index.htm;</span><br><span class="line">    #    &#125;</span><br><span class="line">    #&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    # HTTPS server</span><br><span class="line">    #</span><br><span class="line">    #server &#123;</span><br><span class="line">    #    listen       443 ssl;</span><br><span class="line">    #    server_name  localhost;</span><br><span class="line"></span><br><span class="line">    #    ssl_certificate      cert.pem;</span><br><span class="line">    #    ssl_certificate_key  cert.key;</span><br><span class="line"></span><br><span class="line">    #    ssl_session_cache    shared:SSL:1m;</span><br><span class="line">    #    ssl_session_timeout  5m;</span><br><span class="line"></span><br><span class="line">    #    ssl_ciphers  HIGH:!aNULL:!MD5;</span><br><span class="line">    #    ssl_prefer_server_ciphers  on;</span><br><span class="line"></span><br><span class="line">    #    location / &#123;</span><br><span class="line">    #        root   html;</span><br><span class="line">    #        index  index.html index.htm;</span><br><span class="line">    #    &#125;</span><br><span class="line">    #&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>在最后面添加上</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">stream &#123;</span><br><span class="line"></span><br><span class="line">map $ssl_preread_server_name $name &#123;</span><br><span class="line">    backend.example.com      backend;</span><br><span class="line">    default                  backend2;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">upstream backend &#123;</span><br><span class="line">    server 192.168.0.3:12345;</span><br><span class="line">    server 192.168.0.4:12345;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">upstream backend2 &#123;</span><br><span class="line">    server 127.0.0.1:8071;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">server &#123;</span><br><span class="line">    listen      12346;</span><br><span class="line">    proxy_pass  $name;</span><br><span class="line">    ssl_preread on;</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>这个时候，我们已经开启了SNI转发的功能，如果你使用backend.example.com的域名访问服务器，就会转发到backend，如果使用其他域名，就会转发到backend2</p>
-<p>测试的时候，让我们在&#x2F;etc&#x2F;hosts里进行设置，添加</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1 backend.example.com</span><br></pre></td></tr></table></figure>
-
-<p>然后进行请求</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl https://backend.example.com:12346</span><br></pre></td></tr></table></figure>
-
-<p>这里注意请求要使用https，http协议或者是tcp可没有SNI的说法</p>
-<p><img src="/nginx/nginx-sni/nginx-sni-backend.png" alt="nginx-sni-backend"></p>
-<p>发现请求的确实是backend</p>
-<p>然后测试请求127.0.0.1:12346</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl https://127.0.0.1:12346</span><br></pre></td></tr></table></figure>
-
-<p><img src="/nginx/nginx-sni/nginx-sni-127.png" alt="nginx-sni-127"></p>
 
       
     </div>

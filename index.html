@@ -146,13 +146,13 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">64</span>
+          <span class="site-state-item-count">65</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">35</span>
+        <span class="site-state-item-count">36</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -177,6 +177,98 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/code/crud-yaml-example/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="shoothzj">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/code/crud-yaml-example/" class="post-title-link" itemprop="url">CRUD接口的api yaml心得</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-12-25 20:05:45" itemprop="dateCreated datePublished" datetime="2023-12-25T20:05:45+00:00">2023-12-25</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-12-26 05:55:03" itemprop="dateModified" datetime="2023-12-26T05:55:03+00:00">2023-12-26</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>在写swagger的时候，经常碰到增删改查的简单接口，我将增删改查简单接口总结如下：</p>
+<p>一般来说，增删改查有如下几个接口</p>
+<ul>
+<li>创建资源，operationId为createXxx</li>
+<li>删除资源</li>
+<li>更新资源</li>
+<li>查询单个资源</li>
+<li>查询资源列表（可能不会查询出所有字段），operationId为listXxx</li>
+</ul>
+<p>根据接口，一般可以设计如下的实体类</p>
+<ul>
+<li>CreateXxxReq 创建资源请求，包含除资源id之外的所有字段，有些变种里面可能会包含id字段。</li>
+<li>UpdateXxxReq 更新资源请求，包含除资源id之外支持更新的所有字段。</li>
+<li>XxxResp 资源响应，可用于Crate、Update接口的返回，包含所有字段。</li>
+<li>ListXxxResp 资源列表响应，包含资源列表。</li>
+<li>List<briefxxxresp> 资源列表响应，包含资源列表，每个资源包含部分字段，一般是id、name、createdTime、updatedTime等。</briefxxxresp></li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -214,9 +306,15 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2023-12-25 08:44:38 / 修改时间：00:59:54" itemprop="dateCreated datePublished" datetime="2023-12-25T08:44:38+00:00">2023-12-25</time>
+      <time title="创建时间：2023-12-25 08:44:38" itemprop="dateCreated datePublished" datetime="2023-12-25T08:44:38+00:00">2023-12-25</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-12-26 05:55:03" itemprop="dateModified" datetime="2023-12-26T05:55:03+00:00">2023-12-26</time>
     </span>
 
   
@@ -315,7 +413,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-25 00:59:54" itemprop="dateModified" datetime="2023-12-25T00:59:54+00:00">2023-12-25</time>
+      <time title="修改时间：2023-12-26 05:55:03" itemprop="dateModified" datetime="2023-12-26T05:55:03+00:00">2023-12-26</time>
     </span>
 
   
@@ -510,7 +608,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-25 00:59:54" itemprop="dateModified" datetime="2023-12-25T00:59:54+00:00">2023-12-25</time>
+      <time title="修改时间：2023-12-26 05:55:03" itemprop="dateModified" datetime="2023-12-26T05:55:03+00:00">2023-12-26</time>
     </span>
 
   
@@ -596,7 +694,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-25 00:59:54" itemprop="dateModified" datetime="2023-12-25T00:59:54+00:00">2023-12-25</time>
+      <time title="修改时间：2023-12-26 05:55:03" itemprop="dateModified" datetime="2023-12-26T05:55:03+00:00">2023-12-26</time>
     </span>
 
   
@@ -692,7 +790,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-25 00:59:54" itemprop="dateModified" datetime="2023-12-25T00:59:54+00:00">2023-12-25</time>
+      <time title="修改时间：2023-12-26 05:55:03" itemprop="dateModified" datetime="2023-12-26T05:55:03+00:00">2023-12-26</time>
     </span>
 
   
@@ -783,7 +881,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-25 00:59:54" itemprop="dateModified" datetime="2023-12-25T00:59:54+00:00">2023-12-25</time>
+      <time title="修改时间：2023-12-26 05:55:03" itemprop="dateModified" datetime="2023-12-26T05:55:03+00:00">2023-12-26</time>
     </span>
 
   
@@ -909,7 +1007,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-25 00:59:54" itemprop="dateModified" datetime="2023-12-25T00:59:54+00:00">2023-12-25</time>
+      <time title="修改时间：2023-12-26 05:55:03" itemprop="dateModified" datetime="2023-12-26T05:55:03+00:00">2023-12-26</time>
     </span>
 
   
@@ -1039,7 +1137,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-25 00:59:54" itemprop="dateModified" datetime="2023-12-25T00:59:54+00:00">2023-12-25</time>
+      <time title="修改时间：2023-12-26 05:55:03" itemprop="dateModified" datetime="2023-12-26T05:55:03+00:00">2023-12-26</time>
     </span>
 
   
@@ -1135,7 +1233,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-25 00:59:54" itemprop="dateModified" datetime="2023-12-25T00:59:54+00:00">2023-12-25</time>
+      <time title="修改时间：2023-12-26 05:55:03" itemprop="dateModified" datetime="2023-12-26T05:55:03+00:00">2023-12-26</time>
     </span>
 
   
@@ -1167,207 +1265,6 @@
 <p>SDK应该避免仅仅打印错误日志然后忽略异常；相反，它应该提供机制让调用者能够捕获并处理异常信息。这种做法有助于保持错误处理的透明性，并允许调用者根据需要采取适当的响应措施。正如<strong>David J. Wheeler</strong>所说”Put the control in the hands of those who know how to handle the information, not those who know how to manage the computers, because encapsulated details will eventually leak out.”把控制权放到那些知道如何处理信息的人手中，而不是放在那些知道如何管理计算机的人手中，因为封装的细节最终都会暴露。</p>
 <h2><span id="shi-fou-xu-yao-shi-yong-xian-shi-de-start-x2f-connect-fang-fa">是否需要使用显式的<code>start</code>&#x2F;<code>connect</code>方法？</span><a href="#shi-fou-xu-yao-shi-yong-xian-shi-de-start-x2f-connect-fang-fa" class="header-anchor">#</a></h2><p>像go这样的语言，一般来说不太在意特定的时间内，某个协程是否处于阻塞等待连接的状态。而在java这样的语言，特别是在采用响应式编程模型的场景下，通常需要通过异步操作来管理连接的建立。这可以通过显式的start&#x2F;connect方法来或者是异步的工厂方法来实现。</p>
 
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/opengemini/opengemini-sdk-design/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="shoothzj">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/opengemini/opengemini-sdk-design/" class="post-title-link" itemprop="url">opengemini client sdk 设计</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2023-11-12 16:21:53" itemprop="dateCreated datePublished" datetime="2023-11-12T16:21:53+00:00">2023-11-12</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-25 00:59:54" itemprop="dateModified" datetime="2023-12-25T00:59:54+00:00">2023-12-25</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1><span id="bei-jing">背景</span><a href="#bei-jing" class="header-anchor">#</a></h1><p>由于Influxdb 1.X的客户端已经基本处于维护状态，同时openGemini仍在不断发展中，为了能够更好地支持openGemini，如支持对接多个服务端地址、支持对接Apache Arrow Flight协议等，社区决定开发属于openGemini自己的客户端SDK。</p>
-<h1><span id="ke-hu-duan-sdk-gui-hua-gong-neng">客户端SDK规划功能</span><a href="#ke-hu-duan-sdk-gui-hua-gong-neng" class="header-anchor">#</a></h1><ul>
-<li>支持对接多个服务端地址</li>
-<li>支持对接Apache Arrow Flight协议</li>
-<li>支持Sql查询、结构化查询、写入、批量写入等，详见下文UML图</li>
-<li>默认超时，连接超时10秒，读写超时30秒</li>
-</ul>
-<p>本文的方法假定编程语言不支持重载，如编程语言支持重载，可以对方法名进行一些优化调整。</p>
-<h1><span id="client-constructor-params-design">Client constructor params design</span><a href="#client-constructor-params-design" class="header-anchor">#</a></h1><p>tls相关配置可以参考<a href="../../code/multi-lang-paradigm-tls-config-design">TLS配置参数设计</a></p>
-<pre class="mermaid">classDiagram
-    class OpenGeminiClient {
-        + List~Address~ addresses
-        + AuthConfig authConfig // nullable, if null, means no auth
-        + BatchConfig batchConfig // nullable, if null, means batch is disabled
-        + timeout
-        + connectTimeout
-        + bool gzipEnabled
-        + bool tlsEnabled
-        + TlsConfig tlsConfig // language specific
-        + void close()
-    }
-    
-    class Address {
-        + String host
-        + int Port // in rust, it is u16
-    }
-    
-    class AuthConfig {
-        + AuthType authType // enum None, Password,Token
-        + String username
-        + String password
-        + String token
-    }
-    
-    class BatchConfig {
-        + int batchInterval // must be greater than 0
-        + int batchSize // must be greater than 0
-    }
-
-    OpenGeminiClient "1" *-- "many" Address : contains
-    OpenGeminiClient *-- AuthConfig : contains
-    OpenGeminiClient *-- BatchConfig : contains</pre>
-
-<h1><span id="database-amp-retentionpolicy-management-design">Database &amp; RetentionPolicy management design</span><a href="#database-amp-retentionpolicy-management-design" class="header-anchor">#</a></h1><pre class="mermaid">classDiagram
-    class RpConfig {
-        + String Name
-        + String Duration
-        + String ShardGroupDuration
-        + String IndexDuration
-    }</pre>
-
-<h1><span id="write-point-design">Write point design</span><a href="#write-point-design" class="header-anchor">#</a></h1><pre class="mermaid">classDiagram
-    class OpenGeminiClient {
-        + WritePoint(String database, Point point)
-        + WriteBatchPoints(String database, BatchPoints batchPoints)
-    }
-    class BatchPoints {
-        + List~Point~ points
-        + AddPoint(Point)
-    }
-    
-    class Point {
-        + String measurement
-        + Precision precision // enum, second, millisecond, microsecond, nanosecond, default is nanosecond
-        + Time time // language specific
-        + Map~String, String~ tags
-        + Map~String, Object~ fields
-        + AddTag(string, string) // init container if null
-        + AddField(string, int) // init container if null
-        + AddField(string, string) // init container if null
-        + AddField(string, float) // init container if null
-        + AddField(string, bool) // init container if null
-        + SetTime(timestamp)
-        + SetPrecision(type)
-        + SetMeasurement(name)
-    }
-
-    BatchPoints "1" *-- "many" Point : contains</pre>
-
-<h1><span id="sql-like-query-design">Sql-like query design</span><a href="#sql-like-query-design" class="header-anchor">#</a></h1><pre class="mermaid">classDiagram
-    class Query {
-        + String database
-        + String retentionPolicy
-        + String command
-    }</pre>
-
-<pre class="mermaid">classDiagram
-    class QueryResult {
-        + List~SeriesResult~ results
-        + String error
-    }
-    class SeriesResult {
-        + List~Series~ series // Series is an uncountable noun.
-        + String error
-    }
-    class Series {
-        + String name
-        + Map~String, String~ tags
-        + List~String~ columns
-        + List~List~ values
-    }
-    QueryResult "1" *-- "0..*" SeriesResult : contains
-    SeriesResult "1" *-- "0..*" Series : contains</pre>
-
-<h1><span id="ping-design">Ping design</span><a href="#ping-design" class="header-anchor">#</a></h1><pre class="mermaid">classDiagram
-    class OpenGeminiClient {
-        + void ping(int index) // index selects one from multiple servers
-    }</pre>
-
-<h1><span id="inner-http-client-design">Inner Http client design</span><a href="#inner-http-client-design" class="header-anchor">#</a></h1><p>使用类似InnerHttpClient的设计，将鉴权、负载均衡、重试等逻辑封装在内部，对client提供简单的接口。增强模块化和代码清晰度。</p>
-<pre class="mermaid">classDiagram
-    class InnerHttpClient {
-        + void executeHttpGetByIdx(int idx,...) // specify server index
-        + void executeHttpRequestByIdx(int idx, String method,...) // specify server index
-        + void executeHttpGet(String method,...) // load balance
-        + void executeHttpRequest(String method,...) // load balance
-        - void executeHttpRequestInner(String url, String method,...) // inner method
-    }</pre>
-
-<pre class="mermaid">graph TD
-    executeHttpGetByIdx --> executeHttpRequestByIdx
-    executeHttpRequestByIdx --> executeHttpRequestInner
-    executeHttpGet --> executeHttpRequest
-    executeHttpRequest --> executeHttpRequestInner</pre>
-
-
-<script type="module"> import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.esm.min.mjs';	mermaid.initialize({startOnLoad: true, flowchart: {curve: 'linear'}}); </script>
       
     </div>
 

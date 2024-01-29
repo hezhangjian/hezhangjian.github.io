@@ -222,7 +222,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-26 05:55:03" itemprop="dateModified" datetime="2023-12-26T05:55:03+00:00">2023-12-26</time>
+      <time title="修改时间：2024-01-29 14:36:43" itemprop="dateModified" datetime="2024-01-29T14:36:43+00:00">2024-01-29</time>
     </span>
 
   
@@ -279,6 +279,15 @@
     OpenGeminiClient *-- BatchConfig : contains</pre>
 
 <h1><span id="database-amp-retentionpolicy-management-design">Database &amp; RetentionPolicy management design</span><a href="#database-amp-retentionpolicy-management-design" class="header-anchor">#</a></h1><pre class="mermaid">classDiagram
+    class OpenGeminiClient {
+        + void CreateDatabase(String database)
+        + void CreateDatabaseWithRp(String database, rpConfig RpConfig)
+        + String[] ShowDatabases()
+        + void DropDatabase(String database)
+        + void CreateRetentionPolicy(database string, rpConfig RpConfig, isDefault bool)
+        + RetentionPolicy[] ShowRetentionPolicies(database string)
+        + void DropRetentionPolicy(database, retentionPolicy string)
+    }
     class RpConfig {
         + String Name
         + String Duration
@@ -423,7 +432,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-26 05:55:03" itemprop="dateModified" datetime="2023-12-26T05:55:03+00:00">2023-12-26</time>
+      <time title="修改时间：2024-01-29 14:36:43" itemprop="dateModified" datetime="2024-01-29T14:36:43+00:00">2024-01-29</time>
     </span>
 
   
@@ -580,7 +589,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-26 05:55:03" itemprop="dateModified" datetime="2023-12-26T05:55:03+00:00">2023-12-26</time>
+      <time title="修改时间：2024-01-29 14:36:43" itemprop="dateModified" datetime="2024-01-29T14:36:43+00:00">2024-01-29</time>
     </span>
 
   
@@ -662,7 +671,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-26 05:55:03" itemprop="dateModified" datetime="2023-12-26T05:55:03+00:00">2023-12-26</time>
+      <time title="修改时间：2024-01-29 14:36:43" itemprop="dateModified" datetime="2024-01-29T14:36:43+00:00">2024-01-29</time>
     </span>
 
   
@@ -746,7 +755,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-26 05:55:03" itemprop="dateModified" datetime="2023-12-26T05:55:03+00:00">2023-12-26</time>
+      <time title="修改时间：2024-01-29 14:36:43" itemprop="dateModified" datetime="2024-01-29T14:36:43+00:00">2024-01-29</time>
     </span>
 
   
@@ -831,7 +840,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-26 05:55:03" itemprop="dateModified" datetime="2023-12-26T05:55:03+00:00">2023-12-26</time>
+      <time title="修改时间：2024-01-29 14:36:43" itemprop="dateModified" datetime="2024-01-29T14:36:43+00:00">2024-01-29</time>
     </span>
 
   
@@ -945,7 +954,7 @@ reactor --> common</pre>
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-26 05:55:03" itemprop="dateModified" datetime="2023-12-26T05:55:03+00:00">2023-12-26</time>
+      <time title="修改时间：2024-01-29 14:36:43" itemprop="dateModified" datetime="2024-01-29T14:36:43+00:00">2024-01-29</time>
     </span>
 
   
@@ -1066,7 +1075,7 @@ reactor --> common</pre>
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-26 05:55:03" itemprop="dateModified" datetime="2023-12-26T05:55:03+00:00">2023-12-26</time>
+      <time title="修改时间：2024-01-29 14:36:43" itemprop="dateModified" datetime="2024-01-29T14:36:43+00:00">2024-01-29</time>
     </span>
 
   
@@ -1161,7 +1170,7 @@ reactor --> common</pre>
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-26 05:55:03" itemprop="dateModified" datetime="2023-12-26T05:55:03+00:00">2023-12-26</time>
+      <time title="修改时间：2024-01-29 14:36:43" itemprop="dateModified" datetime="2024-01-29T14:36:43+00:00">2024-01-29</time>
     </span>
 
   
@@ -1272,7 +1281,7 @@ reactor --> common</pre>
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-26 05:55:03" itemprop="dateModified" datetime="2023-12-26T05:55:03+00:00">2023-12-26</time>
+      <time title="修改时间：2024-01-29 14:36:43" itemprop="dateModified" datetime="2024-01-29T14:36:43+00:00">2024-01-29</time>
     </span>
 
   
@@ -1351,7 +1360,7 @@ reactor --> common</pre>
 
   <div class="copyright">
     &copy; 
-    <span itemprop="copyrightYear">2023</span>
+    <span itemprop="copyrightYear">2024</span>
     <span class="with-love">
       <i class="fa fa-heart"></i>
     </span>

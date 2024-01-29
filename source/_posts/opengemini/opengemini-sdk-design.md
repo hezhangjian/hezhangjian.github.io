@@ -63,6 +63,15 @@ classDiagram
 
 ```mermaid
 classDiagram
+    class OpenGeminiClient {
+        + void CreateDatabase(String database)
+        + void CreateDatabaseWithRp(String database, rpConfig RpConfig)
+        + String[] ShowDatabases()
+        + void DropDatabase(String database)
+        + void CreateRetentionPolicy(database string, rpConfig RpConfig, isDefault bool)
+        + RetentionPolicy[] ShowRetentionPolicies(database string)
+        + void DropRetentionPolicy(database, retentionPolicy string)
+    }
     class RpConfig {
         + String Name
         + String Duration

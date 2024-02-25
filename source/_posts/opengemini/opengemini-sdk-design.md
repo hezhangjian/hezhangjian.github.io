@@ -50,7 +50,7 @@ classDiagram
     }
     
     class BatchConfig {
-        + int batchInterval // must be greater than 0
+        + Duration batchInterval // must be greater than 0
         + int batchSize // must be greater than 0
     }
 

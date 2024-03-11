@@ -146,13 +146,13 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">65</span>
+          <span class="site-state-item-count">66</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">36</span>
+        <span class="site-state-item-count">38</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -177,6 +177,143 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/lvs/lvs-performance-manual/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="shoothzj">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/lvs/lvs-performance-manual/" class="post-title-link" itemprop="url">lvs 性能手册</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-08-01 21:37:08" itemprop="dateCreated datePublished" datetime="2022-08-01T21:37:08+00:00">2022-08-01</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2024-03-11 12:58:39" itemprop="dateModified" datetime="2024-03-11T12:58:39+00:00">2024-03-11</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1><span id="lvs-shi-zuo-shi-me-de">lvs是做什么的</span><a href="#lvs-shi-zuo-shi-me-de" class="header-anchor">#</a></h1><p>lvs通常用做tcp&#x2F;udp协议的四层负载均衡</p>
+<p><img src="/lvs/lvs-performance-manual/lvs-brief.png" alt="lvs-brief"></p>
+<p>相比也可以用于四层负载的<strong>Nginx</strong>组件，<strong>Lvs</strong>因为运行在内核态，性能高是它的主要优势，同样，因为运行在内核态中，无法像Nginx那样，对四层的tls做卸载等动作。</p>
+<h1><span id="lvs-xing-neng-xiang-guan-zhi-biao-yong-hu-shi-jiao">lvs性能相关指标(用户视角)</span><a href="#lvs-xing-neng-xiang-guan-zhi-biao-yong-hu-shi-jiao" class="header-anchor">#</a></h1><h2><span id="ke-hu-duan-de-lian-jie-shu">客户端的连接数</span><a href="#ke-hu-duan-de-lian-jie-shu" class="header-anchor">#</a></h2><ul>
+<li>UDP模式下，按连接超时时间计算（根据业务需求决定）。可通过<code>ipvsadm -l --timeout</code>来查看udp超时时间</li>
+<li>TCP模式下，即为tcp连接数</li>
+</ul>
+<h2><span id="ke-hu-duan-qing-qiu-liu-liang">客户端请求流量</span><a href="#ke-hu-duan-qing-qiu-liu-liang" class="header-anchor">#</a></h2><p>即client与lvs、lvs与RS之间交互的流量</p>
+<h2><span id="ke-hu-duan-qing-qiu-ping-jun-bao-da-xiao">客户端请求平均包大小</span><a href="#ke-hu-duan-qing-qiu-ping-jun-bao-da-xiao" class="header-anchor">#</a></h2><p>即client与lvs、lvs与RS之间的平均包大小</p>
+<h1><span id="lvs-xing-neng-xiang-guan-can-shu">lvs性能相关参数</span><a href="#lvs-xing-neng-xiang-guan-can-shu" class="header-anchor">#</a></h1><h2><span id="hui-hua-chao-shi-shi-jian">会话超时时间</span><a href="#hui-hua-chao-shi-shi-jian" class="header-anchor">#</a></h2><h3><span id="cha-kan">查看</span><a href="#cha-kan" class="header-anchor">#</a></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ipvsadm -l --<span class="built_in">timeout</span></span><br></pre></td></tr></table></figure>
+
+<h3><span id="xiu-gai">修改</span><a href="#xiu-gai" class="header-anchor">#</a></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ipvsadm --<span class="built_in">set</span> <span class="variable">$&#123;tcptimeout&#125;</span> <span class="variable">$&#123;tcpfintimeout&#125;</span> <span class="variable">$&#123;udptimeout&#125;</span></span><br></pre></td></tr></table></figure>
+
+<h2><span id="vm-conntrack-zui-da-ge-shu">vm conntrack最大个数</span><a href="#vm-conntrack-zui-da-ge-shu" class="header-anchor">#</a></h2><h3><span id="cha-kan">查看</span><a href="#cha-kan" class="header-anchor">#</a></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sysctl -a |grep net.netfilter.nf_conntrack_max</span><br></pre></td></tr></table></figure>
+
+<h3><span id="cha-kan-dang-qian-nf-conntrack-ge-shu">查看当前nf_conntrack个数</span><a href="#cha-kan-dang-qian-nf-conntrack-ge-shu" class="header-anchor">#</a></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 方式一</span></span><br><span class="line">conntrack -C</span><br><span class="line"><span class="comment"># 方式二</span></span><br><span class="line"><span class="built_in">cat</span> /proc/net/nf_conntrack | <span class="built_in">wc</span> -l</span><br></pre></td></tr></table></figure>
+
+<h3><span id="xiu-gai">修改</span><a href="#xiu-gai" class="header-anchor">#</a></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sysctl -w net.netfilter.nf_conntrack_max=1024</span><br></pre></td></tr></table></figure>
+
+<h2><span id="hashsize">hashsize</span><a href="#hashsize" class="header-anchor">#</a></h2><h3><span id="shi-me-shi-hashsize">什么是hashsize</span><a href="#shi-me-shi-hashsize" class="header-anchor">#</a></h3><p><strong>hashsize</strong>也就是<strong>nf_conntrack_buckets</strong>，如果不手动指定。linux会根据机器的内存计算。如果要支持海量的<strong>nf_conntrack</strong>，则可以适当调大。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">  <span class="comment">// nf_conntrack_core.c</span></span><br><span class="line">  nf_conntrack_htable_size</span><br><span class="line">	= (((nr_pages &lt;&lt; PAGE_SHIFT) / <span class="number">16384</span>)</span><br><span class="line">	   / <span class="keyword">sizeof</span>(<span class="keyword">struct</span> hlist_head));</span><br><span class="line"><span class="keyword">if</span> (BITS_PER_LONG &gt;= <span class="number">64</span> &amp;&amp;</span><br><span class="line">    nr_pages &gt; (<span class="number">4</span> * (<span class="number">1024</span> * <span class="number">1024</span> * <span class="number">1024</span> / PAGE_SIZE)))</span><br><span class="line">	nf_conntrack_htable_size = <span class="number">262144</span>;</span><br><span class="line"><span class="keyword">else</span> <span class="keyword">if</span> (nr_pages &gt; (<span class="number">1024</span> * <span class="number">1024</span> * <span class="number">1024</span> / PAGE_SIZE))</span><br><span class="line">	nf_conntrack_htable_size = <span class="number">65536</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (nf_conntrack_htable_size &lt; <span class="number">1024</span>)</span><br><span class="line">	nf_conntrack_htable_size = <span class="number">1024</span>;</span><br></pre></td></tr></table></figure>
+
+<p><strong>hlist_head</strong>的大小在64位的机器下大小为16</p>
+<h3><span id="cha-kan">查看</span><a href="#cha-kan" class="header-anchor">#</a></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> /sys/module/nf_conntrack/parameters/hashsize</span><br></pre></td></tr></table></figure>
+
+<h3><span id="xiu-gai-fang-shi-yi">修改 （方式一）</span><a href="#xiu-gai-fang-shi-yi" class="header-anchor">#</a></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> 65536 &gt; /sys/module/nf_conntrack/parameters/hashsize</span><br></pre></td></tr></table></figure>
+
+<h3><span id="xiu-gai-fang-shi-er-yong-jiu-sheng-xiao">修改（方式二）永久生效</span><a href="#xiu-gai-fang-shi-er-yong-jiu-sheng-xiao" class="header-anchor">#</a></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># exmaple file, you can modify this config if exists. File name doesn&#x27;t matter.</span></span><br><span class="line"><span class="comment"># 样例文件，你可以修改已存在的这个文件。文件名称并不重要。</span></span><br><span class="line"><span class="built_in">touch</span> /etc/modprobe.d/lvs.conf</span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;options nf_conntrack hashsize=65536&quot;</span> &gt;&gt; /etc/modprobe.d/lvs.conf</span><br><span class="line"><span class="comment"># then you need reboot</span></span><br><span class="line"><span class="comment"># 需要重试来使配置生效</span></span><br></pre></td></tr></table></figure>
+
+<h2><span id="wen-jian-ju-bing-shu">文件句柄数</span><a href="#wen-jian-ju-bing-shu" class="header-anchor">#</a></h2><h3><span id="cha-kan">查看</span><a href="#cha-kan" class="header-anchor">#</a></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">ulimit</span> -n</span><br></pre></td></tr></table></figure>
+
+<h3><span id="xiu-gai">修改</span><a href="#xiu-gai" class="header-anchor">#</a></h3><p>不同的linux发行版，修改方式不太一样，以RedHat为例</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">num=`<span class="built_in">ulimit</span> -n`</span><br><span class="line">sed -i <span class="string">&quot;s|<span class="variable">$num</span>|65536|g&quot;</span> /etc/security/limits.d/*-nofile.conf</span><br></pre></td></tr></table></figure>
+
+<h1><span id="lvs-xing-neng-ping-jing">lvs性能瓶颈</span><a href="#lvs-xing-neng-ping-jing" class="header-anchor">#</a></h1><h2><span id="xu-ni-ji-nei-cun">虚拟机内存</span><a href="#xu-ni-ji-nei-cun" class="header-anchor">#</a></h2><p>contnrack使用<strong>slab</strong>分配内存，可以通过<strong>slabtop</strong>命令查看nf_conntrack模块占用的内存。当连接数较高时，Lvs的内存瓶颈在于会话管理。</p>
+<p><strong>conntrack</strong>最大理论内存占用为</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">max_mem_used = conntrack * max * sizeof (struct nf_conntrack) + conntrack_buckets * sizeof (struct list_head)</span><br></pre></td></tr></table></figure>
+
+<p>使用如下python代码计算</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> ctypes</span><br><span class="line"></span><br><span class="line"><span class="comment"># 这个是nf_conntrack的动态库所在路径</span></span><br><span class="line"><span class="comment"># libnetfilter git地址 git://git.netfilter.org/libnetfilter_conntrack</span></span><br><span class="line">LIBNETFILTER_CONNTRACK = <span class="string">&#x27;/usr/lib/aarch64-linux-gnu/libnetfilter_conntrack.so.3.7.0&#x27;</span></span><br><span class="line">nfct = ctypes.CDLL(LIBNETFILTER_CONNTRACK)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;max size of struct nf_conntrack:&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(nfct.nfct_maxsize())</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;sizeof(struct list_head):&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(ctypes.sizeof(ctypes.c_void_p) * <span class="number">2</span>)</span><br></pre></td></tr></table></figure>
+
+<p>其中<code>nfct_maxsize</code>出自于<code>git://git.netfilter.org/libnetfilter_conntrack</code>中的<code>src/conntrack/api.c</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * nfct_maxsize - return the maximum size in bytes of a conntrack object</span></span><br><span class="line"><span class="comment"> */</span></span><br></pre></td></tr></table></figure>
+
+<p>在如下操作系统下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">uname -a</span><br><span class="line">&gt; Linux primary 5.4.0-122-generic #138-Ubuntu SMP Wed Jun 22 15:05:39 UTC 2022 aarch64 aarch64 aarch64 GNU/Linux</span><br></pre></td></tr></table></figure>
+
+<p>以100万conntrack_max，65536buckets为例，占用的内存为</p>
+<p>1_000_000 * 392 + 65536 * 16 约等于 373.84 + 1 为374M内存</p>
+<h2><span id="wang-qia-liu-liang">网卡流量</span><a href="#wang-qia-liu-liang" class="header-anchor">#</a></h2><p>最大进出带宽。在云上，通常由云厂商限制。如果你将lvs上面的浮动Ip通过EIP的方式暴露出去（这很常见），还需要考虑EIP自身的带宽</p>
+<h2><span id="wang-qia-jin-chu-bao-ge-shu-pps">网卡进出包个数（PPS)</span><a href="#wang-qia-jin-chu-bao-ge-shu-pps" class="header-anchor">#</a></h2><p>最大进出包个数</p>
+<h2><span id="xu-ni-ji-neng-zhi-chi-de-zui-da-wang-luo-lian-jie-shu">虚拟机能支持的最大网络连接数</span><a href="#xu-ni-ji-neng-zhi-chi-de-zui-da-wang-luo-lian-jie-shu" class="header-anchor">#</a></h2><p>ECS上可以支持的最大网络连接数。在云上，通常由云厂商限制</p>
+<h1><span id="lvs-jian-kong-amp-kuo-rong">Lvs监控&amp;扩容</span><a href="#lvs-jian-kong-amp-kuo-rong" class="header-anchor">#</a></h1><h2><span id="cpu-shi-yong-lu">cpu使用率</span><a href="#cpu-shi-yong-lu" class="header-anchor">#</a></h2><p>可在超过百分之80的时候告警。处理方式：</p>
+<ul>
+<li>如果内存还没有到达瓶颈，可以通过扩大hashsize的方式，降低hash链上元素的个数，减少匹配消耗的cpu</li>
+<li>如果内存水位也较高。对CPU进行扩容</li>
+</ul>
+<h2><span id="nei-cun-shi-yong-lu">内存使用率</span><a href="#nei-cun-shi-yong-lu" class="header-anchor">#</a></h2><p>可在超过内存容量百分之80的时候告警。处理方式：扩容内存</p>
+<h2><span id="conntrack-ge-shu">conntrack个数</span><a href="#conntrack-ge-shu" class="header-anchor">#</a></h2><p>通过<code>conntrack -C</code>或<code>cat /proc/net/nf_conntrack | wc -l</code>, 定期进行统计，使用<code>sysctl -w net.netfilter.nf_conntrack_max</code>进行扩容</p>
+<h2><span id="wang-qia-liu-liang-wang-qia-jin-chu-bao-ge-shu">网卡流量、网卡进出包个数</span><a href="#wang-qia-liu-liang-wang-qia-jin-chu-bao-ge-shu" class="header-anchor">#</a></h2><p>可以利用云厂商的监控或<code>nicstat</code>命令查看。处理方式：扩容网卡</p>
+<h2><span id="zui-da-wang-luo-lian-jie-shu">最大网络连接数</span><a href="#zui-da-wang-luo-lian-jie-shu" class="header-anchor">#</a></h2><p>可以利用云厂商的监控或<code>netstat -an|egrep &quot;tcp|udp&quot;|grep -v &quot;LISTEN&quot;|wc -l</code>或<code>ss -tun state all | grep -v LISTEN | wc -l</code>查看。处理方式：扩容ECS规格</p>
+<h2><span id="eip-dai-kuan">EIP带宽</span><a href="#eip-dai-kuan" class="header-anchor">#</a></h2><p>通过云厂商的指标来监控。处理方式，扩容EIP的BGP带宽</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -222,7 +359,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-02-25 01:49:11" itemprop="dateModified" datetime="2024-02-25T01:49:11+00:00">2024-02-25</time>
+      <time title="修改时间：2024-03-11 12:58:39" itemprop="dateModified" datetime="2024-03-11T12:58:39+00:00">2024-03-11</time>
     </span>
 
   
@@ -350,7 +487,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-02-25 01:49:10" itemprop="dateModified" datetime="2024-02-25T01:49:10+00:00">2024-02-25</time>
+      <time title="修改时间：2024-03-11 12:58:39" itemprop="dateModified" datetime="2024-03-11T12:58:39+00:00">2024-03-11</time>
     </span>
 
   
@@ -461,7 +598,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-02-25 01:49:10" itemprop="dateModified" datetime="2024-02-25T01:49:10+00:00">2024-02-25</time>
+      <time title="修改时间：2024-03-11 12:58:38" itemprop="dateModified" datetime="2024-03-11T12:58:38+00:00">2024-03-11</time>
     </span>
 
   
@@ -564,7 +701,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-02-25 01:49:10" itemprop="dateModified" datetime="2024-02-25T01:49:10+00:00">2024-02-25</time>
+      <time title="修改时间：2024-03-11 12:58:39" itemprop="dateModified" datetime="2024-03-11T12:58:39+00:00">2024-03-11</time>
     </span>
 
   
@@ -661,7 +798,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-02-25 01:49:10" itemprop="dateModified" datetime="2024-02-25T01:49:10+00:00">2024-02-25</time>
+      <time title="修改时间：2024-03-11 12:58:38" itemprop="dateModified" datetime="2024-03-11T12:58:38+00:00">2024-03-11</time>
     </span>
 
   
@@ -749,7 +886,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-02-25 01:49:10" itemprop="dateModified" datetime="2024-02-25T01:49:10+00:00">2024-02-25</time>
+      <time title="修改时间：2024-03-11 12:58:39" itemprop="dateModified" datetime="2024-03-11T12:58:39+00:00">2024-03-11</time>
     </span>
 
   
@@ -832,7 +969,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-02-25 01:49:10" itemprop="dateModified" datetime="2024-02-25T01:49:10+00:00">2024-02-25</time>
+      <time title="修改时间：2024-03-11 12:58:38" itemprop="dateModified" datetime="2024-03-11T12:58:38+00:00">2024-03-11</time>
     </span>
 
   
@@ -945,7 +1082,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-02-25 01:49:10" itemprop="dateModified" datetime="2024-02-25T01:49:10+00:00">2024-02-25</time>
+      <time title="修改时间：2024-03-11 12:58:39" itemprop="dateModified" datetime="2024-03-11T12:58:39+00:00">2024-03-11</time>
     </span>
 
   
@@ -1052,7 +1189,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-02-25 01:49:10" itemprop="dateModified" datetime="2024-02-25T01:49:10+00:00">2024-02-25</time>
+      <time title="修改时间：2024-03-11 12:58:38" itemprop="dateModified" datetime="2024-03-11T12:58:38+00:00">2024-03-11</time>
     </span>
 
   
@@ -1106,114 +1243,6 @@
 
 <p>省略掉那些重复的添加结构体，读取<code>max_len</code>在encode的时候忽略掉</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">s := value.(<span class="type">string</span>)</span><br><span class="line"><span class="keyword">if</span> <span class="built_in">len</span>(s) &gt;= w.MaxLen &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/security/cert-manager/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="shoothzj">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/security/cert-manager/" class="post-title-link" itemprop="url">大型系统中的证书管理</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-05-30 22:47:05" itemprop="dateCreated datePublished" datetime="2021-05-30T22:47:05+00:00">2021-05-30</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-02-25 01:49:11" itemprop="dateModified" datetime="2024-02-25T01:49:11+00:00">2024-02-25</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1><span id="da-xing-xi-tong-zhong-de-zheng-shu-guan-li">大型系统中的证书管理</span><a href="#da-xing-xi-tong-zhong-de-zheng-shu-guan-li" class="header-anchor">#</a></h1><p>随着安全的要求，现在我们在越来越多的通信中使用TLS加密。下图是一个微服务架构下数据流向的例子</p>
-<p><img src="/security/cert-manager/cert-manager1.png" alt="cert-manager1"></p>
-<ul>
-<li>蓝色部分，即和三方交互时需要TLS加密认证</li>
-<li>红色部分，各个微服务、消息中间件等通信需要TLS加密认证</li>
-<li>绿色部分，各个微服务和存储层通信也需要TLS加密认证</li>
-</ul>
-<p>安全上对我们的要求逐步变化为，仅蓝色使用TLS&#x3D;》蓝色和红色使用TLS&#x3D;》全部使用TLS加密</p>
-<h2><span id="zheng-shu-guan-li-de-bi-yao-xing">证书管理的必要性</span><a href="#zheng-shu-guan-li-de-bi-yao-xing" class="header-anchor">#</a></h2><p>从安全的角度上来说，我们最好能支持证书的更换和热加载。如果您的业务当前使用加密的场景不多，可能暂时看不到证书管理的意义。但是当你在各个方面使用TLS更加频繁之后，会发现证书管理可带来如下好处：</p>
-<ul>
-<li>可以通过抽象出场景，通过场景和证书的关联联系，在各个地方通信使用的证书，可以统一更换。</li>
-<li>统一提供证书过期告警等功能</li>
-<li>统一提供证书的变更通知，通知到各个实例</li>
-</ul>
-<p>以我在工作中接触到的两个基础PAAS平台，都有证书管理的功能，可见证书管理的必要性。</p>
-<p>PS: 开源组件大多都拥有证书配置能力，没有可对接证书管理的能力，但这个能力很难贡献给社区，需要自己开发。</p>
-<h2><span id="zheng-shu-guan-li-gai-nian">证书管理概念</span><a href="#zheng-shu-guan-li-gai-nian" class="header-anchor">#</a></h2><p>在TLS会话中，从依赖的证书文件角度来看，可以分为加密流程和验证流程。</p>
-<h3><span id="jia-mi-zheng-shu">加密证书</span><a href="#jia-mi-zheng-shu" class="header-anchor">#</a></h3><p>TLS加密流程的证书，包含证书链文件和密钥</p>
-<h3><span id="yan-zheng-zheng-shu">验证证书</span><a href="#yan-zheng-zheng-shu" class="header-anchor">#</a></h3><p>TLS验证流程的证书，仅包含证书链文件</p>
-<h3><span id="chai-fen-wei-jia-mi-liu-cheng-he-yan-zheng-liu-cheng-de-he-li-xing">拆分为加密流程和验证流程的合理性</span><a href="#chai-fen-wei-jia-mi-liu-cheng-he-yan-zheng-liu-cheng-de-he-li-xing" class="header-anchor">#</a></h3><p>这使得加密流程证书和验证流程证书可以互相独立的替换，更方便在大型场景下复用证书。</p>
-<p>让我们来假设如下的场景：</p>
-<p><img src="/security/cert-manager/cert-manager2.png" alt="cert-manager2"></p>
-<p>客户A、客户B、客户C、客户D的验证流程证书自然不相同，但服务跟客户交互的时候，使用的加密流程证书确实同一份。如果将两个阶段的证书合一，那么在更换证书的时候，就需要更新4份数据，当你有1000名用户的时候，这个数字将会是1000，这对于存储和应用程序来说都是不小的冲击。</p>
-<h3><span id="scene">Scene</span><a href="#scene" class="header-anchor">#</a></h3><p>Scene是在一个会话中，代表会话和请求证书、验证证书的绑定关系。Scene和请求证书、验证证书都是1：1的关系。这使得我们不仅仅可以修改证书文件，也可以对TLS会话中使用的证书进行修改。在证书无法复用，且证书绑定了多个场景的时候，针对单个场景修改其绑定的证书。</p>
-<p>以上图作为例子，假设客户D有特殊的要求，要求加密流程使用特定的证书或密钥，我们就可以将客户D的场景绑定到客户D独有的加密证书</p>
-<h3><span id="duo-ji-qun-guan-li">多集群管理</span><a href="#duo-ji-qun-guan-li" class="header-anchor">#</a></h3><p>如果证书管理需要管理多个集群，那么证书和Scene前面可以加上层级来隔离，如环境、集群等。</p>
-<h3><span id="dui-xiao-xing-xi-tong-de-jian-yi">对小型系统的建议</span><a href="#dui-xiao-xing-xi-tong-de-jian-yi" class="header-anchor">#</a></h3><p>如果规模不大，且TLS场景有限，需要考虑一下有无拆分加密证书和验证证书的必要，可以合一，应用程序直接以合一的证书id来关联，而非场景id。虽不方便复用，但大大降低了复杂性。</p>
-<h2><span id="zheng-shu-guan-li-de-gong-neng">证书管理的功能</span><a href="#zheng-shu-guan-li-de-gong-neng" class="header-anchor">#</a></h2><p><img src="/security/cert-manager/cert-manager3.png" alt="cert-manager3"></p>
-<h2><span id="zheng-shu-guan-li-chang-jing">证书管理场景</span><a href="#zheng-shu-guan-li-chang-jing" class="header-anchor">#</a></h2><h3><span id="she-ding-yi-ge-tls-hui-hua">设定一个TLS会话</span><a href="#she-ding-yi-ge-tls-hui-hua" class="header-anchor">#</a></h3><p><img src="/security/cert-manager/cert-manager4.png" alt="cert-manager4"></p>
-<h3><span id="shi-yong-tls-hui-hua">使用TLS会话</span><a href="#shi-yong-tls-hui-hua" class="header-anchor">#</a></h3><p>这要求应用程序持久化场景信息</p>
-<p><img src="/security/cert-manager/cert-manager5.png" alt="cert-manager5"></p>
-<h2><span id="zu-zhi-jia-gou-xiang-guan">组织架构相关</span><a href="#zu-zhi-jia-gou-xiang-guan" class="header-anchor">#</a></h2><p>大型系统下，证书管理是一个必须的组件，且一定是由团队最底层的组织架构承接。如若不然，那么由底层组织架构维护的组件，因为依赖关系，无法基于证书管理来统一实现证书的更换和过期告警。除非不基于证书管理自己构筑一套能力。</p>
-<h2><span id="tldr">TLDR</span><a href="#tldr" class="header-anchor">#</a></h2><p>随着组件和使用加密场景的不断扩大，证书管理是一个必须的组件，通过抽象出场景的概念来复用证书，通过变更通知在微服务模式下快速更换所有微服务实例上的证书，并提供统一的证书过期告警功能来提醒管理员更换证书。</p>
 
       
     </div>

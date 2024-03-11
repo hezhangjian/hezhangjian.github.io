@@ -550,6 +550,35 @@
       </tags>
   </entry>
   <entry>
+    <title>异步网络请求编码</title>
+    <url>/code/async-network-code/</url>
+    <content><![CDATA[<p>本文介绍常见的异步网络请求编码手法。尽管像golang这些的语言，支持协程，可以使得Programmer以同步的方式编写代码，大大降低编码者的心智负担。但网络编程中，批量又非常常见，这就导致即使在Golang中，也不得不进行协程的切换来满足批量的诉求，在Golang中往往对外以callback的方式暴露接口。</p>
+<p>无论是callback、还是返回future、还是返回Mono&#x2F;Flux，亦或是从channel中读取，这是不同的异步编程范式，编码的时候，可以从项目整体、团队编码风格、个人喜好来依次考虑。本文将以callback为主，但移植到其他异步编码范式，并不困难。</p>
+<p>使用callback模式后，对外的方法签名类似:</p>
+<p>go</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Client)</span></span> Get(ctx context.Context, req *Request, callback <span class="function"><span class="keyword">func</span><span class="params">(resp *Response, err <span class="type">error</span>)</span></span>) <span class="type">error</span></span><br></pre></td></tr></table></figure>
+
+<p>java</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">Client</span> &#123;</span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">get</span><span class="params">(Request req, Callback callback)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2><span id="wang-luo-bian-cheng-zhong-de-pi-liang">网络编程中的批量</span><a href="#wang-luo-bian-cheng-zhong-de-pi-liang" class="header-anchor">#</a></h2><p>对于网络请求来说，批量可以提高性能。 批量处理是指将多个请求或任务组合在一起，作为单一的工作单元进行处理。批量尽量对用户透明，用户只需要简单地对批量进行配置，而不需要关心批量的实现细节。</p>
+<p>常见的批量相关配置</p>
+<ul>
+<li>batch interval: 批量的时间间隔，比如每隔1s，批量一次</li>
+<li>batch size: 批量的最大大小，比如每次最多批量100个请求</li>
+</ul>
+<p>批量可以通过定时任务实现，也可以做一些优化，比如队列中无请求时，暂停定时任务，有请求时，启动定时任务。</p>
+<h2><span id="bian-ma-xi-jie">编码细节</span><a href="#bian-ma-xi-jie" class="header-anchor">#</a></h2><p>整体流程大概如下图所示：</p>
+<p><img src="/code/async-network-code/async-network-code.png" alt="async-network-code"></p>
+<h3><span id="yi-ding-yao-xian-ba-qing-qiu-fang-dao-dui-lie-x2f-map-zhong">一定要先把请求放到队列&#x2F;map中</span><a href="#yi-ding-yao-xian-ba-qing-qiu-fang-dao-dui-lie-x2f-map-zhong" class="header-anchor">#</a></h3><p>避免网络请求响应过快，导致callback还没注册上，就已经收到响应了。</p>
+<h3><span id="dui-lie-zhong-de-xiao-xi-yi-ding-yao-you-chao-shi-ji-zhi">队列中的消息一定要有超时机制</span><a href="#dui-lie-zhong-de-xiao-xi-yi-ding-yao-you-chao-shi-ji-zhi" class="header-anchor">#</a></h3><p>避免由于丢包等原因，导致请求一直没有响应，而导致队列中的请求越来越多，最终内存溢出。</p>
+<h3><span id="wait-dui-lie-sheng-ming-zhou-qi-yu-di-ceng-wang-luo-client-sheng-ming-zhou-qi-yi-zhi">wait队列生命周期与底层网络client生命周期一致</span><a href="#wait-dui-lie-sheng-ming-zhou-qi-yu-di-ceng-wang-luo-client-sheng-ming-zhou-qi-yi-zhi" class="header-anchor">#</a></h3><p>wait队列中请求一定是依附于client的，一旦client重建，队列也需要重建，并触发callback、future的失败回调。</p>
+]]></content>
+      <tags>
+        <tag>Code</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>calcite parser代码生成详解</title>
     <url>/calcite/calcite-parser-code-generate/</url>
     <content><![CDATA[<h1><span id="calcite-parser-dai-ma-sheng-cheng-xiang-jie">calcite parser代码生成详解</span><a href="#calcite-parser-dai-ma-sheng-cheng-xiang-jie" class="header-anchor">#</a></h1><p>本文代码均已上传到<a href="https://gitee.com/shoothzj/calcite-examples">gitee</a><br>calcite的parser代码生成分为如下两个步骤</p>
@@ -585,35 +614,6 @@
 ]]></content>
       <tags>
         <tag>calcite</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>异步网络请求编码</title>
-    <url>/code/async-network-code/</url>
-    <content><![CDATA[<p>本文介绍常见的异步网络请求编码手法。尽管像golang这些的语言，支持协程，可以使得Programmer以同步的方式编写代码，大大降低编码者的心智负担。但网络编程中，批量又非常常见，这就导致即使在Golang中，也不得不进行协程的切换来满足批量的诉求，在Golang中往往对外以callback的方式暴露接口。</p>
-<p>无论是callback、还是返回future、还是返回Mono&#x2F;Flux，亦或是从channel中读取，这是不同的异步编程范式，编码的时候，可以从项目整体、团队编码风格、个人喜好来依次考虑。本文将以callback为主，但移植到其他异步编码范式，并不困难。</p>
-<p>使用callback模式后，对外的方法签名类似:</p>
-<p>go</p>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Client)</span></span> Get(ctx context.Context, req *Request, callback <span class="function"><span class="keyword">func</span><span class="params">(resp *Response, err <span class="type">error</span>)</span></span>) <span class="type">error</span></span><br></pre></td></tr></table></figure>
-
-<p>java</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">Client</span> &#123;</span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">get</span><span class="params">(Request req, Callback callback)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2><span id="wang-luo-bian-cheng-zhong-de-pi-liang">网络编程中的批量</span><a href="#wang-luo-bian-cheng-zhong-de-pi-liang" class="header-anchor">#</a></h2><p>对于网络请求来说，批量可以提高性能。 批量处理是指将多个请求或任务组合在一起，作为单一的工作单元进行处理。批量尽量对用户透明，用户只需要简单地对批量进行配置，而不需要关心批量的实现细节。</p>
-<p>常见的批量相关配置</p>
-<ul>
-<li>batch interval: 批量的时间间隔，比如每隔1s，批量一次</li>
-<li>batch size: 批量的最大大小，比如每次最多批量100个请求</li>
-</ul>
-<p>批量可以通过定时任务实现，也可以做一些优化，比如队列中无请求时，暂停定时任务，有请求时，启动定时任务。</p>
-<h2><span id="bian-ma-xi-jie">编码细节</span><a href="#bian-ma-xi-jie" class="header-anchor">#</a></h2><p>整体流程大概如下图所示：</p>
-<p><img src="/code/async-network-code/async-network-code.png" alt="async-network-code"></p>
-<h3><span id="yi-ding-yao-xian-ba-qing-qiu-fang-dao-dui-lie-x2f-map-zhong">一定要先把请求放到队列&#x2F;map中</span><a href="#yi-ding-yao-xian-ba-qing-qiu-fang-dao-dui-lie-x2f-map-zhong" class="header-anchor">#</a></h3><p>避免网络请求响应过快，导致callback还没注册上，就已经收到响应了。</p>
-<h3><span id="dui-lie-zhong-de-xiao-xi-yi-ding-yao-you-chao-shi-ji-zhi">队列中的消息一定要有超时机制</span><a href="#dui-lie-zhong-de-xiao-xi-yi-ding-yao-you-chao-shi-ji-zhi" class="header-anchor">#</a></h3><p>避免由于丢包等原因，导致请求一直没有响应，而导致队列中的请求越来越多，最终内存溢出。</p>
-<h3><span id="wait-dui-lie-sheng-ming-zhou-qi-yu-di-ceng-wang-luo-client-sheng-ming-zhou-qi-yi-zhi">wait队列生命周期与底层网络client生命周期一致</span><a href="#wait-dui-lie-sheng-ming-zhou-qi-yu-di-ceng-wang-luo-client-sheng-ming-zhou-qi-yi-zhi" class="header-anchor">#</a></h3><p>wait队列中请求一定是依附于client的，一旦client重建，队列也需要重建，并触发callback、future的失败回调。</p>
-]]></content>
-      <tags>
-        <tag>Code</tag>
       </tags>
   </entry>
   <entry>
@@ -705,6 +705,33 @@
       </tags>
   </entry>
   <entry>
+    <title>多语言SDK设计</title>
+    <url>/code/multi-lang-client-sdk-design/</url>
+    <content><![CDATA[<div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#duo-yu-yan-sdk-she-ji-de-chang-jian-wen-ti">多语言SDK设计的常见问题</a><ul>
+<li><a href="#ri-zhi-da-yin-de-she-ji-ce-lue">日志打印的设计策略</a></li>
+<li><a href="#shi-fou-xu-yao-shi-yong-xian-shi-de-start-connect-fang-fa">是否需要使用显式的<code>start</code>&#x2F;<code>connect</code>方法？</a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="duo-yu-yan-sdk-she-ji-de-chang-jian-wen-ti">多语言SDK设计的常见问题</span><a href="#duo-yu-yan-sdk-she-ji-de-chang-jian-wen-ti" class="header-anchor">#</a></h1><h2><span id="ri-zhi-da-yin-de-she-ji-ce-lue">日志打印的设计策略</span><a href="#ri-zhi-da-yin-de-she-ji-ce-lue" class="header-anchor">#</a></h2><p>在SDK的关键节点，比如初始化完成、连接建立或者连接断开，都可以打印日志。如果是PerRequest的日志，一般默认不会打印INFO级别的日志。</p>
+<p>SDK应该避免仅仅打印错误日志然后忽略异常；相反，它应该提供机制让调用者能够捕获并处理异常信息。这种做法有助于保持错误处理的透明性，并允许调用者根据需要采取适当的响应措施。正如<strong>David J. Wheeler</strong>所说”Put the control in the hands of those who know how to handle the information, not those who know how to manage the computers, because encapsulated details will eventually leak out.”把控制权放到那些知道如何处理信息的人手中，而不是放在那些知道如何管理计算机的人手中，因为封装的细节最终都会暴露。</p>
+<h2><span id="shi-fou-xu-yao-shi-yong-xian-shi-de-start-x2f-connect-fang-fa">是否需要使用显式的<code>start</code>&#x2F;<code>connect</code>方法？</span><a href="#shi-fou-xu-yao-shi-yong-xian-shi-de-start-x2f-connect-fang-fa" class="header-anchor">#</a></h2><p>像go这样的语言，一般来说不太在意特定的时间内，某个协程是否处于阻塞等待连接的状态。而在java这样的语言，特别是在采用响应式编程模型的场景下，通常需要通过异步操作来管理连接的建立。这可以通过显式的start&#x2F;connect方法来或者是异步的工厂方法来实现。</p>
+]]></content>
+      <tags>
+        <tag>Code</tag>
+        <tag>SDK</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>GitHub Actions 参考大全</title>
     <url>/code/github-actions-reference/</url>
     <content><![CDATA[<div class="toc">
@@ -764,33 +791,6 @@
       </tags>
   </entry>
   <entry>
-    <title>多语言SDK设计</title>
-    <url>/code/multi-lang-client-sdk-design/</url>
-    <content><![CDATA[<div class="toc">
-
-<!-- toc -->
-
-<ul>
-<li><a href="#duo-yu-yan-sdk-she-ji-de-chang-jian-wen-ti">多语言SDK设计的常见问题</a><ul>
-<li><a href="#ri-zhi-da-yin-de-she-ji-ce-lue">日志打印的设计策略</a></li>
-<li><a href="#shi-fou-xu-yao-shi-yong-xian-shi-de-start-connect-fang-fa">是否需要使用显式的<code>start</code>&#x2F;<code>connect</code>方法？</a></li>
-</ul>
-</li>
-</ul>
-<!-- tocstop -->
-
-</div>
-
-<h1><span id="duo-yu-yan-sdk-she-ji-de-chang-jian-wen-ti">多语言SDK设计的常见问题</span><a href="#duo-yu-yan-sdk-she-ji-de-chang-jian-wen-ti" class="header-anchor">#</a></h1><h2><span id="ri-zhi-da-yin-de-she-ji-ce-lue">日志打印的设计策略</span><a href="#ri-zhi-da-yin-de-she-ji-ce-lue" class="header-anchor">#</a></h2><p>在SDK的关键节点，比如初始化完成、连接建立或者连接断开，都可以打印日志。如果是PerRequest的日志，一般默认不会打印INFO级别的日志。</p>
-<p>SDK应该避免仅仅打印错误日志然后忽略异常；相反，它应该提供机制让调用者能够捕获并处理异常信息。这种做法有助于保持错误处理的透明性，并允许调用者根据需要采取适当的响应措施。正如<strong>David J. Wheeler</strong>所说”Put the control in the hands of those who know how to handle the information, not those who know how to manage the computers, because encapsulated details will eventually leak out.”把控制权放到那些知道如何处理信息的人手中，而不是放在那些知道如何管理计算机的人手中，因为封装的细节最终都会暴露。</p>
-<h2><span id="shi-fou-xu-yao-shi-yong-xian-shi-de-start-x2f-connect-fang-fa">是否需要使用显式的<code>start</code>&#x2F;<code>connect</code>方法？</span><a href="#shi-fou-xu-yao-shi-yong-xian-shi-de-start-x2f-connect-fang-fa" class="header-anchor">#</a></h2><p>像go这样的语言，一般来说不太在意特定的时间内，某个协程是否处于阻塞等待连接的状态。而在java这样的语言，特别是在采用响应式编程模型的场景下，通常需要通过异步操作来管理连接的建立。这可以通过显式的start&#x2F;connect方法来或者是异步的工厂方法来实现。</p>
-]]></content>
-      <tags>
-        <tag>Code</tag>
-        <tag>SDK</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>多语言编程 各大Http库配置指南</title>
     <url>/code/multi-lang-http-client-config/</url>
     <content><![CDATA[<div class="toc">
@@ -806,6 +806,19 @@
 </li>
 </ul>
 </li>
+<li><a href="#java">Java</a><ul>
+<li><a href="#biao-zhun-ku-jdk17">标准库(jdk17+)</a><ul>
+<li><a href="#timeout-1">timeout</a></li>
+<li><a href="#connectiontimeout">connectionTimeout</a></li>
+</ul>
+</li>
+<li><a href="#reactor-netty">Reactor Netty</a><ul>
+<li><a href="#timeout-2">timeout</a></li>
+<li><a href="#connectiontimeout-1">connectionTimeout</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 <!-- tocstop -->
 
@@ -814,6 +827,14 @@
 <h1><span id="go">Go</span><a href="#go" class="header-anchor">#</a></h1><h2><span id="go-biao-zhun-ku">Go标准库</span><a href="#go-biao-zhun-ku" class="header-anchor">#</a></h2><h3><span id="timeout">timeout</span><a href="#timeout" class="header-anchor">#</a></h3><figure class="highlight go"><table><tr><td class="code"><pre><span class="line">client := http.Client&#123;</span><br><span class="line">    Timeout: timeout,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <h3><span id="connection-timeout">connection timeout</span><a href="#connection-timeout" class="header-anchor">#</a></h3><figure class="highlight go"><table><tr><td class="code"><pre><span class="line">client := http.Client&#123;</span><br><span class="line">    Transport: &amp;http.Transport&#123;</span><br><span class="line">        Dial: (&amp;net.Dialer&#123;</span><br><span class="line">            Timeout: timeout,</span><br><span class="line">        &#125;).Dial,</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1><span id="java">Java</span><a href="#java" class="header-anchor">#</a></h1><h2><span id="biao-zhun-ku-jdk17">标准库(jdk17+)</span><a href="#biao-zhun-ku-jdk17" class="header-anchor">#</a></h2><h3><span id="timeout">timeout</span><a href="#timeout" class="header-anchor">#</a></h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="type">HttpRequest</span> <span class="variable">request</span> <span class="operator">=</span> HttpRequest.newBuilder()</span><br><span class="line">    .uri(URI.create(<span class="string">&quot;http://example.com&quot;</span>))</span><br><span class="line">    .timeout(Duration.ofSeconds(<span class="number">10</span>))</span><br><span class="line">    .build();</span><br></pre></td></tr></table></figure>
+
+<h3><span id="connectiontimeout">connectionTimeout</span><a href="#connectiontimeout" class="header-anchor">#</a></h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">HttpClient.<span class="type">Builder</span> <span class="variable">builder</span> <span class="operator">=</span> HttpClient.newBuilder()</span><br><span class="line">.connectTimeout(Duration.ofSeconds(<span class="number">10</span>))</span><br><span class="line">.version(HttpClient.Version.HTTP_1_1);</span><br></pre></td></tr></table></figure>
+
+<h2><span id="reactor-netty">Reactor Netty</span><a href="#reactor-netty" class="header-anchor">#</a></h2><h3><span id="timeout">timeout</span><a href="#timeout" class="header-anchor">#</a></h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="type">HttpClient</span> <span class="variable">client</span> <span class="operator">=</span> HttpClient.create().responseTimeout(Duration.ofSeconds(<span class="number">10</span>));</span><br></pre></td></tr></table></figure>
+
+<h3><span id="connectiontimeout">connectionTimeout</span><a href="#connectiontimeout" class="header-anchor">#</a></h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="type">HttpClient</span> <span class="variable">client</span> <span class="operator">=</span> HttpClient.create().option(ChannelOption.CONNECT_TIMEOUT_MILLIS, <span class="number">5000</span>);</span><br></pre></td></tr></table></figure>
 ]]></content>
       <tags>
         <tag>Code</tag>
@@ -831,6 +852,7 @@
 <li><a href="#tong-yong-can-shu">通用参数</a></li>
 <li><a href="#go">Go</a></li>
 <li><a href="#java">Java</a></li>
+<li><a href="#javascript">JavaScript</a></li>
 <li><a href="#kotlin">Kotlin</a></li>
 <li><a href="#python">Python</a></li>
 <li><a href="#rust">Rust</a></li>
@@ -870,6 +892,7 @@
 <li>tlsVersions: TLS版本列表</li>
 <li>tlsCipherSuites: TLS加密套件列表</li>
 </ul>
+<h1><span id="javascript">JavaScript</span><a href="#javascript" class="header-anchor">#</a></h1><p>JavaScript可以使用标准库里的tls.SecureContextOptions</p>
 <h1><span id="kotlin">Kotlin</span><a href="#kotlin" class="header-anchor">#</a></h1><p>kotlin的Tls与Java相同：</p>
 <ul>
 <li>keyStorePath: keystore文件路径</li>
@@ -884,7 +907,7 @@
 <h1><span id="python">Python</span><a href="#python" class="header-anchor">#</a></h1><p>推荐使用方式一</p>
 <p>方式一</p>
 <ul>
-<li>tlsContext: Python标准库的内置TLS结构体</li>
+<li>ssl.SSLContext: Python标准库的内置TLS结构体</li>
 </ul>
 <p>方式二</p>
 <p>Python可以使用文件路径以及加密的私钥文件。</p>
@@ -2554,6 +2577,25 @@ springIgnite --> util</pre>
       </tags>
   </entry>
   <entry>
+    <title>Spring记录数据库操作时间的几种方式</title>
+    <url>/code/java/spring-database-audit-time/</url>
+    <content><![CDATA[<p>Spring记录数据库操作时间的几种方式</p>
+<h1><span id="spring-jpa">Spring Jpa</span><a href="#spring-jpa" class="header-anchor">#</a></h1><p>@EnableJpaAuditing注解开启Jpa的审计功能，然后在实体类上使用@CreatedDate和@LastModifiedDate注解即可</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Column(name = &quot;create_time&quot;)</span></span><br><span class="line"><span class="meta">@CreatedDate</span></span><br><span class="line"><span class="keyword">private</span> LocalDateTime createTime;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Column(name = &quot;update_time&quot;)</span></span><br><span class="line"><span class="meta">@LastModifiedDate</span></span><br><span class="line"><span class="keyword">private</span> LocalDateTime updateTime;</span><br></pre></td></tr></table></figure>
+
+<h1><span id="spring-r2dbc">Spring R2dbc</span><a href="#spring-r2dbc" class="header-anchor">#</a></h1><p>Spring R2dbc可以使用@CreatedDate和@LastModifiedDate注解来实现。但是需要在Application上开启<code>@EnableR2dbcAuditing</code></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Column(&quot;created_time&quot;)</span></span><br><span class="line"><span class="meta">@CreatedDate</span></span><br><span class="line"><span class="keyword">private</span> LocalDateTime createdTime;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Column(&quot;updated_time&quot;)</span></span><br><span class="line"><span class="meta">@LastModifiedDate</span></span><br><span class="line"><span class="keyword">private</span> LocalDateTime updatedTime;</span><br></pre></td></tr></table></figure>
+
+<h1><span id="ying-yong-cheng-xu-xiu-gai">应用程序修改</span><a href="#ying-yong-cheng-xu-xiu-gai" class="header-anchor">#</a></h1><p>应用程序修改就比较简单，简单设置一下即可,以PersonPo类为例</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="type">PersonPo</span> <span class="variable">personPo</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">PersonPo</span>();</span><br><span class="line">personPo.setCreateTime(LocalDateTime.now());</span><br><span class="line">personPo.setUpdateTime(LocalDateTime.now());</span><br></pre></td></tr></table></figure>
+
+<h1><span id="mysql-chang-jing-xia-li-yong-timestamp-neng-li">Mysql场景下利用TIMESTAMP能力</span><a href="#mysql-chang-jing-xia-li-yong-timestamp-neng-li" class="header-anchor">#</a></h1><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> person (</span><br><span class="line">    id <span class="type">INT</span> <span class="keyword">PRIMARY</span> KEY,</span><br><span class="line">    <span class="operator">/</span><span class="operator">/</span> ... 其他字段 ...</span><br><span class="line">    create_time <span class="type">TIMESTAMP</span> <span class="keyword">DEFAULT</span> <span class="built_in">CURRENT_TIMESTAMP</span>,</span><br><span class="line">    update_time <span class="type">TIMESTAMP</span> <span class="keyword">DEFAULT</span> <span class="built_in">CURRENT_TIMESTAMP</span> <span class="keyword">ON</span> <span class="keyword">UPDATE</span> <span class="built_in">CURRENT_TIMESTAMP</span></span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+]]></content>
+      <tags>
+        <tag>Java</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Java依赖不同版本冲突解决方案之shade包</title>
     <url>/code/java/java-shade-package/</url>
     <content><![CDATA[<p>我们在很多场景下会碰到java包冲突的问题：</p>
@@ -2571,25 +2613,6 @@ springIgnite --> util</pre>
 <p>通过上面的配置，artifactSet选择要修改的pom依赖，通过relocation修改包名，达到不冲突的效果。<strong>mvn clean package</strong> 后查看效果</p>
 <p><img src="/code/java/java-shade-package/java-shade-package-result.png" alt="java-shade-package-result"></p>
 <p>可以发现，包名已经被修改完成,达到了避免冲突的目的。</p>
-]]></content>
-      <tags>
-        <tag>Java</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Spring记录数据库操作时间的几种方式</title>
-    <url>/code/java/spring-database-audit-time/</url>
-    <content><![CDATA[<p>Spring记录数据库操作时间的几种方式</p>
-<h1><span id="spring-jpa">Spring Jpa</span><a href="#spring-jpa" class="header-anchor">#</a></h1><p>@EnableJpaAuditing注解开启Jpa的审计功能，然后在实体类上使用@CreatedDate和@LastModifiedDate注解即可</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Column(name = &quot;create_time&quot;)</span></span><br><span class="line"><span class="meta">@CreatedDate</span></span><br><span class="line"><span class="keyword">private</span> LocalDateTime createTime;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Column(name = &quot;update_time&quot;)</span></span><br><span class="line"><span class="meta">@LastModifiedDate</span></span><br><span class="line"><span class="keyword">private</span> LocalDateTime updateTime;</span><br></pre></td></tr></table></figure>
-
-<h1><span id="spring-r2dbc">Spring R2dbc</span><a href="#spring-r2dbc" class="header-anchor">#</a></h1><p>Spring R2dbc可以使用@CreatedDate和@LastModifiedDate注解来实现。但是需要在Application上开启<code>@EnableR2dbcAuditing</code></p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Column(&quot;created_time&quot;)</span></span><br><span class="line"><span class="meta">@CreatedDate</span></span><br><span class="line"><span class="keyword">private</span> LocalDateTime createdTime;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Column(&quot;updated_time&quot;)</span></span><br><span class="line"><span class="meta">@LastModifiedDate</span></span><br><span class="line"><span class="keyword">private</span> LocalDateTime updatedTime;</span><br></pre></td></tr></table></figure>
-
-<h1><span id="ying-yong-cheng-xu-xiu-gai">应用程序修改</span><a href="#ying-yong-cheng-xu-xiu-gai" class="header-anchor">#</a></h1><p>应用程序修改就比较简单，简单设置一下即可,以PersonPo类为例</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="type">PersonPo</span> <span class="variable">personPo</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">PersonPo</span>();</span><br><span class="line">personPo.setCreateTime(LocalDateTime.now());</span><br><span class="line">personPo.setUpdateTime(LocalDateTime.now());</span><br></pre></td></tr></table></figure>
-
-<h1><span id="mysql-chang-jing-xia-li-yong-timestamp-neng-li">Mysql场景下利用TIMESTAMP能力</span><a href="#mysql-chang-jing-xia-li-yong-timestamp-neng-li" class="header-anchor">#</a></h1><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> person (</span><br><span class="line">    id <span class="type">INT</span> <span class="keyword">PRIMARY</span> KEY,</span><br><span class="line">    <span class="operator">/</span><span class="operator">/</span> ... 其他字段 ...</span><br><span class="line">    create_time <span class="type">TIMESTAMP</span> <span class="keyword">DEFAULT</span> <span class="built_in">CURRENT_TIMESTAMP</span>,</span><br><span class="line">    update_time <span class="type">TIMESTAMP</span> <span class="keyword">DEFAULT</span> <span class="built_in">CURRENT_TIMESTAMP</span> <span class="keyword">ON</span> <span class="keyword">UPDATE</span> <span class="built_in">CURRENT_TIMESTAMP</span></span><br><span class="line">);</span><br></pre></td></tr></table></figure>
 ]]></content>
       <tags>
         <tag>Java</tag>
@@ -2672,6 +2695,27 @@ springIgnite --> util</pre>
       <tags>
         <tag>Java</tag>
         <tag>Ignite</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>利用Lombok的@RequiredArgsConstructor简化Spring构造函数</title>
+    <url>/code/java/lombok/lombok-required-args-constructor-spring/</url>
+    <content><![CDATA[<p>从Spring的新版本开始，推荐使用构造函数的注入方式，通过构造函数注入有很多优点，诸如不变性等等。同时在构造函数上，也不需要添加<code>@Autowire</code><br>注解就可以完成注入</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// Before</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ABC</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> A a;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> B b;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> C c;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">ABC</span><span class="params">(<span class="meta">@Autowire</span> A a, <span class="meta">@Autowire</span> B b, <span class="meta">@Autowire</span> C c)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.a = a;</span><br><span class="line">        <span class="built_in">this</span>.b = b;</span><br><span class="line">        <span class="built_in">this</span>.c = c;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// After</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ABC</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> A a;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> B b;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> C c;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">ABC</span><span class="params">(A a, B b, C c)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.a = a;</span><br><span class="line">        <span class="built_in">this</span>.b = b;</span><br><span class="line">        <span class="built_in">this</span>.c = c;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>但是，这种注入方式会导致变动代码的时候，需要同时修改field以及构造函数，在项目早期发展时期，这种变动显得有一些枯燥，再加上已经不需要<code>@Autowire</code><br>注解。这时，我们可以用Lombok的@RequiredArgsConstructor来简化这个流程。</p>
+<p>Lombok的<code>@RequiredArgsConstructor</code>会包含这些参数：</p>
+<ul>
+<li>所有未初始化的 final 字段</li>
+<li>被标记为 @NonNull 但在声明时未初始化的字段。</li>
+</ul>
+<p>对于那些被标记为 @NonNull<br>的字段，还会生成一个显式的空检查（不过在Spring框架里这个没什么作用）。通过应用<code>@RequiredArgsConstructor</code><br>，代码可以简化为如下模样，同时添加新的字段也不需要修改多行。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="meta">@RequiredArgsConstructor</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ABC</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> A a;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> B b;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> C c;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+]]></content>
+      <tags>
+        <tag>Java</tag>
+        <tag>Lombok</tag>
+        <tag>Spring</tag>
       </tags>
   </entry>
 </search>

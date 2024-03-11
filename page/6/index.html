@@ -146,13 +146,13 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">65</span>
+          <span class="site-state-item-count">66</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">36</span>
+        <span class="site-state-item-count">38</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -177,6 +177,114 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/security/cert-manager/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="shoothzj">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/security/cert-manager/" class="post-title-link" itemprop="url">大型系统中的证书管理</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-05-30 22:47:05" itemprop="dateCreated datePublished" datetime="2021-05-30T22:47:05+00:00">2021-05-30</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2024-03-11 12:58:39" itemprop="dateModified" datetime="2024-03-11T12:58:39+00:00">2024-03-11</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1><span id="da-xing-xi-tong-zhong-de-zheng-shu-guan-li">大型系统中的证书管理</span><a href="#da-xing-xi-tong-zhong-de-zheng-shu-guan-li" class="header-anchor">#</a></h1><p>随着安全的要求，现在我们在越来越多的通信中使用TLS加密。下图是一个微服务架构下数据流向的例子</p>
+<p><img src="/security/cert-manager/cert-manager1.png" alt="cert-manager1"></p>
+<ul>
+<li>蓝色部分，即和三方交互时需要TLS加密认证</li>
+<li>红色部分，各个微服务、消息中间件等通信需要TLS加密认证</li>
+<li>绿色部分，各个微服务和存储层通信也需要TLS加密认证</li>
+</ul>
+<p>安全上对我们的要求逐步变化为，仅蓝色使用TLS&#x3D;》蓝色和红色使用TLS&#x3D;》全部使用TLS加密</p>
+<h2><span id="zheng-shu-guan-li-de-bi-yao-xing">证书管理的必要性</span><a href="#zheng-shu-guan-li-de-bi-yao-xing" class="header-anchor">#</a></h2><p>从安全的角度上来说，我们最好能支持证书的更换和热加载。如果您的业务当前使用加密的场景不多，可能暂时看不到证书管理的意义。但是当你在各个方面使用TLS更加频繁之后，会发现证书管理可带来如下好处：</p>
+<ul>
+<li>可以通过抽象出场景，通过场景和证书的关联联系，在各个地方通信使用的证书，可以统一更换。</li>
+<li>统一提供证书过期告警等功能</li>
+<li>统一提供证书的变更通知，通知到各个实例</li>
+</ul>
+<p>以我在工作中接触到的两个基础PAAS平台，都有证书管理的功能，可见证书管理的必要性。</p>
+<p>PS: 开源组件大多都拥有证书配置能力，没有可对接证书管理的能力，但这个能力很难贡献给社区，需要自己开发。</p>
+<h2><span id="zheng-shu-guan-li-gai-nian">证书管理概念</span><a href="#zheng-shu-guan-li-gai-nian" class="header-anchor">#</a></h2><p>在TLS会话中，从依赖的证书文件角度来看，可以分为加密流程和验证流程。</p>
+<h3><span id="jia-mi-zheng-shu">加密证书</span><a href="#jia-mi-zheng-shu" class="header-anchor">#</a></h3><p>TLS加密流程的证书，包含证书链文件和密钥</p>
+<h3><span id="yan-zheng-zheng-shu">验证证书</span><a href="#yan-zheng-zheng-shu" class="header-anchor">#</a></h3><p>TLS验证流程的证书，仅包含证书链文件</p>
+<h3><span id="chai-fen-wei-jia-mi-liu-cheng-he-yan-zheng-liu-cheng-de-he-li-xing">拆分为加密流程和验证流程的合理性</span><a href="#chai-fen-wei-jia-mi-liu-cheng-he-yan-zheng-liu-cheng-de-he-li-xing" class="header-anchor">#</a></h3><p>这使得加密流程证书和验证流程证书可以互相独立的替换，更方便在大型场景下复用证书。</p>
+<p>让我们来假设如下的场景：</p>
+<p><img src="/security/cert-manager/cert-manager2.png" alt="cert-manager2"></p>
+<p>客户A、客户B、客户C、客户D的验证流程证书自然不相同，但服务跟客户交互的时候，使用的加密流程证书确实同一份。如果将两个阶段的证书合一，那么在更换证书的时候，就需要更新4份数据，当你有1000名用户的时候，这个数字将会是1000，这对于存储和应用程序来说都是不小的冲击。</p>
+<h3><span id="scene">Scene</span><a href="#scene" class="header-anchor">#</a></h3><p>Scene是在一个会话中，代表会话和请求证书、验证证书的绑定关系。Scene和请求证书、验证证书都是1：1的关系。这使得我们不仅仅可以修改证书文件，也可以对TLS会话中使用的证书进行修改。在证书无法复用，且证书绑定了多个场景的时候，针对单个场景修改其绑定的证书。</p>
+<p>以上图作为例子，假设客户D有特殊的要求，要求加密流程使用特定的证书或密钥，我们就可以将客户D的场景绑定到客户D独有的加密证书</p>
+<h3><span id="duo-ji-qun-guan-li">多集群管理</span><a href="#duo-ji-qun-guan-li" class="header-anchor">#</a></h3><p>如果证书管理需要管理多个集群，那么证书和Scene前面可以加上层级来隔离，如环境、集群等。</p>
+<h3><span id="dui-xiao-xing-xi-tong-de-jian-yi">对小型系统的建议</span><a href="#dui-xiao-xing-xi-tong-de-jian-yi" class="header-anchor">#</a></h3><p>如果规模不大，且TLS场景有限，需要考虑一下有无拆分加密证书和验证证书的必要，可以合一，应用程序直接以合一的证书id来关联，而非场景id。虽不方便复用，但大大降低了复杂性。</p>
+<h2><span id="zheng-shu-guan-li-de-gong-neng">证书管理的功能</span><a href="#zheng-shu-guan-li-de-gong-neng" class="header-anchor">#</a></h2><p><img src="/security/cert-manager/cert-manager3.png" alt="cert-manager3"></p>
+<h2><span id="zheng-shu-guan-li-chang-jing">证书管理场景</span><a href="#zheng-shu-guan-li-chang-jing" class="header-anchor">#</a></h2><h3><span id="she-ding-yi-ge-tls-hui-hua">设定一个TLS会话</span><a href="#she-ding-yi-ge-tls-hui-hua" class="header-anchor">#</a></h3><p><img src="/security/cert-manager/cert-manager4.png" alt="cert-manager4"></p>
+<h3><span id="shi-yong-tls-hui-hua">使用TLS会话</span><a href="#shi-yong-tls-hui-hua" class="header-anchor">#</a></h3><p>这要求应用程序持久化场景信息</p>
+<p><img src="/security/cert-manager/cert-manager5.png" alt="cert-manager5"></p>
+<h2><span id="zu-zhi-jia-gou-xiang-guan">组织架构相关</span><a href="#zu-zhi-jia-gou-xiang-guan" class="header-anchor">#</a></h2><p>大型系统下，证书管理是一个必须的组件，且一定是由团队最底层的组织架构承接。如若不然，那么由底层组织架构维护的组件，因为依赖关系，无法基于证书管理来统一实现证书的更换和过期告警。除非不基于证书管理自己构筑一套能力。</p>
+<h2><span id="tldr">TLDR</span><a href="#tldr" class="header-anchor">#</a></h2><p>随着组件和使用加密场景的不断扩大，证书管理是一个必须的组件，通过抽象出场景的概念来复用证书，通过变更通知在微服务模式下快速更换所有微服务实例上的证书，并提供统一的证书过期告警功能来提醒管理员更换证书。</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -222,7 +330,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-02-25 01:49:10" itemprop="dateModified" datetime="2024-02-25T01:49:10+00:00">2024-02-25</time>
+      <time title="修改时间：2024-03-11 12:58:38" itemprop="dateModified" datetime="2024-03-11T12:58:38+00:00">2024-03-11</time>
     </span>
 
   
@@ -377,7 +485,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-02-25 01:49:11" itemprop="dateModified" datetime="2024-02-25T01:49:11+00:00">2024-02-25</time>
+      <time title="修改时间：2024-03-11 12:58:39" itemprop="dateModified" datetime="2024-03-11T12:58:39+00:00">2024-03-11</time>
     </span>
 
   
@@ -475,7 +583,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-02-25 01:49:11" itemprop="dateModified" datetime="2024-02-25T01:49:11+00:00">2024-02-25</time>
+      <time title="修改时间：2024-03-11 12:58:39" itemprop="dateModified" datetime="2024-03-11T12:58:39+00:00">2024-03-11</time>
     </span>
 
   
@@ -568,7 +676,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-02-25 01:49:10" itemprop="dateModified" datetime="2024-02-25T01:49:10+00:00">2024-02-25</time>
+      <time title="修改时间：2024-03-11 12:58:39" itemprop="dateModified" datetime="2024-03-11T12:58:39+00:00">2024-03-11</time>
     </span>
 
   
@@ -676,7 +784,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-02-25 01:49:11" itemprop="dateModified" datetime="2024-02-25T01:49:11+00:00">2024-02-25</time>
+      <time title="修改时间：2024-03-11 12:58:39" itemprop="dateModified" datetime="2024-03-11T12:58:39+00:00">2024-03-11</time>
     </span>
 
   
@@ -848,7 +956,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-02-25 01:49:11" itemprop="dateModified" datetime="2024-02-25T01:49:11+00:00">2024-02-25</time>
+      <time title="修改时间：2024-03-11 12:58:39" itemprop="dateModified" datetime="2024-03-11T12:58:39+00:00">2024-03-11</time>
     </span>
 
   
@@ -938,7 +1046,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-02-25 01:49:10" itemprop="dateModified" datetime="2024-02-25T01:49:10+00:00">2024-02-25</time>
+      <time title="修改时间：2024-03-11 12:58:39" itemprop="dateModified" datetime="2024-03-11T12:58:39+00:00">2024-03-11</time>
     </span>
 
   
@@ -1025,7 +1133,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-02-25 01:49:10" itemprop="dateModified" datetime="2024-02-25T01:49:10+00:00">2024-02-25</time>
+      <time title="修改时间：2024-03-11 12:58:38" itemprop="dateModified" datetime="2024-03-11T12:58:38+00:00">2024-03-11</time>
     </span>
 
   
@@ -1127,7 +1235,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-02-25 01:49:10" itemprop="dateModified" datetime="2024-02-25T01:49:10+00:00">2024-02-25</time>
+      <time title="修改时间：2024-03-11 12:58:38" itemprop="dateModified" datetime="2024-03-11T12:58:38+00:00">2024-03-11</time>
     </span>
 
   
@@ -1155,99 +1263,6 @@
 <p>通过上面的配置，artifactSet选择要修改的pom依赖，通过relocation修改包名，达到不冲突的效果。<strong>mvn clean package</strong> 后查看效果</p>
 <p><img src="/code/java/java-shade-package/java-shade-package-result.png" alt="java-shade-package-result"></p>
 <p>可以发现，包名已经被修改完成,达到了避免冲突的目的。</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/loadbalance-layer-four-source-ip/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="shoothzj">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/loadbalance-layer-four-source-ip/" class="post-title-link" itemprop="url">通用4层获取源IP的负载均衡网关建设</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-12-25 21:20:32" itemprop="dateCreated datePublished" datetime="2020-12-25T21:20:32+00:00">2020-12-25</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-02-25 01:49:10" itemprop="dateModified" datetime="2024-02-25T01:49:10+00:00">2024-02-25</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1><span id="wang-guan-jian-she">网关建设</span><a href="#wang-guan-jian-she" class="header-anchor">#</a></h1><p>今天给大家介绍三种常见的四层负载均衡、网络转发方案，可用于四层的网关建设。</p>
-<h2><span id="li-yong-ipvs-shi-xian-xu-yao-hou-duan-fu-wu-neng-lian-tong-wai-bu-wang-luo">利用ipvs实现(需要后端服务能连通外部网络)</span><a href="#li-yong-ipvs-shi-xian-xu-yao-hou-duan-fu-wu-neng-lian-tong-wai-bu-wang-luo" class="header-anchor">#</a></h2><p><img src="/loadbalance-layer-four-source-ip/lb-4-ipvs.png" alt="lb-4-ipvs"></p>
-<p>该方案需要后端服务器与前端client网络打通，GatewayIp可以采用主备的方式保证高可用</p>
-<p>配置都在GatewayIp上，需要配置的如下:</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ipvsadm -A -u <span class="variable">$GatewayIp</span>:<span class="variable">$port</span> -s rr -p 600</span><br><span class="line"><span class="comment"># -u表示为udp协议，-t表示为tcp协议</span></span><br><span class="line"><span class="comment"># rr 为均衡算法，roundroubin的意思，lc则代表最短连接数</span></span><br><span class="line">ipvsadm -a -u <span class="variable">$GatewayIp</span>:<span class="variable">$port</span> -r <span class="variable">$ServerIp</span>:<span class="variable">$port</span> -m</span><br></pre></td></tr></table></figure>
-
-<h2><span id="ipvs-iptables-shi-xian">Ipvs+Iptables实现</span><a href="#ipvs-iptables-shi-xian" class="header-anchor">#</a></h2><p>如果您不希望后端Server与客户端面对面打通，那么您可能会喜欢这种方式，将GatewayIP设置为ServerIp的默认网关，再由Snat转换将报文转换出去，这样子Server就不需要与客户端面对面打通了，图示如下:</p>
-<p><img src="/loadbalance-layer-four-source-ip/lb-4-ipvs-iptables.png" alt="lb-4-ipvs-iptables"></p>
-<p>配置默认路由也很简单</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip route add 客户端IP网段 via GateWayIp dev eth0</span><br></pre></td></tr></table></figure>
-<p>配置iptables</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iptables -t nat -A POSTROUTING -m iprange -p udp --dst-range $client_ip_range -o eth1  -j SNAT  --to-source $GateWayIp</span><br></pre></td></tr></table></figure>
-
-<h2><span id="ipvs-iptables-iptunnel-shi-xian">Ipvs+Iptables+Iptunnel实现</span><a href="#ipvs-iptables-iptunnel-shi-xian" class="header-anchor">#</a></h2><p>默认路由有一个限制，就是说Server与Gateway都在一个子网内，有过商用经验的大家都知道DMZ之类的说法，就是说应用服务器和网关服务器在诸如安全组，子网等等上需要隔离。假设你需要将应用服务器和网关放在不同的子网，上面的方案就搞不定啊，这个时候需要使用ip隧道的方式来跨子网，图示如下，仅仅后边红色路线的ip发生了变化，原来的报文被ip隧道Wrap:</p>
-<p><img src="/loadbalance-layer-four-source-ip/lb-4-ipvs-iptables-iptunnel.png" alt="lb-4-ipvs-iptables-iptunnel"></p>
-<p>配置ip 隧道倒也不难</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip tunnel add $tun_name mode ipip remote $remote_ip local $local_ip ttl 255</span><br></pre></td></tr></table></figure>
-<h1><span id="zong-jie">总结</span><a href="#zong-jie" class="header-anchor">#</a></h1><p>以上三种方案均没有单点问题，且都兼容tcp，udp协议。GateWay处的单点问题，通过zk选主、etcd选主，keepalive等 + 浮动IP迁移的方式均能解决。大家可以根据自己的网规网设自由选择</p>
 
       
     </div>

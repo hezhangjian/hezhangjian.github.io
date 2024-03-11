@@ -146,13 +146,13 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">65</span>
+          <span class="site-state-item-count">66</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">36</span>
+        <span class="site-state-item-count">38</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -177,6 +177,86 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/code/java/lombok/lombok-required-args-constructor-spring/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="shoothzj">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/code/java/lombok/lombok-required-args-constructor-spring/" class="post-title-link" itemprop="url">利用Lombok的@RequiredArgsConstructor简化Spring构造函数</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2024-03-11 20:47:12 / 修改时间：12:58:38" itemprop="dateCreated datePublished" datetime="2024-03-11T20:47:12+00:00">2024-03-11</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>从Spring的新版本开始，推荐使用构造函数的注入方式，通过构造函数注入有很多优点，诸如不变性等等。同时在构造函数上，也不需要添加<code>@Autowire</code><br>注解就可以完成注入</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Before</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ABC</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> A a;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> B b;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> C c;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">ABC</span><span class="params">(<span class="meta">@Autowire</span> A a, <span class="meta">@Autowire</span> B b, <span class="meta">@Autowire</span> C c)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.a = a;</span><br><span class="line">        <span class="built_in">this</span>.b = b;</span><br><span class="line">        <span class="built_in">this</span>.c = c;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// After</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ABC</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> A a;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> B b;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> C c;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">ABC</span><span class="params">(A a, B b, C c)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.a = a;</span><br><span class="line">        <span class="built_in">this</span>.b = b;</span><br><span class="line">        <span class="built_in">this</span>.c = c;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>但是，这种注入方式会导致变动代码的时候，需要同时修改field以及构造函数，在项目早期发展时期，这种变动显得有一些枯燥，再加上已经不需要<code>@Autowire</code><br>注解。这时，我们可以用Lombok的@RequiredArgsConstructor来简化这个流程。</p>
+<p>Lombok的<code>@RequiredArgsConstructor</code>会包含这些参数：</p>
+<ul>
+<li>所有未初始化的 final 字段</li>
+<li>被标记为 @NonNull 但在声明时未初始化的字段。</li>
+</ul>
+<p>对于那些被标记为 @NonNull<br>的字段，还会生成一个显式的空检查（不过在Spring框架里这个没什么作用）。通过应用<code>@RequiredArgsConstructor</code><br>，代码可以简化为如下模样，同时添加新的字段也不需要修改多行。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="meta">@RequiredArgsConstructor</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ABC</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> A a;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> B b;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> C c;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -222,7 +302,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-02-25 01:49:10" itemprop="dateModified" datetime="2024-02-25T01:49:10+00:00">2024-02-25</time>
+      <time title="修改时间：2024-03-11 12:58:38" itemprop="dateModified" datetime="2024-03-11T12:58:38+00:00">2024-03-11</time>
     </span>
 
   
@@ -314,7 +394,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-02-25 01:49:10" itemprop="dateModified" datetime="2024-02-25T01:49:10+00:00">2024-02-25</time>
+      <time title="修改时间：2024-03-11 12:58:38" itemprop="dateModified" datetime="2024-03-11T12:58:38+00:00">2024-03-11</time>
     </span>
 
   
@@ -413,7 +493,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-02-25 01:49:11" itemprop="dateModified" datetime="2024-02-25T01:49:11+00:00">2024-02-25</time>
+      <time title="修改时间：2024-03-11 12:58:39" itemprop="dateModified" datetime="2024-03-11T12:58:39+00:00">2024-03-11</time>
     </span>
 
   
@@ -608,7 +688,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-02-25 01:49:10" itemprop="dateModified" datetime="2024-02-25T01:49:10+00:00">2024-02-25</time>
+      <time title="修改时间：2024-03-11 12:58:38" itemprop="dateModified" datetime="2024-03-11T12:58:38+00:00">2024-03-11</time>
     </span>
 
   
@@ -694,7 +774,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-02-25 01:49:10" itemprop="dateModified" datetime="2024-02-25T01:49:10+00:00">2024-02-25</time>
+      <time title="修改时间：2024-03-11 12:58:38" itemprop="dateModified" datetime="2024-03-11T12:58:38+00:00">2024-03-11</time>
     </span>
 
   
@@ -790,7 +870,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-02-25 01:49:10" itemprop="dateModified" datetime="2024-02-25T01:49:10+00:00">2024-02-25</time>
+      <time title="修改时间：2024-03-11 12:58:38" itemprop="dateModified" datetime="2024-03-11T12:58:38+00:00">2024-03-11</time>
     </span>
 
   
@@ -881,7 +961,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-02-25 01:49:10" itemprop="dateModified" datetime="2024-02-25T01:49:10+00:00">2024-02-25</time>
+      <time title="修改时间：2024-03-11 12:58:38" itemprop="dateModified" datetime="2024-03-11T12:58:38+00:00">2024-03-11</time>
     </span>
 
   
@@ -1007,7 +1087,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-02-25 01:49:10" itemprop="dateModified" datetime="2024-02-25T01:49:10+00:00">2024-02-25</time>
+      <time title="修改时间：2024-03-11 12:58:38" itemprop="dateModified" datetime="2024-03-11T12:58:38+00:00">2024-03-11</time>
     </span>
 
   
@@ -1137,7 +1217,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-02-25 01:49:10" itemprop="dateModified" datetime="2024-02-25T01:49:10+00:00">2024-02-25</time>
+      <time title="修改时间：2024-03-11 12:58:38" itemprop="dateModified" datetime="2024-03-11T12:58:38+00:00">2024-03-11</time>
     </span>
 
   
@@ -1163,6 +1243,19 @@
 </li>
 </ul>
 </li>
+<li><a href="#java">Java</a><ul>
+<li><a href="#biao-zhun-ku-jdk17">标准库(jdk17+)</a><ul>
+<li><a href="#timeout-1">timeout</a></li>
+<li><a href="#connectiontimeout">connectionTimeout</a></li>
+</ul>
+</li>
+<li><a href="#reactor-netty">Reactor Netty</a><ul>
+<li><a href="#timeout-2">timeout</a></li>
+<li><a href="#connectiontimeout-1">connectionTimeout</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 <!-- tocstop -->
 
@@ -1172,98 +1265,13 @@
 
 <h3><span id="connection-timeout">connection timeout</span><a href="#connection-timeout" class="header-anchor">#</a></h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">client := http.Client&#123;</span><br><span class="line">    Transport: &amp;http.Transport&#123;</span><br><span class="line">        Dial: (&amp;net.Dialer&#123;</span><br><span class="line">            Timeout: timeout,</span><br><span class="line">        &#125;).Dial,</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-      
-    </div>
+<h1><span id="java">Java</span><a href="#java" class="header-anchor">#</a></h1><h2><span id="biao-zhun-ku-jdk17">标准库(jdk17+)</span><a href="#biao-zhun-ku-jdk17" class="header-anchor">#</a></h2><h3><span id="timeout">timeout</span><a href="#timeout" class="header-anchor">#</a></h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">HttpRequest</span> <span class="variable">request</span> <span class="operator">=</span> HttpRequest.newBuilder()</span><br><span class="line">    .uri(URI.create(<span class="string">&quot;http://example.com&quot;</span>))</span><br><span class="line">    .timeout(Duration.ofSeconds(<span class="number">10</span>))</span><br><span class="line">    .build();</span><br></pre></td></tr></table></figure>
 
-    
-    
-    
+<h3><span id="connectiontimeout">connectionTimeout</span><a href="#connectiontimeout" class="header-anchor">#</a></h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">HttpClient.<span class="type">Builder</span> <span class="variable">builder</span> <span class="operator">=</span> HttpClient.newBuilder()</span><br><span class="line">.connectTimeout(Duration.ofSeconds(<span class="number">10</span>))</span><br><span class="line">.version(HttpClient.Version.HTTP_1_1);</span><br></pre></td></tr></table></figure>
 
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
+<h2><span id="reactor-netty">Reactor Netty</span><a href="#reactor-netty" class="header-anchor">#</a></h2><h3><span id="timeout">timeout</span><a href="#timeout" class="header-anchor">#</a></h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">HttpClient</span> <span class="variable">client</span> <span class="operator">=</span> HttpClient.create().responseTimeout(Duration.ofSeconds(<span class="number">10</span>));</span><br></pre></td></tr></table></figure>
 
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/code/multi-lang-client-sdk-design/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="shoothzj">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/code/multi-lang-client-sdk-design/" class="post-title-link" itemprop="url">多语言SDK设计</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2023-11-12 21:09:32" itemprop="dateCreated datePublished" datetime="2023-11-12T21:09:32+00:00">2023-11-12</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-02-25 01:49:10" itemprop="dateModified" datetime="2024-02-25T01:49:10+00:00">2024-02-25</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <div class="toc">
-
-<!-- toc -->
-
-<ul>
-<li><a href="#duo-yu-yan-sdk-she-ji-de-chang-jian-wen-ti">多语言SDK设计的常见问题</a><ul>
-<li><a href="#ri-zhi-da-yin-de-she-ji-ce-lue">日志打印的设计策略</a></li>
-<li><a href="#shi-fou-xu-yao-shi-yong-xian-shi-de-start-connect-fang-fa">是否需要使用显式的<code>start</code>&#x2F;<code>connect</code>方法？</a></li>
-</ul>
-</li>
-</ul>
-<!-- tocstop -->
-
-</div>
-
-<h1><span id="duo-yu-yan-sdk-she-ji-de-chang-jian-wen-ti">多语言SDK设计的常见问题</span><a href="#duo-yu-yan-sdk-she-ji-de-chang-jian-wen-ti" class="header-anchor">#</a></h1><h2><span id="ri-zhi-da-yin-de-she-ji-ce-lue">日志打印的设计策略</span><a href="#ri-zhi-da-yin-de-she-ji-ce-lue" class="header-anchor">#</a></h2><p>在SDK的关键节点，比如初始化完成、连接建立或者连接断开，都可以打印日志。如果是PerRequest的日志，一般默认不会打印INFO级别的日志。</p>
-<p>SDK应该避免仅仅打印错误日志然后忽略异常；相反，它应该提供机制让调用者能够捕获并处理异常信息。这种做法有助于保持错误处理的透明性，并允许调用者根据需要采取适当的响应措施。正如<strong>David J. Wheeler</strong>所说”Put the control in the hands of those who know how to handle the information, not those who know how to manage the computers, because encapsulated details will eventually leak out.”把控制权放到那些知道如何处理信息的人手中，而不是放在那些知道如何管理计算机的人手中，因为封装的细节最终都会暴露。</p>
-<h2><span id="shi-fou-xu-yao-shi-yong-xian-shi-de-start-x2f-connect-fang-fa">是否需要使用显式的<code>start</code>&#x2F;<code>connect</code>方法？</span><a href="#shi-fou-xu-yao-shi-yong-xian-shi-de-start-x2f-connect-fang-fa" class="header-anchor">#</a></h2><p>像go这样的语言，一般来说不太在意特定的时间内，某个协程是否处于阻塞等待连接的状态。而在java这样的语言，特别是在采用响应式编程模型的场景下，通常需要通过异步操作来管理连接的建立。这可以通过显式的start&#x2F;connect方法来或者是异步的工厂方法来实现。</p>
+<h3><span id="connectiontimeout">connectionTimeout</span><a href="#connectiontimeout" class="header-anchor">#</a></h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">HttpClient</span> <span class="variable">client</span> <span class="operator">=</span> HttpClient.create().option(ChannelOption.CONNECT_TIMEOUT_MILLIS, <span class="number">5000</span>);</span><br></pre></td></tr></table></figure>
 
       
     </div>

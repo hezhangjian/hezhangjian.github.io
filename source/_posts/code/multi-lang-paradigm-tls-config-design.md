@@ -50,6 +50,11 @@ Java的TLS参数基本上都是基于keystore和truststore来配置的。一般�
 - tlsVersions: TLS版本列表
 - tlsCipherSuites: TLS加密套件列表
 
+# JavaScript
+
+JavaScript可以使用标准库里的tls.SecureContextOptions
+
+
 # Kotlin
 
 kotlin的Tls与Java相同：
@@ -69,7 +74,7 @@ kotlin的Tls与Java相同：
 
 方式一
 
-- tlsContext: Python标准库的内置TLS结构体
+- ssl.SSLContext: Python标准库的内置TLS结构体
 
 方式二
 

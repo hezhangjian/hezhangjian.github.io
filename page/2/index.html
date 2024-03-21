@@ -146,7 +146,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">66</span>
+          <span class="site-state-item-count">67</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -177,6 +177,123 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/code/multi-lang-http-client-config/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="shoothzj">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/code/multi-lang-http-client-config/" class="post-title-link" itemprop="url">多语言编程 各大Http库配置指南</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-11-18 17:24:58" itemprop="dateCreated datePublished" datetime="2023-11-18T17:24:58+00:00">2023-11-18</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2024-03-21 10:58:33" itemprop="dateModified" datetime="2024-03-21T10:58:33+00:00">2024-03-21</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#go">Go</a><ul>
+<li><a href="#go-biao-zhun-ku">Go标准库</a><ul>
+<li><a href="#timeout">timeout</a></li>
+<li><a href="#connection-timeout">connection timeout</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#java">Java</a><ul>
+<li><a href="#biao-zhun-ku-jdk17">标准库(jdk17+)</a><ul>
+<li><a href="#timeout-1">timeout</a></li>
+<li><a href="#connectiontimeout">connectionTimeout</a></li>
+</ul>
+</li>
+<li><a href="#reactor-netty">Reactor Netty</a><ul>
+<li><a href="#timeout-2">timeout</a></li>
+<li><a href="#connectiontimeout-1">connectionTimeout</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="go">Go</span><a href="#go" class="header-anchor">#</a></h1><h2><span id="go-biao-zhun-ku">Go标准库</span><a href="#go-biao-zhun-ku" class="header-anchor">#</a></h2><h3><span id="timeout">timeout</span><a href="#timeout" class="header-anchor">#</a></h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">client := http.Client&#123;</span><br><span class="line">    Timeout: timeout,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3><span id="connection-timeout">connection timeout</span><a href="#connection-timeout" class="header-anchor">#</a></h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">client := http.Client&#123;</span><br><span class="line">    Transport: &amp;http.Transport&#123;</span><br><span class="line">        Dial: (&amp;net.Dialer&#123;</span><br><span class="line">            Timeout: timeout,</span><br><span class="line">        &#125;).Dial,</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1><span id="java">Java</span><a href="#java" class="header-anchor">#</a></h1><h2><span id="biao-zhun-ku-jdk17">标准库(jdk17+)</span><a href="#biao-zhun-ku-jdk17" class="header-anchor">#</a></h2><h3><span id="timeout">timeout</span><a href="#timeout" class="header-anchor">#</a></h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">HttpRequest</span> <span class="variable">request</span> <span class="operator">=</span> HttpRequest.newBuilder()</span><br><span class="line">    .uri(URI.create(<span class="string">&quot;http://example.com&quot;</span>))</span><br><span class="line">    .timeout(Duration.ofSeconds(<span class="number">10</span>))</span><br><span class="line">    .build();</span><br></pre></td></tr></table></figure>
+
+<h3><span id="connectiontimeout">connectionTimeout</span><a href="#connectiontimeout" class="header-anchor">#</a></h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">HttpClient.<span class="type">Builder</span> <span class="variable">builder</span> <span class="operator">=</span> HttpClient.newBuilder()</span><br><span class="line">.connectTimeout(Duration.ofSeconds(<span class="number">10</span>))</span><br><span class="line">.version(HttpClient.Version.HTTP_1_1);</span><br></pre></td></tr></table></figure>
+
+<h2><span id="reactor-netty">Reactor Netty</span><a href="#reactor-netty" class="header-anchor">#</a></h2><h3><span id="timeout">timeout</span><a href="#timeout" class="header-anchor">#</a></h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">HttpClient</span> <span class="variable">client</span> <span class="operator">=</span> HttpClient.create().responseTimeout(Duration.ofSeconds(<span class="number">10</span>));</span><br></pre></td></tr></table></figure>
+
+<h3><span id="connectiontimeout">connectionTimeout</span><a href="#connectiontimeout" class="header-anchor">#</a></h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">HttpClient</span> <span class="variable">client</span> <span class="operator">=</span> HttpClient.create().option(ChannelOption.CONNECT_TIMEOUT_MILLIS, <span class="number">5000</span>);</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -222,7 +339,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-11 12:58:38" itemprop="dateModified" datetime="2024-03-11T12:58:38+00:00">2024-03-11</time>
+      <time title="修改时间：2024-03-21 10:58:33" itemprop="dateModified" datetime="2024-03-21T10:58:33+00:00">2024-03-21</time>
     </span>
 
   
@@ -315,7 +432,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-11 12:58:39" itemprop="dateModified" datetime="2024-03-11T12:58:39+00:00">2024-03-11</time>
+      <time title="修改时间：2024-03-21 10:58:33" itemprop="dateModified" datetime="2024-03-21T10:58:33+00:00">2024-03-21</time>
     </span>
 
   
@@ -525,7 +642,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-11 12:58:38" itemprop="dateModified" datetime="2024-03-11T12:58:38+00:00">2024-03-11</time>
+      <time title="修改时间：2024-03-21 10:58:33" itemprop="dateModified" datetime="2024-03-21T10:58:33+00:00">2024-03-21</time>
     </span>
 
   
@@ -684,7 +801,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-11 12:58:38" itemprop="dateModified" datetime="2024-03-11T12:58:38+00:00">2024-03-11</time>
+      <time title="修改时间：2024-03-21 10:58:33" itemprop="dateModified" datetime="2024-03-21T10:58:33+00:00">2024-03-21</time>
     </span>
 
   
@@ -766,7 +883,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-11 12:58:38" itemprop="dateModified" datetime="2024-03-11T12:58:38+00:00">2024-03-11</time>
+      <time title="修改时间：2024-03-21 10:58:33" itemprop="dateModified" datetime="2024-03-21T10:58:33+00:00">2024-03-21</time>
     </span>
 
   
@@ -850,7 +967,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-11 12:58:38" itemprop="dateModified" datetime="2024-03-11T12:58:38+00:00">2024-03-11</time>
+      <time title="修改时间：2024-03-21 10:58:33" itemprop="dateModified" datetime="2024-03-21T10:58:33+00:00">2024-03-21</time>
     </span>
 
   
@@ -935,7 +1052,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-11 12:58:38" itemprop="dateModified" datetime="2024-03-11T12:58:38+00:00">2024-03-11</time>
+      <time title="修改时间：2024-03-21 10:58:33" itemprop="dateModified" datetime="2024-03-21T10:58:33+00:00">2024-03-21</time>
     </span>
 
   
@@ -1049,7 +1166,7 @@ reactor --> common</pre>
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-11 12:58:39" itemprop="dateModified" datetime="2024-03-11T12:58:39+00:00">2024-03-11</time>
+      <time title="修改时间：2024-03-21 10:58:33" itemprop="dateModified" datetime="2024-03-21T10:58:33+00:00">2024-03-21</time>
     </span>
 
   
@@ -1170,7 +1287,7 @@ reactor --> common</pre>
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-11 12:58:39" itemprop="dateModified" datetime="2024-03-11T12:58:39+00:00">2024-03-11</time>
+      <time title="修改时间：2024-03-21 10:58:33" itemprop="dateModified" datetime="2024-03-21T10:58:33+00:00">2024-03-21</time>
     </span>
 
   
@@ -1203,117 +1320,6 @@ reactor --> common</pre>
 
 <h2><span id="gou-zao-ke-zhi-xing-wen-jian-self-extracting-sh">构造可执行文件 <code>self_extracting.sh</code></span><a href="#gou-zao-ke-zhi-xing-wen-jian-self-extracting-sh" class="header-anchor">#</a></h2><p>以使用<code>__ARCHIVE_BELOW__</code>做分隔符为例，<code>self_extracting.sh</code>里面内容:</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line">CURRENT_DIR=<span class="string">&quot;<span class="subst">$(dirname <span class="string">&quot;<span class="variable">$0</span>&quot;</span>)</span>&quot;</span></span><br><span class="line"></span><br><span class="line">ARCHIVE_START_LINE=$(awk <span class="string">&#x27;/^__ARCHIVE_BELOW__/ &#123;print NR + 1; exit 0; &#125;&#x27;</span> <span class="variable">$0</span>)</span><br><span class="line"><span class="built_in">tail</span> -n+<span class="variable">$ARCHIVE_START_LINE</span> <span class="variable">$0</span> | tar xz -C <span class="string">&quot;<span class="variable">$CURRENT_DIR</span>&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># replace the following line with your own code</span></span><br><span class="line"><span class="built_in">cat</span> temp.txt</span><br><span class="line"></span><br><span class="line"><span class="built_in">exit</span> 0</span><br><span class="line"></span><br><span class="line">__ARCHIVE_BELOW__</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/code/java/ignite/ignite-java-client-best-practice/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="shoothzj">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/code/java/ignite/ignite-java-client-best-practice/" class="post-title-link" itemprop="url">Ignite Java客户端最佳实践</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2023-10-10 22:08:55" itemprop="dateCreated datePublished" datetime="2023-10-10T22:08:55+00:00">2023-10-10</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-11 12:58:38" itemprop="dateModified" datetime="2024-03-11T12:58:38+00:00">2024-03-11</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <div class="toc">
-
-<!-- toc -->
-
-<ul>
-<li><a href="#ignite-java-ke-hu-duan-zui-jia-shi-jian">Ignite Java 客户端最佳实践</a><ul>
-<li><a href="#bei-jing">背景</a></li>
-<li><a href="#ke-hu-duan-xiang-guan">客户端相关</a><ul>
-<li><a href="#clientconfiguration-timeout">ClientConfiguration timeout</a></li>
-</ul>
-</li>
-<li><a href="#sql-xiang-guan">SQL相关</a><ul>
-<li><a href="#sqlfieldsquery-timeout">SqlFieldsQuery timeout</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<!-- tocstop -->
-
-</div>
-
-<h1><span id="ignite-java-ke-hu-duan-zui-jia-shi-jian">Ignite Java 客户端最佳实践</span><a href="#ignite-java-ke-hu-duan-zui-jia-shi-jian" class="header-anchor">#</a></h1><h2><span id="bei-jing">背景</span><a href="#bei-jing" class="header-anchor">#</a></h2><p>本文总结了在使用Apache Ignite（Ignite2.0）的Java客户端时，需要注意的一些问题，以及一些最佳实践。值得一提的是 Ignite的Java客户端有一些跟直觉上不太一样的地方，需要注意下。</p>
-<h2><span id="ke-hu-duan-xiang-guan">客户端相关</span><a href="#ke-hu-duan-xiang-guan" class="header-anchor">#</a></h2><p>Ignite客户端有两处跟直觉上相差较大：</p>
-<ul>
-<li>Ignite客户端连接没有默认超时时间，如果连接不上，有概率会导致创建客户端一直阻塞，所以一定要设置timeout参数</li>
-<li>Ignite客户端默认不会重连，更不用说无限重连了。并且Ignite客户端重连的实现方式是预先计算出所有重连的时间戳，然后在这些时间戳到达时重连，由于要预先计算出重连的时间戳存入数组，这也就意味着不能无限重连。如果您的应用程序需要无限重连（在云原生环境下，这是非常常见的场景），那么您需要自己实现重连逻辑。</li>
-</ul>
-<p>ClientConfiguration里的重要参数</p>
-<h3><span id="clientconfiguration-timeout">ClientConfiguration timeout</span><a href="#clientconfiguration-timeout" class="header-anchor">#</a></h3><p>控制连接超时的参数，单位是毫秒。必须设置！如果不设置，有概率会导致创建客户端一直阻塞。</p>
-<h2><span id="sql-xiang-guan">SQL相关</span><a href="#sql-xiang-guan" class="header-anchor">#</a></h2><p>SQL查询典型用法</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">SqlFieldsQuery</span> <span class="variable">query</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">SqlFieldsQuery</span>(<span class="string">&quot;SELECT 42&quot;</span>).setTimeout(<span class="number">5</span>, TimeUnit.SECONDS);</span><br><span class="line">FieldsQueryCursor&lt;List&lt;?&gt;&gt; cursor = igniteClient.query(query))</span><br><span class="line">List&lt;List&lt;?&gt;&gt; result = cursor.getAll();</span><br></pre></td></tr></table></figure>
-
-<p>注意：Ignite query出来的cursor如果自己通过iterator遍历则必须要close，否则会导致内存泄漏。</p>
-<p>Query相关参数</p>
-<h3><span id="sqlfieldsquery-timeout">SqlFieldsQuery timeout</span><a href="#sqlfieldsquery-timeout" class="header-anchor">#</a></h3><p>SqlQuery的超时时间，必须设置。默认是0，表示永不超时。如果不设置，有概率会导致查询一直阻塞。</p>
 
       
     </div>

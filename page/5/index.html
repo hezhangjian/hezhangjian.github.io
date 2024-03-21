@@ -146,7 +146,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">66</span>
+          <span class="site-state-item-count">67</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -177,6 +177,111 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/calcite/calcite-parser-code-generate/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="shoothzj">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/calcite/calcite-parser-code-generate/" class="post-title-link" itemprop="url">calcite parser代码生成详解</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-09-26 22:51:07" itemprop="dateCreated datePublished" datetime="2022-09-26T22:51:07+00:00">2022-09-26</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2024-03-21 10:58:33" itemprop="dateModified" datetime="2024-03-21T10:58:33+00:00">2024-03-21</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1><span id="calcite-parser-dai-ma-sheng-cheng-xiang-jie">calcite parser代码生成详解</span><a href="#calcite-parser-dai-ma-sheng-cheng-xiang-jie" class="header-anchor">#</a></h1><p>本文代码均已上传到<a target="_blank" rel="noopener" href="https://gitee.com/shoothzj/calcite-examples">gitee</a><br>calcite的parser代码生成分为如下两个步骤</p>
+<p><img src="/calcite/calcite-parser-code-generate/calcite-parser-code-generate-process.png" alt="calcite-parser-code-generate-process"></p>
+<h2><span id="sheng-cheng-parse-jj">生成Parse.jj</span><a href="#sheng-cheng-parse-jj" class="header-anchor">#</a></h2><p>文件目录如下</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">├── pom.xml</span><br><span class="line">└── src</span><br><span class="line">    ├── main</span><br><span class="line">    │   ├── codegen</span><br><span class="line">    │   │   ├── config.fmpp</span><br><span class="line">    │   │   ├── includes</span><br><span class="line">    │   │   │   ├── compoundIdentifier.ftl</span><br><span class="line">    │   │   │   └── parserImpls.ftl</span><br><span class="line">    │   │   └── templates</span><br><span class="line">    │   │       └── Parser.jj</span><br></pre></td></tr></table></figure>
+
+<p>添加calcite dependency</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.calcite<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>calcite-core<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p>配置<code>drill-fmpp-maven-plugin</code>插件如下</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">plugin</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.drill.tools<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>drill-fmpp-maven-plugin<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">executions</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">execution</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">config</span>&gt;</span>src/main/codegen/config.fmpp<span class="tag">&lt;/<span class="name">config</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">output</span>&gt;</span>$&#123;project.build.directory&#125;/generated-sources/fmpp<span class="tag">&lt;/<span class="name">output</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">templates</span>&gt;</span>src/main/codegen/templates<span class="tag">&lt;/<span class="name">templates</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">id</span>&gt;</span>generate-fmpp-sources<span class="tag">&lt;/<span class="name">id</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">phase</span>&gt;</span>validate<span class="tag">&lt;/<span class="name">phase</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">goals</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">goal</span>&gt;</span>generate<span class="tag">&lt;/<span class="name">goal</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">goals</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">execution</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">executions</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">plugin</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>codegen 模块的文件都拷贝自对应版本的<strong>calclite</strong> <strong>core&#x2F;src&#x2F;main&#x2F;codegen</strong>路径 <a target="_blank" rel="noopener" href="https://github.com/apache/calcite/tree/main/core/src/main/codegen">https://github.com/apache/calcite/tree/main/core/src/main/codegen</a></p>
+<p>然后把<a target="_blank" rel="noopener" href="https://github.com/apache/calcite/blob/main/core/src/main/codegen/default_config.fmpp">https://github.com/apache/calcite/blob/main/core/src/main/codegen/default_config.fmpp</a> 中的parser属性与config.fmpp中的parser属性合并。就可以通过<strong>mvn package</strong>命令生成Parser.jj了。当然，如果有定制化修改的需求，也可以在这个阶段修改config.fmpp</p>
+<p><img src="/calcite/calcite-parser-code-generate/calcite-parser-code-generator-fmpp.png" alt="calcite-parser-code-generator-fmpp"></p>
+<h2><span id="parser-jj-sheng-cheng-java-dai-ma">Parser.jj生成java代码</span><a href="#parser-jj-sheng-cheng-java-dai-ma" class="header-anchor">#</a></h2><p>文件目录如下</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">├── pom.xml</span><br><span class="line">├── src</span><br><span class="line">│   ├── main</span><br><span class="line">│   │   ├── codegen</span><br><span class="line">│   │   │   └── Parser.jj</span><br></pre></td></tr></table></figure>
+
+<p>Parser.jj就是我们上一步生成的Parser.jj，如果有什么想要的定制化修改，也可以在这个步骤改入到Parser.jj中。</p>
+<p>添加calcite dependency</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.calcite<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>calcite-core<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>配置<code>javacc-maven-plugin</code>如下</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">plugin</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.codehaus.mojo<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>javacc-maven-plugin<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">executions</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">execution</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">id</span>&gt;</span>javacc<span class="tag">&lt;/<span class="name">id</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">goals</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">goal</span>&gt;</span>javacc<span class="tag">&lt;/<span class="name">goal</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">goals</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">sourceDirectory</span>&gt;</span>$&#123;project.basedir&#125;/src/main/codegen<span class="tag">&lt;/<span class="name">sourceDirectory</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">includes</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">include</span>&gt;</span>**/Parser.jj<span class="tag">&lt;/<span class="name">include</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;/<span class="name">includes</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">execution</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">executions</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">plugin</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>生成代码</p>
+<p><img src="/calcite/calcite-parser-code-generate/calcite-parser-code-generator-javacc.png" alt="calcite-parser-code-generator-javacc"></p>
+<h2><span id="wu-parser-jj-ding-zhi-hua-xiu-gai-yi-bu-sheng-cheng">无Parser.jj定制化修改，一步生成</span><a href="#wu-parser-jj-ding-zhi-hua-xiu-gai-yi-bu-sheng-cheng" class="header-anchor">#</a></h2><p>如果不需要对Parser.jj进行定制化修改，那么可以通过连续运行两个插件来生成代码，这里给出pom文件样例，不再赘述</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">plugin</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.drill.tools<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>drill-fmpp-maven-plugin<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">executions</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">execution</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">config</span>&gt;</span>src/main/codegen/config.fmpp<span class="tag">&lt;/<span class="name">config</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">output</span>&gt;</span>$&#123;project.build.directory&#125;/generated-sources/fmpp<span class="tag">&lt;/<span class="name">output</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">templates</span>&gt;</span>src/main/codegen/templates<span class="tag">&lt;/<span class="name">templates</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">id</span>&gt;</span>generate-fmpp-sources<span class="tag">&lt;/<span class="name">id</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">phase</span>&gt;</span>validate<span class="tag">&lt;/<span class="name">phase</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">goals</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">goal</span>&gt;</span>generate<span class="tag">&lt;/<span class="name">goal</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">goals</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">execution</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">executions</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">plugin</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">plugin</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.codehaus.mojo<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>javacc-maven-plugin<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">executions</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">execution</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">id</span>&gt;</span>javacc<span class="tag">&lt;/<span class="name">id</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">goals</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">goal</span>&gt;</span>javacc<span class="tag">&lt;/<span class="name">goal</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">goals</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">sourceDirectory</span>&gt;</span>$&#123;project.build.directory&#125;/generated-sources/fmpp<span class="tag">&lt;/<span class="name">sourceDirectory</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">includes</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">include</span>&gt;</span>**/Parser.jj<span class="tag">&lt;/<span class="name">include</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;/<span class="name">includes</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">lookAhead</span>&gt;</span>2<span class="tag">&lt;/<span class="name">lookAhead</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">isStatic</span>&gt;</span>false<span class="tag">&lt;/<span class="name">isStatic</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">execution</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">execution</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">id</span>&gt;</span>javacc-test<span class="tag">&lt;/<span class="name">id</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">phase</span>&gt;</span>generate-test-sources<span class="tag">&lt;/<span class="name">phase</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">goals</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">goal</span>&gt;</span>javacc<span class="tag">&lt;/<span class="name">goal</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">goals</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">sourceDirectory</span>&gt;</span>$&#123;project.build.directory&#125;/generated-test-sources/fmpp<span class="tag">&lt;/<span class="name">sourceDirectory</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">outputDirectory</span>&gt;</span>$&#123;project.build.directory&#125;/generated-test-sources/javacc<span class="tag">&lt;/<span class="name">outputDirectory</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">includes</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">include</span>&gt;</span>**/Parser.jj<span class="tag">&lt;/<span class="name">include</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;/<span class="name">includes</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">isStatic</span>&gt;</span>false<span class="tag">&lt;/<span class="name">isStatic</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">ignoreCase</span>&gt;</span>true<span class="tag">&lt;/<span class="name">ignoreCase</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">unicodeInput</span>&gt;</span>true<span class="tag">&lt;/<span class="name">unicodeInput</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">execution</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">executions</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">plugin</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -222,7 +327,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-11 12:58:39" itemprop="dateModified" datetime="2024-03-11T12:58:39+00:00">2024-03-11</time>
+      <time title="修改时间：2024-03-21 10:58:33" itemprop="dateModified" datetime="2024-03-21T10:58:33+00:00">2024-03-21</time>
     </span>
 
   
@@ -359,7 +464,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-11 12:58:39" itemprop="dateModified" datetime="2024-03-11T12:58:39+00:00">2024-03-11</time>
+      <time title="修改时间：2024-03-21 10:58:33" itemprop="dateModified" datetime="2024-03-21T10:58:33+00:00">2024-03-21</time>
     </span>
 
   
@@ -487,7 +592,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-11 12:58:39" itemprop="dateModified" datetime="2024-03-11T12:58:39+00:00">2024-03-11</time>
+      <time title="修改时间：2024-03-21 10:58:33" itemprop="dateModified" datetime="2024-03-21T10:58:33+00:00">2024-03-21</time>
     </span>
 
   
@@ -598,7 +703,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-11 12:58:38" itemprop="dateModified" datetime="2024-03-11T12:58:38+00:00">2024-03-11</time>
+      <time title="修改时间：2024-03-21 10:58:33" itemprop="dateModified" datetime="2024-03-21T10:58:33+00:00">2024-03-21</time>
     </span>
 
   
@@ -701,7 +806,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-11 12:58:39" itemprop="dateModified" datetime="2024-03-11T12:58:39+00:00">2024-03-11</time>
+      <time title="修改时间：2024-03-21 10:58:33" itemprop="dateModified" datetime="2024-03-21T10:58:33+00:00">2024-03-21</time>
     </span>
 
   
@@ -798,7 +903,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-11 12:58:38" itemprop="dateModified" datetime="2024-03-11T12:58:38+00:00">2024-03-11</time>
+      <time title="修改时间：2024-03-21 10:58:33" itemprop="dateModified" datetime="2024-03-21T10:58:33+00:00">2024-03-21</time>
     </span>
 
   
@@ -886,7 +991,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-11 12:58:39" itemprop="dateModified" datetime="2024-03-11T12:58:39+00:00">2024-03-11</time>
+      <time title="修改时间：2024-03-21 10:58:33" itemprop="dateModified" datetime="2024-03-21T10:58:33+00:00">2024-03-21</time>
     </span>
 
   
@@ -969,7 +1074,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-11 12:58:38" itemprop="dateModified" datetime="2024-03-11T12:58:38+00:00">2024-03-11</time>
+      <time title="修改时间：2024-03-21 10:58:33" itemprop="dateModified" datetime="2024-03-21T10:58:33+00:00">2024-03-21</time>
     </span>
 
   
@@ -1082,7 +1187,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-11 12:58:39" itemprop="dateModified" datetime="2024-03-11T12:58:39+00:00">2024-03-11</time>
+      <time title="修改时间：2024-03-21 10:58:33" itemprop="dateModified" datetime="2024-03-21T10:58:33+00:00">2024-03-21</time>
     </span>
 
   
@@ -1127,122 +1232,6 @@
 <p>截止到目前，我们只需要一个静态配置，使得应用程序可以连接到中间件。最好这个配置是可以修改的，这样我们还可以继承蓝绿、灰度发布的能力。</p>
 <h3><span id="zhong-jian-jian-dao-ye-wu-cheng-xu-de-fa-xian">中间件到业务程序的发现</span><a href="#zhong-jian-jian-dao-ye-wu-cheng-xu-de-fa-xian" class="header-anchor">#</a></h3><p>这个模式常用于负载均衡中间件如<code>Lvs</code>、<code>Nginx</code>自动维护后端列表，我们可以通过<code>adapter</code>来从注册中心获取后端服务的实例信息，并实时更新。</p>
 <h2><span id="zong-jie">总结</span><a href="#zong-jie" class="header-anchor">#</a></h2><p>在商用系统中，中间件并没有想象中的那么开箱即用，本文讲述了一些中间件集成到商用系统中需要具备的能力。在对中间件侵入式修改没有技术能力或不想对中间件进行侵入式修改的场景。选用团队常用的、占用资源少的语言来开发中间件<code>adapter</code>应该是更好的选择。</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/filebeat/filebeat-output-websocket/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="shoothzj">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/filebeat/filebeat-output-websocket/" class="post-title-link" itemprop="url">开发一个filebeat output websocket插件</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-07-04 09:38:39" itemprop="dateCreated datePublished" datetime="2021-07-04T09:38:39+00:00">2021-07-04</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-11 12:58:38" itemprop="dateModified" datetime="2024-03-11T12:58:38+00:00">2024-03-11</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>开发一个filebeat的<code>websocket</code>插件， 代码仓地址: <a target="_blank" rel="noopener" href="https://github.com/shoothzj/beats_output_websocket">https://github.com/shoothzj/beats_output_websocket</a></p>
-<h2><span id="yin-ru-dui-beat-de-yi-lai">引入对<code>beat</code>的依赖</span><a href="#yin-ru-dui-beat-de-yi-lai" class="header-anchor">#</a></h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">go get github.com/elastic/beats/v7</span><br></pre></td></tr></table></figure>
-
-<h2><span id="ding-yi-zai-filebeat-zhong-de-pei-zhi-wen-jian">定义在filebeat中的配置文件</span><a href="#ding-yi-zai-filebeat-zhong-de-pei-zhi-wen-jian" class="header-anchor">#</a></h2><p><code>filebeat</code>通常以配置文件的方式加载插件。让我们定义一下必须的配置，就像<code>elasticsearch</code>中的连接地址等等一样。</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">output.websocket:</span></span><br><span class="line">  <span class="comment"># worker</span></span><br><span class="line">  <span class="comment"># 用于工作的websocket客户端数量</span></span><br><span class="line">  <span class="attr">workers:</span> <span class="number">1</span></span><br><span class="line">  <span class="comment"># 日志批量的最大大小</span></span><br><span class="line">  <span class="attr">batch_size:</span> <span class="number">1</span></span><br><span class="line">  <span class="comment"># 重试的最大次数，0代表不重试</span></span><br><span class="line">  <span class="attr">retry_limit:</span> <span class="number">1</span></span><br><span class="line">  <span class="comment"># conn</span></span><br><span class="line">  <span class="comment"># ws/wss</span></span><br><span class="line">  <span class="attr">schema:</span> <span class="string">&quot;ws&quot;</span></span><br><span class="line">  <span class="comment"># websocket连接地址</span></span><br><span class="line">  <span class="attr">addr:</span> <span class="string">&quot;localhost:8080&quot;</span></span><br><span class="line">  <span class="comment"># websocket路径</span></span><br><span class="line">  <span class="attr">path:</span> <span class="string">&quot;/echo&quot;</span></span><br><span class="line">  <span class="comment"># websocket心跳间隔，用于保活</span></span><br><span class="line">  <span class="attr">ping_interval:</span> <span class="number">30</span></span><br></pre></td></tr></table></figure>
-
-<h3><span id="go-wen-jian-zhong-de-pei-zhi">go文件中的配置</span><a href="#go-wen-jian-zhong-de-pei-zhi" class="header-anchor">#</a></h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> clientConfig <span class="keyword">struct</span> &#123;</span><br><span class="line">	<span class="comment">// Number of worker goroutines publishing log events</span></span><br><span class="line">	Workers <span class="type">int</span> <span class="string">`config:&quot;workers&quot; validate:&quot;min=1&quot;`</span></span><br><span class="line">	<span class="comment">// Max number of events in a batch to send to a single client</span></span><br><span class="line">	BatchSize <span class="type">int</span> <span class="string">`config:&quot;batch_size&quot; validate:&quot;min=1&quot;`</span></span><br><span class="line">	<span class="comment">// Max number of retries for single batch of events</span></span><br><span class="line">	RetryLimit <span class="type">int</span> <span class="string">`config:&quot;retry_limit&quot;`</span></span><br><span class="line">	<span class="comment">// Schema WebSocket Schema</span></span><br><span class="line">	Schema <span class="type">string</span> <span class="string">`config:&quot;schema&quot;`</span></span><br><span class="line">	<span class="comment">// Addr WebSocket Addr</span></span><br><span class="line">	Addr <span class="type">string</span> <span class="string">`config:&quot;addr&quot;`</span></span><br><span class="line">	<span class="comment">// Path WebSocket Path</span></span><br><span class="line">	Path <span class="type">string</span> <span class="string">`config:&quot;path&quot;`</span></span><br><span class="line">	<span class="comment">// PingInterval WebSocket PingInterval</span></span><br><span class="line">	PingInterval <span class="type">int</span> <span class="string">`config:&quot;ping_interval&quot;`</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h2><span id="chu-shi-hua-jia-zai-cha-jian">初始化加载插件</span><a href="#chu-shi-hua-jia-zai-cha-jian" class="header-anchor">#</a></h2><h3><span id="jia-zai-cha-jian">加载插件</span><a href="#jia-zai-cha-jian" class="header-anchor">#</a></h3><p>在某个init函数中注册插件</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">init</span><span class="params">()</span></span> &#123;</span><br><span class="line">	outputs.RegisterType(<span class="string">&quot;websocket&quot;</span>, newWsOutput)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>在<code>newWsOutput</code>中卸载配置，并提供配置给<code>WebSocket</code>客户端</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">newWsOutput</span><span class="params">(_ outputs.IndexManager, _ beat.Info, stats outputs.Observer, cfg *common.Config)</span></span> (outputs.Group, <span class="type">error</span>) &#123;</span><br><span class="line">	config := clientConfig&#123;&#125;</span><br><span class="line">	<span class="comment">// 卸载配置，将配置用于初始化WebSocket客户端</span></span><br><span class="line">	<span class="keyword">if</span> err := cfg.Unpack(&amp;config); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> outputs.Fail(err)</span><br><span class="line">	&#125;</span><br><span class="line">	clients := <span class="built_in">make</span>([]outputs.NetworkClient, config.Workers)</span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; config.Workers; i++ &#123;</span><br><span class="line">		clients[i] = &amp;wsClient&#123;</span><br><span class="line">			stats:  stats,</span><br><span class="line">			Schema: config.Schema,</span><br><span class="line">			Host:   config.Addr,</span><br><span class="line">			Path:   config.Path,</span><br><span class="line">			PingInterval: config.PingInterval,</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> outputs.SuccessNet(<span class="literal">true</span>, config.BatchSize, config.RetryLimit, clients)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2><span id="chu-shi-hua-websocket-ke-hu-duan">初始化<code>WebSocket</code>客户端</span><a href="#chu-shi-hua-websocket-ke-hu-duan" class="header-anchor">#</a></h2><p><code>WebSocket</code>客户端不仅仅是一个<code>WebSocket</code>客户端，而且还需要实现<code>filebeat</code>中的<code>NetworkClient</code>接口，接下来，让我们来关注接口中的每一个方法的作用及实现</p>
-<h3><span id="string-jie-kou">String()接口</span><a href="#string-jie-kou" class="header-anchor">#</a></h3><p><code>String</code>作为客户端的名字，用来标识日志以及指标。是最简单的一个接口</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(w *wsClient)</span></span> String() <span class="type">string</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="string">&quot;websocket&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3><span id="connect-jie-kou">Connect()接口</span><a href="#connect-jie-kou" class="header-anchor">#</a></h3><p><code>Connect</code>用来初始化客户端</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(w *wsClient)</span></span> Connect() <span class="type">error</span> &#123;</span><br><span class="line">	u := url.URL&#123;Scheme: w.Schema, Host: w.Host, Path: w.Path&#125;</span><br><span class="line">	dial, _, err := websocket.DefaultDialer.Dial(u.String(), <span class="literal">nil</span>)</span><br><span class="line">	<span class="keyword">if</span> err == <span class="literal">nil</span> &#123;</span><br><span class="line">		w.conn = dial</span><br><span class="line">		ticker := time.NewTicker(time.Duration(w.PingInterval) * time.Second)</span><br><span class="line">		<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">			<span class="keyword">for</span> <span class="keyword">range</span> ticker.C &#123;</span><br><span class="line">				w.conn.WriteMessage(websocket.PingMessage, <span class="literal">nil</span>)</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;()</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		time.Sleep(<span class="number">10</span> * time.Second)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> err</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>注意，这里初始化失败，需要<code>Sleep</code>一段时间，否则，filebeat会一直重试。这绝非是你想要的。或许对于场景来说，退避重试可能会更好</p>
-<h3><span id="close-jie-kou">Close()接口</span><a href="#close-jie-kou" class="header-anchor">#</a></h3><p>关闭客户端，也是很简单的接口</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(w *wsClient)</span></span> Close() <span class="type">error</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> w.conn.Close()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3><span id="publish-jie-kou">Publish()接口</span><a href="#publish-jie-kou" class="header-anchor">#</a></h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(w *wsClient)</span></span> Publish(_ context.Context, batch publisher.Batch) <span class="type">error</span> &#123;</span><br><span class="line">	events := batch.Events()</span><br><span class="line">	<span class="comment">// 记录这批日志</span></span><br><span class="line">	w.stats.NewBatch(<span class="built_in">len</span>(events))</span><br><span class="line">	failEvents, err := w.PublishEvents(events)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="comment">// 如果发送正常，则ACK</span></span><br><span class="line">		batch.ACK()</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		<span class="comment">// 发送失败，则重试。受RetryLimit的限制</span></span><br><span class="line">		batch.RetryEvents(failEvents)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> err</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(w *wsClient)</span></span> PublishEvents(events []publisher.Event) ([]publisher.Event, <span class="type">error</span>) &#123;</span><br><span class="line">	<span class="keyword">for</span> i, event := <span class="keyword">range</span> events &#123;</span><br><span class="line">		err := w.publishEvent(&amp;event)</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="comment">// 如果单条消息发送失败，则将剩余的消息直接重试</span></span><br><span class="line">			<span class="keyword">return</span> events[i:], err</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span>, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(w *wsClient)</span></span> publishEvent(event *publisher.Event) <span class="type">error</span> &#123;</span><br><span class="line">	bytes, err := encode(&amp;event.Content)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="comment">// 如果编码失败，就不重试了，重试也不会成功</span></span><br><span class="line">		<span class="comment">// encode error, don&#x27;t retry.</span></span><br><span class="line">		<span class="comment">// consider being success</span></span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line">	err = w.conn.WriteMessage(websocket.TextMessage, bytes)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="comment">// 写入WebSocket Server失败</span></span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3><span id="bian-ma">编码</span><a href="#bian-ma" class="header-anchor">#</a></h3><p>编码的逻辑因人而异，事实上，这可能是大家最大的差异所在。这里只是做一个简单地例子</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> LogOutput <span class="keyword">struct</span> &#123;</span><br><span class="line">	Timestamp time.Time <span class="string">`json:&quot;timestamp&quot;`</span></span><br><span class="line">	Message   <span class="type">string</span>    <span class="string">`json:&quot;message&quot;`</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">encode</span><span class="params">(event *beat.Event)</span></span> ([]<span class="type">byte</span>, <span class="type">error</span>) &#123;</span><br><span class="line">	logOutput := &amp;LogOutput&#123;&#125;</span><br><span class="line">	value, err := event.Fields.GetValue(<span class="string">&quot;message&quot;</span>)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">	&#125;</span><br><span class="line">	logOutput.Timestamp = event.Timestamp</span><br><span class="line">	logOutput.Message = value.(<span class="type">string</span>)</span><br><span class="line">	<span class="keyword">return</span> json.Marshal(logOutput)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3><span id="zui-hou-shi-wo-men-de-wsclient">最后是我们的<code>wsclient</code></span><a href="#zui-hou-shi-wo-men-de-wsclient" class="header-anchor">#</a></h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> wsClient <span class="keyword">struct</span> &#123;</span><br><span class="line">	<span class="comment">// construct field</span></span><br><span class="line">	Schema       <span class="type">string</span></span><br><span class="line">	Host         <span class="type">string</span></span><br><span class="line">	Path         <span class="type">string</span></span><br><span class="line">	PingInterval <span class="type">int</span></span><br><span class="line"></span><br><span class="line">	stats outputs.Observer</span><br><span class="line">	conn  *websocket.Conn</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2><span id="tian-jia-e-wai-de-gong-neng-da-bao-diu-qi">添加额外的功能：大包丢弃</span><a href="#tian-jia-e-wai-de-gong-neng-da-bao-diu-qi" class="header-anchor">#</a></h2><p>你可能会想保护你的<code>WebSocket</code>服务器，避免接收到超级大的日志。我们可以在配置项中添加一个配置</p>
-<p>maxLen用来限制日志长度，超过maxLen的日志直接丢弃。为什么不使用<code>filebeat</code>中的<code>max_bytes</code>？</p>
-<p>因为<code>filebeat</code>中<code>max_bytes</code>的默认行为是截断，截断的日志在某些场景下不如丢弃。（比如，日志是json格式，截断后格式无法解析）</p>
-<h3><span id="pei-zhi-zhong-tian-jia-maxlen">配置中添加maxLen</span><a href="#pei-zhi-zhong-tian-jia-maxlen" class="header-anchor">#</a></h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">max_len:</span> <span class="number">1024</span></span><br></pre></td></tr></table></figure>
-
-<p>省略掉那些重复的添加结构体，读取<code>max_len</code>在encode的时候忽略掉</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">s := value.(<span class="type">string</span>)</span><br><span class="line"><span class="keyword">if</span> <span class="built_in">len</span>(s) &gt;= w.MaxLen &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
       
     </div>

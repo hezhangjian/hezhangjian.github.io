@@ -146,7 +146,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">67</span>
+          <span class="site-state-item-count">68</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -177,6 +177,113 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/middleware-adapter-paradigm/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="shoothzj">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/middleware-adapter-paradigm/" class="post-title-link" itemprop="url">中间件是开箱即用的吗？为什么要开发中间件adapter？</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-08-09 17:37:59" itemprop="dateCreated datePublished" datetime="2021-08-09T17:37:59+00:00">2021-08-09</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2024-03-28 09:49:30" itemprop="dateModified" datetime="2024-03-28T09:49:30+00:00">2024-03-28</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2><span id="zhong-jian-jian-zai-hen-duo-xi-tong-zhong-du-cun-zai">中间件在很多系统中都存在</span><a href="#zhong-jian-jian-zai-hen-duo-xi-tong-zhong-du-cun-zai" class="header-anchor">#</a></h2><p>在一个系统里面，或多或少地都会有中间件的存在，总会有数据库吧，其他的如消息队列，缓存，大数据组件。即使是基于公有云构筑的系统，公有云厂商只提供广泛使用的中间件，假如你的系统里面有很多组件没那么泛用，那么就只能自己维护，如<code>ZooKeeper</code>、<code>Etcd</code>、<code>Pulsar</code>、<code>Prometheus</code>、<code>Lvs</code>等</p>
+<h2><span id="shi-me-shi-zhong-jian-jian-adapter">什么是中间件adapter</span><a href="#shi-me-shi-zhong-jian-jian-adapter" class="header-anchor">#</a></h2><p>中间件<code>adapter</code>指的是和中间件运行在一起（同一个物理机或同一个容器），使得中间件和商用系统中已有的组件进行对接，最终使得该中间件达到在该系统商用的标准。像Prometheus的众多<code>exporter</code>，就是将中间件和已有的监控系统（Prometheus）进行对接的<code>adpater</code>。</p>
+<h2><span id="wei-shi-me-bu-xiu-gai-zhong-jian-jian-yuan-ma-zhi-jie-ji-cheng">为什么不修改中间件源码直接集成</span><a href="#wei-shi-me-bu-xiu-gai-zhong-jian-jian-yuan-ma-zhi-jie-ji-cheng" class="header-anchor">#</a></h2><p>原因可以有很多，这里我列出几点</p>
+<h3><span id="yuan-ma-xiu-gai-rong-yi-wei-hu-kun-nan">源码修改容易，维护困难</span><a href="#yuan-ma-xiu-gai-rong-yi-wei-hu-kun-nan" class="header-anchor">#</a></h3><p>很多时候不是社区通用需求，无法合并到社区主干。后续每次中间件版本升级，源码的修改就要重新进行一次。社区大版本代码重构，有的甚至不知道如何修改下去。并且对研发人员的技能要求高。</p>
+<h3><span id="yuan-ma-yu-tuan-dui-ji-zhu-zhan-bu-tong-xiu-gai-kun-nan">源码与团队技术栈不同，修改困难</span><a href="#yuan-ma-yu-tuan-dui-ji-zhu-zhan-bu-tong-xiu-gai-kun-nan" class="header-anchor">#</a></h3><p>这是最常见的，像<code>java</code>团队维护<code>erlang</code>写的<code>rabbitmq</code></p>
+<h3><span id="he-qi-ta-xi-tong-dui-jie-you-yu-yan-yao-qiu">和其他系统对接，有语言要求</span><a href="#he-qi-ta-xi-tong-dui-jie-you-yu-yan-yao-qiu" class="header-anchor">#</a></h3><p>XX监控系统，只能使用X语言接入，但中间件使用Y语言写的，怎么办？adapter的能力就体现出来了。</p>
+<h2><span id="wei-shi-me-zai-shang-yong-xi-tong-zhong-zhong-jian-jian-zuo-bu-dao-kai-xiang-ji-yong">为什么在商用系统中中间件做不到开箱即用</span><a href="#wei-shi-me-zai-shang-yong-xi-tong-zhong-zhong-jian-jian-zuo-bu-dao-kai-xiang-ji-yong" class="header-anchor">#</a></h2><p>在商用系统中，对一个新引入的中间件，往往有如下能力上的诉求，原生的中间件很难满足</p>
+<ul>
+<li>适配原有的监控系统</li>
+<li>适配原有的告警系统</li>
+<li>适配原有的证书系统</li>
+<li>适配原有的备份系统（如果该中间件有状态）</li>
+<li>适配原有的容灾系统（如果该中间件有状态）</li>
+<li>自动化能力（适配部署、账号创建、权限策略创建）</li>
+<li>对外暴露时封装一层接口</li>
+<li>应用程序和中间件的服务发现</li>
+</ul>
+<p>有时候，业务也会根据业务的需求对中间件做一些能力增强，这部分需求比较定制，这里无法展开讨论了。</p>
+<p>我们来逐一讨论上面列出的能力诉求，凡是<code>adapter</code>能实现的功能，对中间件做修改也能实现，只不过因为上一节列出的原因，选择不在中间件处侵入式修改。</p>
+<h2><span id="gua-pei-yuan-you-de-jian-kong-xi-tong">适配原有的监控系统</span><a href="#gua-pei-yuan-you-de-jian-kong-xi-tong" class="header-anchor">#</a></h2><p>监控系统获取数据，往往是推拉两种模式，如果该中间件原生不支持和该监控系统对接。我们就可以让<code>adapter</code>先从中间件处取得监控数据，再和监控系统对接</p>
+<h2><span id="gua-pei-yuan-you-de-gao-jing-xi-tong">适配原有的告警系统</span><a href="#gua-pei-yuan-you-de-gao-jing-xi-tong" class="header-anchor">#</a></h2><p>如果中间件发生了不可恢复的错误，如写事务文件失败，操作ZooKeeper元数据失败，可以通过<code>adapter</code>来识别中间件是否发生了上述不可恢复的错误，并和告警系统对接，发出告警。</p>
+<h2><span id="gua-pei-yuan-you-de-zheng-shu-xi-tong">适配原有的证书系统</span><a href="#gua-pei-yuan-you-de-zheng-shu-xi-tong" class="header-anchor">#</a></h2><p>这一点也很关键，开源的中间件，根据我的了解，几乎没有项目做了动态证书轮换的方案，证书基本都不支持变更。而出色的商用系统是一定要支持证书轮换的。不过很遗憾的是，这些涉及到TLS握手的关键流程，<code>adapter</code>无法干涉这个流程，只能对中间件进行侵入式修改。</p>
+<h2><span id="gua-pei-yuan-you-de-bei-fen-xi-tong">适配原有的备份系统</span><a href="#gua-pei-yuan-you-de-bei-fen-xi-tong" class="header-anchor">#</a></h2><p>通过<code>adapter</code>对中间件进行定期备份、按照配置中心的策略备份、备份文件自动上传到文件服务器等。</p>
+<h2><span id="gua-pei-yuan-you-de-rong-zai-xi-tong">适配原有的容灾系统</span><a href="#gua-pei-yuan-you-de-rong-zai-xi-tong" class="header-anchor">#</a></h2><p>这个视中间件而定，有些中间件如<code>Pulsar</code>原生支持跨地域容灾的话，我们可能做一做配置就好了。另外一些，像<code>mysql</code>和<code>mongo</code>这种，可能我们还需要通过<code>adapter</code>来进行数据同步。不过这个时候<code>adapter</code>负责的职责就大了，还包括了容灾能力。</p>
+<h2><span id="zi-dong-hua-neng-li">自动化能力</span><a href="#zi-dong-hua-neng-li" class="header-anchor">#</a></h2><h3><span id="zi-dong-hua-bu-shu">自动化部署</span><a href="#zi-dong-hua-bu-shu" class="header-anchor">#</a></h3><p>比如<code>ZooKeeper</code>、<code>Kafka</code>、<code>filebeat</code>在安装的时候，要求填写配置文件，我们就可以让<code>adapter</code>来自动化生成配置或更新配置</p>
+<h3><span id="zhang-hao-he-ce-lue-de-chuang-jian-geng-xin">账号和策略的创建更新</span><a href="#zhang-hao-he-ce-lue-de-chuang-jian-geng-xin" class="header-anchor">#</a></h3><p>像<code>kubernetes</code>、<code>mysql</code>、<code>mongo</code>，我们可以在安装的时候通过<code>adapter</code>来自动化创建或更新</p>
+<h2><span id="dui-wai-bao-lu-shi-feng-zhuang-yi-ceng-jie-kou">对外暴露时封装一层接口</span><a href="#dui-wai-bao-lu-shi-feng-zhuang-yi-ceng-jie-kou" class="header-anchor">#</a></h2><p>封装接口常用于中间件的提供者，出于种种原因，如中间件原本接口能力太大、中间件原本接口未做权限控制、中间件原本接口未适配期望的权限框架等。我们可以用<code>adapter</code>封装实现一层新的接口对外暴露。</p>
+<h2><span id="ying-yong-cheng-xu-he-zhong-jian-jian-de-fu-wu-fa-xian">应用程序和中间件的服务发现</span><a href="#ying-yong-cheng-xu-he-zhong-jian-jian-de-fu-wu-fa-xian" class="header-anchor">#</a></h2><h3><span id="ying-yong-cheng-xu-fa-xian-zhong-jian-jian">应用程序发现中间件</span><a href="#ying-yong-cheng-xu-fa-xian-zhong-jian-jian" class="header-anchor">#</a></h3><p>应用程序与中间件的连接，说的简单一点就是如何获取<code>Ip</code>，如果是基于kubernetes的部署，那么不推荐配置<code>Ip</code>，最好是配置域名，因为<code>Ip</code>会跟着容器的生命周期变化。首先，你的应用程序并不会因为中间件的一个容器重启了来重建客户端，往往是通过一个简单重连的方式连接到新的中间件容器继续工作。其次，我们的运维人员也不会每时每刻盯着容器Ip是否变化来进行配置吧。以下图为例，域名的配置要优于Ip的配置。</p>
+<p><img src="/middleware-adapter-paradigm/application-discover-middleware.png" alt="application-discover-middleware"></p>
+<p>截止到目前，我们只需要一个静态配置，使得应用程序可以连接到中间件。最好这个配置是可以修改的，这样我们还可以继承蓝绿、灰度发布的能力。</p>
+<h3><span id="zhong-jian-jian-dao-ye-wu-cheng-xu-de-fa-xian">中间件到业务程序的发现</span><a href="#zhong-jian-jian-dao-ye-wu-cheng-xu-de-fa-xian" class="header-anchor">#</a></h3><p>这个模式常用于负载均衡中间件如<code>Lvs</code>、<code>Nginx</code>自动维护后端列表，我们可以通过<code>adapter</code>来从注册中心获取后端服务的实例信息，并实时更新。</p>
+<h2><span id="zong-jie">总结</span><a href="#zong-jie" class="header-anchor">#</a></h2><p>在商用系统中，中间件并没有想象中的那么开箱即用，本文讲述了一些中间件集成到商用系统中需要具备的能力。在对中间件侵入式修改没有技术能力或不想对中间件进行侵入式修改的场景。选用团队常用的、占用资源少的语言来开发中间件<code>adapter</code>应该是更好的选择。</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -222,7 +329,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-21 10:58:33" itemprop="dateModified" datetime="2024-03-21T10:58:33+00:00">2024-03-21</time>
+      <time title="修改时间：2024-03-28 09:49:30" itemprop="dateModified" datetime="2024-03-28T09:49:30+00:00">2024-03-28</time>
     </span>
 
   
@@ -338,7 +445,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-21 10:58:33" itemprop="dateModified" datetime="2024-03-21T10:58:33+00:00">2024-03-21</time>
+      <time title="修改时间：2024-03-28 09:49:30" itemprop="dateModified" datetime="2024-03-28T09:49:30+00:00">2024-03-28</time>
     </span>
 
   
@@ -446,7 +553,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-21 10:58:33" itemprop="dateModified" datetime="2024-03-21T10:58:33+00:00">2024-03-21</time>
+      <time title="修改时间：2024-03-28 09:49:30" itemprop="dateModified" datetime="2024-03-28T09:49:30+00:00">2024-03-28</time>
     </span>
 
   
@@ -601,7 +708,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-21 10:58:33" itemprop="dateModified" datetime="2024-03-21T10:58:33+00:00">2024-03-21</time>
+      <time title="修改时间：2024-03-28 09:49:30" itemprop="dateModified" datetime="2024-03-28T09:49:30+00:00">2024-03-28</time>
     </span>
 
   
@@ -699,7 +806,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-21 10:58:33" itemprop="dateModified" datetime="2024-03-21T10:58:33+00:00">2024-03-21</time>
+      <time title="修改时间：2024-03-28 09:49:30" itemprop="dateModified" datetime="2024-03-28T09:49:30+00:00">2024-03-28</time>
     </span>
 
   
@@ -792,7 +899,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-21 10:58:33" itemprop="dateModified" datetime="2024-03-21T10:58:33+00:00">2024-03-21</time>
+      <time title="修改时间：2024-03-28 09:49:30" itemprop="dateModified" datetime="2024-03-28T09:49:30+00:00">2024-03-28</time>
     </span>
 
   
@@ -900,7 +1007,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-21 10:58:33" itemprop="dateModified" datetime="2024-03-21T10:58:33+00:00">2024-03-21</time>
+      <time title="修改时间：2024-03-28 09:49:30" itemprop="dateModified" datetime="2024-03-28T09:49:30+00:00">2024-03-28</time>
     </span>
 
   
@@ -1072,7 +1179,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-21 10:58:33" itemprop="dateModified" datetime="2024-03-21T10:58:33+00:00">2024-03-21</time>
+      <time title="修改时间：2024-03-28 09:49:30" itemprop="dateModified" datetime="2024-03-28T09:49:30+00:00">2024-03-28</time>
     </span>
 
   
@@ -1162,7 +1269,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-21 10:58:33" itemprop="dateModified" datetime="2024-03-21T10:58:33+00:00">2024-03-21</time>
+      <time title="修改时间：2024-03-28 09:49:30" itemprop="dateModified" datetime="2024-03-28T09:49:30+00:00">2024-03-28</time>
     </span>
 
   
@@ -1187,108 +1294,6 @@
 <li>persistent值大于等于set时，persistent timeout以persistent的设置为准。</li>
 <li>persistent值小于set时，当set超时，但persistent超时后，会将persistent再次设置为60。只到set超时为止。所以这个时候，真实生效的persistent timeout是<code>(s/60)*60 + p%60 + 60</code></li>
 </ul>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/bookkeeper/bookkeeper-persistent-file/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="shoothzj">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/bookkeeper/bookkeeper-persistent-file/" class="post-title-link" itemprop="url">bookkeeper 持久化文件解析</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-02-16 12:19:19" itemprop="dateCreated datePublished" datetime="2021-02-16T12:19:19+00:00">2021-02-16</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-21 10:58:33" itemprop="dateModified" datetime="2024-03-21T10:58:33+00:00">2024-03-21</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1><span id="entry-log-file">Entry Log File</span><a href="#entry-log-file" class="header-anchor">#</a></h1><h2><span id="bei-jing">背景</span><a href="#bei-jing" class="header-anchor">#</a></h2><p>测试环境上出现了一些entryLog解析异常的问题，想分析一下磁盘上.log文件的格式，分析分析我们的文件是否有问题</p>
-<h2><span id="jie-xi-dai-ma-di-zhi">解析代码地址</span><a href="#jie-xi-dai-ma-di-zhi" class="header-anchor">#</a></h2><p><a target="_blank" rel="noopener" href="https://github.com/protocol-laboratory/bookkeeper-codec-java/blob/main/src/main/java/com/github/protocol/EntryLogReader.java">https://github.com/protocol-laboratory/bookkeeper-codec-java/blob/main/src/main/java/com/github/protocol/EntryLogReader.java</a></p>
-<h2><span id="zheng-wen">正文</span><a href="#zheng-wen" class="header-anchor">#</a></h2><p>我们采用的配置是singleEntryLog模式，就是说很多ledger的信息都会放在一个log文件内部。</p>
-<p>插一句话：这种log文件，其实和LSM相似，属于不可变的数据结构，这种数据结构，得益于不可变，所以内容可以安排的非常紧凑，不像B树结构，需要预留一定空间给原地更新，随机插入等。</p>
-<p><img src="/bookkeeper/bookkeeper-persistent-file/bookkeeper-entry-log-format.png" alt="bookkeeper-entry-log-format"></p>
-<p>如上图所示，接下来，我们沿着解析的流程，解读每个部分的详细格式</p>
-<h3><span id="jie-xi-tou-bu">解析头部</span><a href="#jie-xi-tou-bu" class="header-anchor">#</a></h3><p>首先，我们解析文件的头部字段，bookkeeper的设计中，文件头部预留了1024字节，目前只使用了20个字节<br>前四个字节是<strong>BKLO</strong>的文件魔数<br>然后紧跟着的4个字节是bk文件的版本号，这里我们仅分析版本号1<br>然后8字节的long类型代表<strong>ledgersMap</strong>的开始位置，称为<strong>ledgersMapOffset</strong>。<br>然后4字节的int类型代表<strong>ledgersMap</strong>的总长度。</p>
-<h3><span id="jie-xi-ledgermap-bu-fen">解析ledgerMap部分</span><a href="#jie-xi-ledgermap-bu-fen" class="header-anchor">#</a></h3><p>最前面四个字节，代表这部分的大小</p>
-<p>然后开始的ledgerId和entryId分别为-1，-2，随后是一个ledger的count大小，后面的ledgerId和size才是有效值</p>
-<p>随后的部分非常紧凑，由一个个ledgerId，size组成</p>
-<p>读取完ledgerMap，可以知道，这个文件包含了多少ledger，总大小是多少？</p>
-<p>注：size代表这一段ledger占用的磁盘空间大小</p>
-<h3><span id="jie-xi-body-nei-rong">解析body内容</span><a href="#jie-xi-body-nei-rong" class="header-anchor">#</a></h3><p>body内容也非常紧凑.<br>最前面4个字节，代表这个entry的大小。<br>然后8个字节，ledgerId<br>然后8个字节，entryId<br>剩下的内容，就是pulsar写数据的编码，不再属于bookkeeper的格式范畴了</p>
-<h1><span id="txn-log-file">Txn Log File</span><a href="#txn-log-file" class="header-anchor">#</a></h1><h2><span id="jie-xi-dai-ma-di-zhi">解析代码地址</span><a href="#jie-xi-dai-ma-di-zhi" class="header-anchor">#</a></h2><p><a target="_blank" rel="noopener" href="https://github.com/protocol-laboratory/bookkeeper-codec-java/blob/main/src/main/java/com/github/protocol/TxnLogReader.java">https://github.com/protocol-laboratory/bookkeeper-codec-java/blob/main/src/main/java/com/github/protocol/TxnLogReader.java</a></p>
-<h2><span id="jian-shu">简述</span><a href="#jian-shu" class="header-anchor">#</a></h2><p>bookkeeper中的journal log，和大部分基于LSM的数据结构一样，是用来保证文件一定被写入的。会在数据写入的时候，写入journal log，崩溃恢复的时候从journal log里面恢复。</p>
-<p><img src="/bookkeeper/bookkeeper-persistent-file/bookkeeper-txn-log-format.png" alt="bookkeeper-txn-log-format"></p>
-<h3><span id="jie-xi-tou-bu">解析头部</span><a href="#jie-xi-tou-bu" class="header-anchor">#</a></h3><p>首先，我们解析文件的头部字段<br>前四个字节是BKLG的文件魔数<br>然后紧跟着的4个字节是bk文件的版本号</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> TxnHeader <span class="title function_">readHeader</span><span class="params">(FileChannel fileChannel)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    <span class="keyword">final</span> <span class="type">ByteBuf</span> <span class="variable">headers</span> <span class="operator">=</span> Unpooled.buffer(HEADER_SIZE);</span><br><span class="line">    <span class="keyword">final</span> <span class="type">int</span> <span class="variable">read</span> <span class="operator">=</span> fileChannel.read(headers.internalNioBuffer( index: <span class="number">0</span>, HEADER_SIZE));</span><br><span class="line">    headers.writerIndex(read);</span><br><span class="line">    <span class="keyword">final</span> <span class="type">byte</span>[] bklgByte = <span class="keyword">new</span> <span class="title class_">byte</span>[<span class="number">4</span>];</span><br><span class="line">    headers.readBytes(bklgByte, dstIndex: <span class="number">0</span>, length: <span class="number">4</span>);</span><br><span class="line">    <span class="keyword">final</span> <span class="type">int</span> <span class="variable">headerVersion</span> <span class="operator">=</span> headers.readInt();</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">TxnHeader</span>(headerVersion);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3><span id="jie-xi-nei-rong">解析内容</span><a href="#jie-xi-nei-rong" class="header-anchor">#</a></h3><p>内容非常紧凑，由ledgerId，entryId和内容组成。ledgerId一定大于0，entryId在小于0的情况下代表特殊的数据。如</p>
-<ul>
-<li>-0x1000即4096 代表ledger的masterKey</li>
-<li>-0x2000即8192 代表ledger是否被fence</li>
-<li>-0x4000即16384 代表ledger的force</li>
-<li>-0x8000即32768 代表ledger的显示LAC</li>
-</ul>
-<h2><span id="hui-fang-liu-cheng">回放流程</span><a href="#hui-fang-liu-cheng" class="header-anchor">#</a></h2><p>当bookkeeper启动的时候，他会从data路径下取得lastMark文件，该文件一定为16个字节，前八个字节代表落盘的最新journal log文件，后八个字节代表文件的位置。会从这个位置开始回放<br>值得一提的是，lastId文件，代表下一个dataLog该使用什么文件名</p>
 
       
     </div>

@@ -146,7 +146,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">67</span>
+          <span class="site-state-item-count">68</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -177,6 +177,100 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/linux/linux-umask-analyze/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="shoothzj">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/linux/linux-umask-analyze/" class="post-title-link" itemprop="url">linux umask 解析</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-11-08 19:20:53" itemprop="dateCreated datePublished" datetime="2022-11-08T19:20:53+00:00">2022-11-08</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2024-03-28 09:49:30" itemprop="dateModified" datetime="2024-03-28T09:49:30+00:00">2024-03-28</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>什么是<strong>umask</strong>， umask即user file-creation mask. 用来控制最终创建文件的权限。</p>
+<p>umask是进程级属性，通常是由<strong>login shell</strong>设置，可以通过系统调用<strong>umask()<strong>或者命令</strong>umask permission</strong>来修改，通过umask命令来查询，linux内核版本4.7之后，还可以通过<strong>cat &#x2F;proc&#x2F;self&#x2F;status|grep -i umask</strong> 查询，示例如下</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">shoothzj:~/masktest $ <span class="built_in">umask</span></span><br><span class="line">0022</span><br><span class="line">shoothzj:~/masktest $ <span class="built_in">umask</span> 0077</span><br><span class="line">shoothzj:~/masktest $ <span class="built_in">umask</span></span><br><span class="line">0077</span><br><span class="line">shoothzj:~/masktest $ <span class="built_in">umask</span> 0022</span><br><span class="line">shoothzj:~/masktest $ <span class="built_in">umask</span></span><br><span class="line">0022</span><br><span class="line">shoothzj:~/masktest $</span><br></pre></td></tr></table></figure>
+
+<p>一般来说，umask的系统默认值在**&#x2F;etc&#x2F;login.defs** 中设置</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">shoothzj:~ <span class="variable">$cat</span> /etc/login.defs|grep -i <span class="built_in">umask</span></span><br><span class="line"><span class="comment">#	UMASK		Default &quot;umask&quot; value.</span></span><br><span class="line"><span class="comment"># UMASK is the default umask value for pam_umask and is used by</span></span><br><span class="line"><span class="comment"># 022 is the &quot;historical&quot; value in Debian for UMASK</span></span><br><span class="line"><span class="comment"># If USERGROUPS_ENAB is set to &quot;yes&quot;, that will modify this UMASK default value</span></span><br><span class="line">UMASK		022</span><br><span class="line"><span class="comment"># Other former uses of this variable such as setting the umask when</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>最常见的默认的umask值是022，目录权限755，文件权限644</li>
+<li>077 的 umask 适用于私有的系统，则其他用户无法读取或写入您的数据。</li>
+</ul>
+<p>针对标准函数<strong>open</strong>来说，最终写入磁盘的权限位是由mode参数和用户的文件创建掩码(umask)执行按位与操作而得到。</p>
+<p>假设当<strong>umask</strong>为0022时，创建一个具有0666权限的文件，就会进行运算决定文件的最终权限，先对掩码取非，再和指定的权限进行binary-And操作，如图所示</p>
+<p><img src="/linux/linux-umask-analyze/linux-umask-analyze.png" alt="linux-umask-analyze"></p>
+<p>示例代码如下</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;fcntl.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> *argv[])</span> &#123;</span><br><span class="line">    <span class="type">int</span> fd;</span><br><span class="line">    <span class="keyword">if</span> (argc != <span class="number">2</span>) &#123;</span><br><span class="line">        <span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">&quot;usage: %s &lt;file&gt;&quot;</span>, argv[<span class="number">0</span>]);</span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">fprintf</span>(<span class="built_in">stdout</span>, <span class="string">&quot;create file %s&quot;</span>, argv[<span class="number">1</span>]);</span><br><span class="line">    fd = open(argv[<span class="number">1</span>], O_WRONLY | O_CREAT | O_TRUNC, <span class="number">0666</span>);</span><br><span class="line">    <span class="keyword">if</span> (fd == <span class="number">-1</span>) &#123;</span><br><span class="line">        perror(<span class="string">&quot;open&quot;</span>);</span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    close(fd);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>结果如下，权限644，符合预期</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ll</span><br><span class="line">total 8</span><br><span class="line">drwxr-xr-x  2 shoothzj shoothzj 4096 Nov  8 06:25 .</span><br><span class="line">drwxr-xr-x 15 shoothzj shoothzj 4096 Nov  8 06:18 ..</span><br><span class="line">-rw-r--r--  1 shoothzj shoothzj    0 Nov  8 06:25 my.txt</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -222,7 +316,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-21 10:58:33" itemprop="dateModified" datetime="2024-03-21T10:58:33+00:00">2024-03-21</time>
+      <time title="修改时间：2024-03-28 09:49:29" itemprop="dateModified" datetime="2024-03-28T09:49:29+00:00">2024-03-28</time>
     </span>
 
   
@@ -327,7 +421,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-21 10:58:33" itemprop="dateModified" datetime="2024-03-21T10:58:33+00:00">2024-03-21</time>
+      <time title="修改时间：2024-03-28 09:49:30" itemprop="dateModified" datetime="2024-03-28T09:49:30+00:00">2024-03-28</time>
     </span>
 
   
@@ -464,7 +558,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-21 10:58:33" itemprop="dateModified" datetime="2024-03-21T10:58:33+00:00">2024-03-21</time>
+      <time title="修改时间：2024-03-28 09:49:30" itemprop="dateModified" datetime="2024-03-28T09:49:30+00:00">2024-03-28</time>
     </span>
 
   
@@ -592,7 +686,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-21 10:58:33" itemprop="dateModified" datetime="2024-03-21T10:58:33+00:00">2024-03-21</time>
+      <time title="修改时间：2024-03-28 09:49:30" itemprop="dateModified" datetime="2024-03-28T09:49:30+00:00">2024-03-28</time>
     </span>
 
   
@@ -703,7 +797,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-21 10:58:33" itemprop="dateModified" datetime="2024-03-21T10:58:33+00:00">2024-03-21</time>
+      <time title="修改时间：2024-03-28 09:49:30" itemprop="dateModified" datetime="2024-03-28T09:49:30+00:00">2024-03-28</time>
     </span>
 
   
@@ -806,7 +900,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-21 10:58:33" itemprop="dateModified" datetime="2024-03-21T10:58:33+00:00">2024-03-21</time>
+      <time title="修改时间：2024-03-28 09:49:30" itemprop="dateModified" datetime="2024-03-28T09:49:30+00:00">2024-03-28</time>
     </span>
 
   
@@ -903,7 +997,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-21 10:58:33" itemprop="dateModified" datetime="2024-03-21T10:58:33+00:00">2024-03-21</time>
+      <time title="修改时间：2024-03-28 09:49:30" itemprop="dateModified" datetime="2024-03-28T09:49:30+00:00">2024-03-28</time>
     </span>
 
   
@@ -991,7 +1085,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-21 10:58:33" itemprop="dateModified" datetime="2024-03-21T10:58:33+00:00">2024-03-21</time>
+      <time title="修改时间：2024-03-28 09:49:30" itemprop="dateModified" datetime="2024-03-28T09:49:30+00:00">2024-03-28</time>
     </span>
 
   
@@ -1074,7 +1168,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-21 10:58:33" itemprop="dateModified" datetime="2024-03-21T10:58:33+00:00">2024-03-21</time>
+      <time title="修改时间：2024-03-28 09:49:30" itemprop="dateModified" datetime="2024-03-28T09:49:30+00:00">2024-03-28</time>
     </span>
 
   
@@ -1125,113 +1219,6 @@
 
 <h1><span id="da-yin-si-suo">打印死锁</span><a href="#da-yin-si-suo" class="header-anchor">#</a></h1><p>javadoc中指出，这是一个开销较大的操作</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">printDeadLock</span><span class="params">()</span> &#123;</span><br><span class="line">       <span class="keyword">final</span> <span class="type">ThreadMXBean</span> <span class="variable">threadMXBean</span> <span class="operator">=</span> ManagementFactory.getThreadMXBean();</span><br><span class="line">       <span class="keyword">final</span> <span class="type">long</span>[] deadlockedThreads = threadMXBean.findDeadlockedThreads();</span><br><span class="line">       <span class="keyword">for</span> (<span class="type">long</span> deadlockedThread : deadlockedThreads) &#123;</span><br><span class="line">           <span class="keyword">final</span> <span class="type">ThreadInfo</span> <span class="variable">threadInfo</span> <span class="operator">=</span> threadMXBean.getThreadInfo(deadlockedThread);</span><br><span class="line">           System.out.println(threadInfo + <span class="string">&quot;deadLocked&quot;</span>);</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/middleware-adapter-paradigm/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="shoothzj">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/middleware-adapter-paradigm/" class="post-title-link" itemprop="url">中间件是开箱即用的吗？为什么要开发中间件adapter？</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-08-09 17:37:59" itemprop="dateCreated datePublished" datetime="2021-08-09T17:37:59+00:00">2021-08-09</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-21 10:58:33" itemprop="dateModified" datetime="2024-03-21T10:58:33+00:00">2024-03-21</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h2><span id="zhong-jian-jian-zai-hen-duo-xi-tong-zhong-du-cun-zai">中间件在很多系统中都存在</span><a href="#zhong-jian-jian-zai-hen-duo-xi-tong-zhong-du-cun-zai" class="header-anchor">#</a></h2><p>在一个系统里面，或多或少地都会有中间件的存在，总会有数据库吧，其他的如消息队列，缓存，大数据组件。即使是基于公有云构筑的系统，公有云厂商只提供广泛使用的中间件，假如你的系统里面有很多组件没那么泛用，那么就只能自己维护，如<code>ZooKeeper</code>、<code>Etcd</code>、<code>Pulsar</code>、<code>Prometheus</code>、<code>Lvs</code>等</p>
-<h2><span id="shi-me-shi-zhong-jian-jian-adapter">什么是中间件adapter</span><a href="#shi-me-shi-zhong-jian-jian-adapter" class="header-anchor">#</a></h2><p>中间件<code>adapter</code>指的是和中间件运行在一起（同一个物理机或同一个容器），使得中间件和商用系统中已有的组件进行对接，最终使得该中间件达到在该系统商用的标准。像Prometheus的众多<code>exporter</code>，就是将中间件和已有的监控系统（Prometheus）进行对接的<code>adpater</code>。</p>
-<h2><span id="wei-shi-me-bu-xiu-gai-zhong-jian-jian-yuan-ma-zhi-jie-ji-cheng">为什么不修改中间件源码直接集成</span><a href="#wei-shi-me-bu-xiu-gai-zhong-jian-jian-yuan-ma-zhi-jie-ji-cheng" class="header-anchor">#</a></h2><p>原因可以有很多，这里我列出几点</p>
-<h3><span id="yuan-ma-xiu-gai-rong-yi-wei-hu-kun-nan">源码修改容易，维护困难</span><a href="#yuan-ma-xiu-gai-rong-yi-wei-hu-kun-nan" class="header-anchor">#</a></h3><p>很多时候不是社区通用需求，无法合并到社区主干。后续每次中间件版本升级，源码的修改就要重新进行一次。社区大版本代码重构，有的甚至不知道如何修改下去。并且对研发人员的技能要求高。</p>
-<h3><span id="yuan-ma-yu-tuan-dui-ji-zhu-zhan-bu-tong-xiu-gai-kun-nan">源码与团队技术栈不同，修改困难</span><a href="#yuan-ma-yu-tuan-dui-ji-zhu-zhan-bu-tong-xiu-gai-kun-nan" class="header-anchor">#</a></h3><p>这是最常见的，像<code>java</code>团队维护<code>erlang</code>写的<code>rabbitmq</code></p>
-<h3><span id="he-qi-ta-xi-tong-dui-jie-you-yu-yan-yao-qiu">和其他系统对接，有语言要求</span><a href="#he-qi-ta-xi-tong-dui-jie-you-yu-yan-yao-qiu" class="header-anchor">#</a></h3><p>XX监控系统，只能使用X语言接入，但中间件使用Y语言写的，怎么办？adapter的能力就体现出来了。</p>
-<h2><span id="wei-shi-me-zai-shang-yong-xi-tong-zhong-zhong-jian-jian-zuo-bu-dao-kai-xiang-ji-yong">为什么在商用系统中中间件做不到开箱即用</span><a href="#wei-shi-me-zai-shang-yong-xi-tong-zhong-zhong-jian-jian-zuo-bu-dao-kai-xiang-ji-yong" class="header-anchor">#</a></h2><p>在商用系统中，对一个新引入的中间件，往往有如下能力上的诉求，原生的中间件很难满足</p>
-<ul>
-<li>适配原有的监控系统</li>
-<li>适配原有的告警系统</li>
-<li>适配原有的证书系统</li>
-<li>适配原有的备份系统（如果该中间件有状态）</li>
-<li>适配原有的容灾系统（如果该中间件有状态）</li>
-<li>自动化能力（适配部署、账号创建、权限策略创建）</li>
-<li>对外暴露时封装一层接口</li>
-<li>应用程序和中间件的服务发现</li>
-</ul>
-<p>有时候，业务也会根据业务的需求对中间件做一些能力增强，这部分需求比较定制，这里无法展开讨论了。</p>
-<p>我们来逐一讨论上面列出的能力诉求，凡是<code>adapter</code>能实现的功能，对中间件做修改也能实现，只不过因为上一节列出的原因，选择不在中间件处侵入式修改。</p>
-<h2><span id="gua-pei-yuan-you-de-jian-kong-xi-tong">适配原有的监控系统</span><a href="#gua-pei-yuan-you-de-jian-kong-xi-tong" class="header-anchor">#</a></h2><p>监控系统获取数据，往往是推拉两种模式，如果该中间件原生不支持和该监控系统对接。我们就可以让<code>adapter</code>先从中间件处取得监控数据，再和监控系统对接</p>
-<h2><span id="gua-pei-yuan-you-de-gao-jing-xi-tong">适配原有的告警系统</span><a href="#gua-pei-yuan-you-de-gao-jing-xi-tong" class="header-anchor">#</a></h2><p>如果中间件发生了不可恢复的错误，如写事务文件失败，操作ZooKeeper元数据失败，可以通过<code>adapter</code>来识别中间件是否发生了上述不可恢复的错误，并和告警系统对接，发出告警。</p>
-<h2><span id="gua-pei-yuan-you-de-zheng-shu-xi-tong">适配原有的证书系统</span><a href="#gua-pei-yuan-you-de-zheng-shu-xi-tong" class="header-anchor">#</a></h2><p>这一点也很关键，开源的中间件，根据我的了解，几乎没有项目做了动态证书轮换的方案，证书基本都不支持变更。而出色的商用系统是一定要支持证书轮换的。不过很遗憾的是，这些涉及到TLS握手的关键流程，<code>adapter</code>无法干涉这个流程，只能对中间件进行侵入式修改。</p>
-<h2><span id="gua-pei-yuan-you-de-bei-fen-xi-tong">适配原有的备份系统</span><a href="#gua-pei-yuan-you-de-bei-fen-xi-tong" class="header-anchor">#</a></h2><p>通过<code>adapter</code>对中间件进行定期备份、按照配置中心的策略备份、备份文件自动上传到文件服务器等。</p>
-<h2><span id="gua-pei-yuan-you-de-rong-zai-xi-tong">适配原有的容灾系统</span><a href="#gua-pei-yuan-you-de-rong-zai-xi-tong" class="header-anchor">#</a></h2><p>这个视中间件而定，有些中间件如<code>Pulsar</code>原生支持跨地域容灾的话，我们可能做一做配置就好了。另外一些，像<code>mysql</code>和<code>mongo</code>这种，可能我们还需要通过<code>adapter</code>来进行数据同步。不过这个时候<code>adapter</code>负责的职责就大了，还包括了容灾能力。</p>
-<h2><span id="zi-dong-hua-neng-li">自动化能力</span><a href="#zi-dong-hua-neng-li" class="header-anchor">#</a></h2><h3><span id="zi-dong-hua-bu-shu">自动化部署</span><a href="#zi-dong-hua-bu-shu" class="header-anchor">#</a></h3><p>比如<code>ZooKeeper</code>、<code>Kafka</code>、<code>filebeat</code>在安装的时候，要求填写配置文件，我们就可以让<code>adapter</code>来自动化生成配置或更新配置</p>
-<h3><span id="zhang-hao-he-ce-lue-de-chuang-jian-geng-xin">账号和策略的创建更新</span><a href="#zhang-hao-he-ce-lue-de-chuang-jian-geng-xin" class="header-anchor">#</a></h3><p>像<code>kubernetes</code>、<code>mysql</code>、<code>mongo</code>，我们可以在安装的时候通过<code>adapter</code>来自动化创建或更新</p>
-<h2><span id="dui-wai-bao-lu-shi-feng-zhuang-yi-ceng-jie-kou">对外暴露时封装一层接口</span><a href="#dui-wai-bao-lu-shi-feng-zhuang-yi-ceng-jie-kou" class="header-anchor">#</a></h2><p>封装接口常用于中间件的提供者，出于种种原因，如中间件原本接口能力太大、中间件原本接口未做权限控制、中间件原本接口未适配期望的权限框架等。我们可以用<code>adapter</code>封装实现一层新的接口对外暴露。</p>
-<h2><span id="ying-yong-cheng-xu-he-zhong-jian-jian-de-fu-wu-fa-xian">应用程序和中间件的服务发现</span><a href="#ying-yong-cheng-xu-he-zhong-jian-jian-de-fu-wu-fa-xian" class="header-anchor">#</a></h2><h3><span id="ying-yong-cheng-xu-fa-xian-zhong-jian-jian">应用程序发现中间件</span><a href="#ying-yong-cheng-xu-fa-xian-zhong-jian-jian" class="header-anchor">#</a></h3><p>应用程序与中间件的连接，说的简单一点就是如何获取<code>Ip</code>，如果是基于kubernetes的部署，那么不推荐配置<code>Ip</code>，最好是配置域名，因为<code>Ip</code>会跟着容器的生命周期变化。首先，你的应用程序并不会因为中间件的一个容器重启了来重建客户端，往往是通过一个简单重连的方式连接到新的中间件容器继续工作。其次，我们的运维人员也不会每时每刻盯着容器Ip是否变化来进行配置吧。以下图为例，域名的配置要优于Ip的配置。</p>
-<p><img src="/middleware-adapter-paradigm/application-discover-middleware.png" alt="application-discover-middleware"></p>
-<p>截止到目前，我们只需要一个静态配置，使得应用程序可以连接到中间件。最好这个配置是可以修改的，这样我们还可以继承蓝绿、灰度发布的能力。</p>
-<h3><span id="zhong-jian-jian-dao-ye-wu-cheng-xu-de-fa-xian">中间件到业务程序的发现</span><a href="#zhong-jian-jian-dao-ye-wu-cheng-xu-de-fa-xian" class="header-anchor">#</a></h3><p>这个模式常用于负载均衡中间件如<code>Lvs</code>、<code>Nginx</code>自动维护后端列表，我们可以通过<code>adapter</code>来从注册中心获取后端服务的实例信息，并实时更新。</p>
-<h2><span id="zong-jie">总结</span><a href="#zong-jie" class="header-anchor">#</a></h2><p>在商用系统中，中间件并没有想象中的那么开箱即用，本文讲述了一些中间件集成到商用系统中需要具备的能力。在对中间件侵入式修改没有技术能力或不想对中间件进行侵入式修改的场景。选用团队常用的、占用资源少的语言来开发中间件<code>adapter</code>应该是更好的选择。</p>
 
       
     </div>

@@ -146,7 +146,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">67</span>
+          <span class="site-state-item-count">68</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -177,6 +177,136 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/code/file-codec-design/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="shoothzj">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/code/file-codec-design/" class="post-title-link" itemprop="url">文件编解码代码设计</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-11-20 15:30:54" itemprop="dateCreated datePublished" datetime="2023-11-20T15:30:54+00:00">2023-11-20</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2024-03-28 09:49:30" itemprop="dateModified" datetime="2024-03-28T09:49:30+00:00">2024-03-28</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#gai-shu">概述</a></li>
+<li><a href="#java">Java</a></li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="gai-shu">概述</span><a href="#gai-shu" class="header-anchor">#</a></h1><p>我们以xyz文件格式为例，来说明文件编解码的代码设计。xyz文件格式内容如下：</p>
+<ul>
+<li>header部分：文件头，包含文件版本号、文件类型、文件大小等信息</li>
+<li>body部分：文件主体</li>
+</ul>
+<p>通用设计大概如下</p>
+<pre class="mermaid">classDiagram
+    class XyzHeader {
+        + byte[] content
+    }
+    class XyzBody {
+        + byte[] content
+    }
+    class Xyz{
+        + XyzHeader header
+        + XyzBody body
+    }
+    class XyzReader {
+        + Xyz read(fileName: string)
+        + void process(String fileName, XyzProcessor processor)
+        - XyzHeader readHeader()
+        - XyzBody readBody()
+    }
+    class XyzProcessor {
+        <<interface>>
+        + void processHeader(XyzHeader header)
+        + void processBody(XyzBody body)
+    }
+    class XyzReadCollectProcessor {
+        Xyz getXyz()
+    }
+    Xyz --> XyzHeader: contains
+    Xyz --> XyzBody: contains
+    XyzReader --> Xyz: reads
+    XyzReader --> XyzProcessor: processes
+    XyzReadCollectProcessor --|> XyzProcessor: implements</interface></pre>
+
+<h1><span id="java">Java</span><a href="#java" class="header-anchor">#</a></h1><p>使用<code>java.io.RandomAccessFile</code>和<code>java.nio.channels.FileChannel</code>来实现文件读取，使用<code>io.netty.buffer.ByteBuf</code>来读写文件。</p>
+<p>核心代码举例:</p>
+<p>XyzReader:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">XyzHeader</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="type">byte</span>[] content;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">XyzBody</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="type">byte</span>[] content;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Xyz</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> XyzHeader header;</span><br><span class="line">    <span class="keyword">private</span> XyzBody body;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">XyzProcessor</span> &#123;</span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">processHeader</span><span class="params">(XyzHeader header)</span>;</span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">processBody</span><span class="params">(XyzBody body)</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">XyzReadCollectProcessor</span> <span class="keyword">implements</span> <span class="title class_">XyzProcessor</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="type">Xyz</span> <span class="variable">xyz</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Xyz</span>();</span><br><span class="line">    <span class="keyword">public</span> Xyz <span class="title function_">getXyz</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> xyz;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">XyzReader</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> Xyz <span class="title function_">read</span><span class="params">(String fileName)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> XyzHeader <span class="title function_">readHeader</span><span class="params">(FileChannel fileChannel)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> XyzBody <span class="title function_">readBody</span><span class="params">(FileChannel fileChannel)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<script type="module"> import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.esm.min.mjs';	mermaid.initialize({startOnLoad: true, flowchart: {curve: 'linear'}}); </script>
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -222,7 +352,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-21 10:58:33" itemprop="dateModified" datetime="2024-03-21T10:58:33+00:00">2024-03-21</time>
+      <time title="修改时间：2024-03-28 09:49:30" itemprop="dateModified" datetime="2024-03-28T09:49:30+00:00">2024-03-28</time>
     </span>
 
   
@@ -339,7 +469,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-21 10:58:33" itemprop="dateModified" datetime="2024-03-21T10:58:33+00:00">2024-03-21</time>
+      <time title="修改时间：2024-03-28 09:49:30" itemprop="dateModified" datetime="2024-03-28T09:49:30+00:00">2024-03-28</time>
     </span>
 
   
@@ -432,7 +562,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-21 10:58:33" itemprop="dateModified" datetime="2024-03-21T10:58:33+00:00">2024-03-21</time>
+      <time title="修改时间：2024-03-28 09:49:30" itemprop="dateModified" datetime="2024-03-28T09:49:30+00:00">2024-03-28</time>
     </span>
 
   
@@ -445,7 +575,7 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h1><span id="bei-jing">背景</span><a href="#bei-jing" class="header-anchor">#</a></h1><p>由于Influxdb 1.X的客户端已经基本处于维护状态，同时openGemini仍在不断发展中，为了能够更好地支持openGemini，如支持对接多个服务端地址、支持对接Apache Arrow Flight协议等，社区决定开发属于openGemini自己的客户端SDK。</p>
+          <h1><span id="bei-jing">背景</span><a href="#bei-jing" class="header-anchor">#</a></h1><p>由于Influxdb 1.X的客户端已经基本处于维护状态，同时openGemini仍在不断发展中，为了能够更好地支持openGemini，如支持对接多个服务端地址、支持对接Apache<br>Arrow Flight协议等，社区决定开发属于openGemini自己的客户端SDK。</p>
 <h1><span id="ke-hu-duan-sdk-gui-hua-gong-neng">客户端SDK规划功能</span><a href="#ke-hu-duan-sdk-gui-hua-gong-neng" class="header-anchor">#</a></h1><ul>
 <li>支持对接多个服务端地址</li>
 <li>支持对接Apache Arrow Flight协议</li>
@@ -466,27 +596,27 @@
         + TlsConfig tlsConfig // language specific
         + void close()
     }
-    
+
     class Address {
         + String host
         + int Port // in rust, it is u16
     }
-    
+
     class AuthConfig {
-        + AuthType authType // enum None, Password,Token
+        + AuthType authType // enum None, Password, Token
         + String username
         + String password
         + String token
     }
-    
+
     class BatchConfig {
         + Duration batchInterval // must be greater than 0
         + int batchSize // must be greater than 0
     }
 
-    OpenGeminiClient "1" *-- "many" Address : contains
-    OpenGeminiClient *-- AuthConfig : contains
-    OpenGeminiClient *-- BatchConfig : contains</pre>
+    OpenGeminiClient "1" *-- "many" Address: contains
+    OpenGeminiClient *-- AuthConfig: contains
+    OpenGeminiClient *-- BatchConfig: contains</pre>
 
 <h1><span id="database-amp-retentionpolicy-management-design">Database &amp; RetentionPolicy management design</span><a href="#database-amp-retentionpolicy-management-design" class="header-anchor">#</a></h1><pre class="mermaid">classDiagram
     class OpenGeminiClient {
@@ -514,7 +644,7 @@
         + List~Point~ points
         + AddPoint(Point)
     }
-    
+
     class Point {
         + String measurement
         + Precision precision // enum, second, millisecond, microsecond, nanosecond, default is nanosecond
@@ -531,7 +661,7 @@
         + SetMeasurement(name)
     }
 
-    BatchPoints "1" *-- "many" Point : contains</pre>
+    BatchPoints "1" *-- "many" Point: contains</pre>
 
 <h1><span id="sql-like-query-design">Sql-like query design</span><a href="#sql-like-query-design" class="header-anchor">#</a></h1><pre class="mermaid">classDiagram
     class Query {
@@ -555,8 +685,8 @@
         + List~String~ columns
         + List~List~ values
     }
-    QueryResult "1" *-- "0..*" SeriesResult : contains
-    SeriesResult "1" *-- "0..*" Series : contains</pre>
+    QueryResult "1" *-- "0..*" SeriesResult: contains
+    SeriesResult "1" *-- "0..*" Series: contains</pre>
 
 <h1><span id="ping-design">Ping design</span><a href="#ping-design" class="header-anchor">#</a></h1><pre class="mermaid">classDiagram
     class OpenGeminiClient {
@@ -566,11 +696,11 @@
 <h1><span id="inner-http-client-design">Inner Http client design</span><a href="#inner-http-client-design" class="header-anchor">#</a></h1><p>使用类似InnerHttpClient的设计，将鉴权、负载均衡、重试等逻辑封装在内部，对client提供简单的接口。增强模块化和代码清晰度。</p>
 <pre class="mermaid">classDiagram
     class InnerHttpClient {
-        + void executeHttpGetByIdx(int idx,...) // specify server index
-        + void executeHttpRequestByIdx(int idx, String method,...) // specify server index
-        + void executeHttpGet(String method,...) // load balance
-        + void executeHttpRequest(String method,...) // load balance
-        - void executeHttpRequestInner(String url, String method,...) // inner method
+        + void executeHttpGetByIdx(int idx, ...) // specify server index
+        + void executeHttpRequestByIdx(int idx, String method, ...) // specify server index
+        + void executeHttpGet(String method, ...) // load balance
+        + void executeHttpRequest(String method, ...) // load balance
+        - void executeHttpRequestInner(String url, String method, ...) // inner method
     }</pre>
 
 <pre class="mermaid">graph TD
@@ -578,6 +708,12 @@
     executeHttpRequestByIdx --> executeHttpRequestInner
     executeHttpGet --> executeHttpRequest
     executeHttpRequest --> executeHttpRequestInner</pre>
+
+<h1><span id="error-handling">Error handling</span><a href="#error-handling" class="header-anchor">#</a></h1><h2><span id="error-message">Error message</span><a href="#error-message" class="header-anchor">#</a></h2><h3><span id="scene1-http-request-failed">Scene1 http request failed</span><a href="#scene1-http-request-failed" class="header-anchor">#</a></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$operation request failed, error: $error_details</span><br></pre></td></tr></table></figure>
+
+<h3><span id="scene2-http-response-code-is-not-200-300">Scene2 http response code is not 200~300</span><a href="#scene2-http-response-code-is-not-200-300" class="header-anchor">#</a></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$operation error resp, code: $code, body: $body</span><br></pre></td></tr></table></figure>
+
+<h3><span id="scene3-other-error">Scene3 other error</span><a href="#scene3-other-error" class="header-anchor">#</a></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$operation failed, error: $error_details</span><br><span class="line"># example:</span><br><span class="line">writePoint failed, unmarshall response body error: json: cannot unmarshal number ...</span><br></pre></td></tr></table></figure>
 
 
 <script type="module"> import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.esm.min.mjs';	mermaid.initialize({startOnLoad: true, flowchart: {curve: 'linear'}}); </script>
@@ -642,7 +778,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-21 10:58:33" itemprop="dateModified" datetime="2024-03-21T10:58:33+00:00">2024-03-21</time>
+      <time title="修改时间：2024-03-28 09:49:30" itemprop="dateModified" datetime="2024-03-28T09:49:30+00:00">2024-03-28</time>
     </span>
 
   
@@ -801,7 +937,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-21 10:58:33" itemprop="dateModified" datetime="2024-03-21T10:58:33+00:00">2024-03-21</time>
+      <time title="修改时间：2024-03-28 09:49:30" itemprop="dateModified" datetime="2024-03-28T09:49:30+00:00">2024-03-28</time>
     </span>
 
   
@@ -883,7 +1019,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-21 10:58:33" itemprop="dateModified" datetime="2024-03-21T10:58:33+00:00">2024-03-21</time>
+      <time title="修改时间：2024-03-28 09:49:30" itemprop="dateModified" datetime="2024-03-28T09:49:30+00:00">2024-03-28</time>
     </span>
 
   
@@ -967,7 +1103,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-21 10:58:33" itemprop="dateModified" datetime="2024-03-21T10:58:33+00:00">2024-03-21</time>
+      <time title="修改时间：2024-03-28 09:49:30" itemprop="dateModified" datetime="2024-03-28T09:49:30+00:00">2024-03-28</time>
     </span>
 
   
@@ -1052,7 +1188,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-21 10:58:33" itemprop="dateModified" datetime="2024-03-21T10:58:33+00:00">2024-03-21</time>
+      <time title="修改时间：2024-03-28 09:49:30" itemprop="dateModified" datetime="2024-03-28T09:49:30+00:00">2024-03-28</time>
     </span>
 
   
@@ -1166,7 +1302,7 @@ reactor --> common</pre>
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-21 10:58:33" itemprop="dateModified" datetime="2024-03-21T10:58:33+00:00">2024-03-21</time>
+      <time title="修改时间：2024-03-28 09:49:30" itemprop="dateModified" datetime="2024-03-28T09:49:30+00:00">2024-03-28</time>
     </span>
 
   
@@ -1225,101 +1361,6 @@ reactor --> common</pre>
 <h3><span id="rust-fu-wu-ti-gong-zhe-zai-springcloud-zookeeper">Rust服务提供者在SpringCloud ZooKeeper</span><a href="#rust-fu-wu-ti-gong-zhe-zai-springcloud-zookeeper" class="header-anchor">#</a></h3><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">use</span> std::collections::HashMap;</span><br><span class="line"><span class="keyword">use</span> std::time::Duration;</span><br><span class="line"><span class="keyword">use</span> serde_json::Value;</span><br><span class="line"><span class="keyword">use</span> warp::Filter;</span><br><span class="line"><span class="keyword">use</span> zookeeper::&#123;Acl, CreateMode, WatchedEvent, Watcher, ZooKeeper&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> ZK_SERVERS: &amp;<span class="type">str</span> = <span class="string">&quot;localhost:2181&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">mut</span> ZK_CONN: <span class="type">Option</span>&lt;ZooKeeper&gt; = <span class="literal">None</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">LoggingWatcher</span>;</span><br><span class="line"><span class="keyword">impl</span> <span class="title class_">Watcher</span> <span class="keyword">for</span> <span class="title class_">LoggingWatcher</span> &#123;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">handle</span>(&amp;<span class="keyword">self</span>, e: WatchedEvent) &#123;</span><br><span class="line">        <span class="built_in">println!</span>(<span class="string">&quot;WatchedEvent: &#123;:?&#125;&quot;</span>, e);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#[tokio::main]</span></span><br><span class="line"><span class="keyword">async</span> <span class="keyword">fn</span> <span class="title function_">main</span>() &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">hello</span> = warp::path!(<span class="string">&quot;hello&quot;</span>).<span class="title function_ invoke__">map</span>(|| warp::reply::<span class="title function_ invoke__">html</span>(<span class="string">&quot;Hello from Rust service!&quot;</span>));</span><br><span class="line">    <span class="title function_ invoke__">register_to_zookeeper</span>().<span class="keyword">await</span>;</span><br><span class="line"></span><br><span class="line">    warp::<span class="title function_ invoke__">serve</span>(hello).<span class="title function_ invoke__">run</span>(([<span class="number">127</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>], <span class="number">8083</span>)).<span class="keyword">await</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">async</span> <span class="keyword">fn</span> <span class="title function_">register_to_zookeeper</span>() &#123;</span><br><span class="line">    <span class="keyword">unsafe</span> &#123;</span><br><span class="line">        ZK_CONN = <span class="title function_ invoke__">Some</span>(ZooKeeper::<span class="title function_ invoke__">connect</span>(ZK_SERVERS, Duration::<span class="title function_ invoke__">from_secs</span>(<span class="number">5</span>), LoggingWatcher).<span class="title function_ invoke__">unwrap</span>());</span><br><span class="line">        <span class="keyword">let</span> <span class="variable">zk</span> = ZK_CONN.<span class="title function_ invoke__">as_ref</span>().<span class="title function_ invoke__">unwrap</span>();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">let</span> <span class="variable">path</span> = <span class="string">&quot;/services/provider-service&quot;</span>;</span><br><span class="line">        <span class="keyword">if</span> zk.<span class="title function_ invoke__">exists</span>(path, <span class="literal">false</span>).<span class="title function_ invoke__">unwrap</span>().<span class="title function_ invoke__">is_none</span>() &#123;</span><br><span class="line">            zk.<span class="title function_ invoke__">create</span>(path, <span class="built_in">vec!</span>[], Acl::<span class="title function_ invoke__">open_unsafe</span>().<span class="title function_ invoke__">clone</span>(), CreateMode::Persistent).<span class="title function_ invoke__">unwrap</span>();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">let</span> <span class="variable">service_data</span> = <span class="title function_ invoke__">get_service_data</span>();</span><br><span class="line">        <span class="keyword">let</span> <span class="variable">service_path</span> = <span class="built_in">format!</span>(<span class="string">&quot;&#123;&#125;/&#123;&#125;&quot;</span>, path, <span class="title function_ invoke__">generate_service_id</span>());</span><br><span class="line">        zk.<span class="title function_ invoke__">create</span>(&amp;service_path, service_data, Acl::<span class="title function_ invoke__">open_unsafe</span>().<span class="title function_ invoke__">clone</span>(), CreateMode::Ephemeral).<span class="title function_ invoke__">unwrap</span>();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">get_service_data</span>() <span class="punctuation">-&gt;</span> <span class="type">Vec</span>&lt;<span class="type">u8</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">data</span>: HashMap&lt;&amp;<span class="type">str</span>, Value&gt; = HashMap::<span class="title function_ invoke__">new</span>();</span><br><span class="line">    data.<span class="title function_ invoke__">insert</span>(<span class="string">&quot;name&quot;</span>, serde_json::Value::<span class="title function_ invoke__">String</span>(<span class="string">&quot;provider-service&quot;</span>.<span class="title function_ invoke__">to_string</span>()));</span><br><span class="line">    data.<span class="title function_ invoke__">insert</span>(<span class="string">&quot;address&quot;</span>, serde_json::Value::<span class="title function_ invoke__">String</span>(<span class="string">&quot;127.0.0.1&quot;</span>.<span class="title function_ invoke__">to_string</span>()));</span><br><span class="line">    data.<span class="title function_ invoke__">insert</span>(<span class="string">&quot;port&quot;</span>, serde_json::Value::<span class="title function_ invoke__">Number</span>(<span class="number">8083</span>.<span class="title function_ invoke__">into</span>()));</span><br><span class="line">    serde_json::<span class="title function_ invoke__">to_vec</span>(&amp;data).<span class="title function_ invoke__">unwrap</span>()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">generate_service_id</span>() <span class="punctuation">-&gt;</span> <span class="type">String</span> &#123;</span><br><span class="line">    <span class="built_in">format!</span>(<span class="string">&quot;&#123;&#125;&quot;</span>, chrono::Utc::<span class="title function_ invoke__">now</span>().<span class="title function_ invoke__">timestamp_nanos</span>())</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <h3><span id="rust-fu-wu-xiao-fei-zhe-zai-springcloud-zookeeper">Rust服务消费者在SpringCloud ZooKeeper</span><a href="#rust-fu-wu-xiao-fei-zhe-zai-springcloud-zookeeper" class="header-anchor">#</a></h3><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">use</span> std::collections::HashMap;</span><br><span class="line"><span class="keyword">use</span> std::time::Duration;</span><br><span class="line"><span class="keyword">use</span> zookeeper::&#123;WatchedEvent, Watcher, ZooKeeper&#125;;</span><br><span class="line"><span class="keyword">use</span> reqwest;</span><br><span class="line"><span class="keyword">use</span> serde_json::Value;</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> ZK_SERVERS: &amp;<span class="type">str</span> = <span class="string">&quot;localhost:2181&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">LoggingWatcher</span>;</span><br><span class="line"><span class="keyword">impl</span> <span class="title class_">Watcher</span> <span class="keyword">for</span> <span class="title class_">LoggingWatcher</span> &#123;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">handle</span>(&amp;<span class="keyword">self</span>, e: WatchedEvent) &#123;</span><br><span class="line">        <span class="built_in">println!</span>(<span class="string">&quot;WatchedEvent: &#123;:?&#125;&quot;</span>, e);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#[tokio::main]</span></span><br><span class="line"><span class="keyword">async</span> <span class="keyword">fn</span> <span class="title function_">main</span>() &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">provider_data</span> = <span class="title function_ invoke__">fetch_provider_data_from_zookeeper</span>().<span class="keyword">await</span>;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">response</span> = <span class="title function_ invoke__">request_provider</span>(&amp;provider_data).<span class="keyword">await</span>;</span><br><span class="line">    <span class="built_in">println!</span>(<span class="string">&quot;Response from provider: &#123;&#125;&quot;</span>, response);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">async</span> <span class="keyword">fn</span> <span class="title function_">fetch_provider_data_from_zookeeper</span>() <span class="punctuation">-&gt;</span> HashMap&lt;<span class="type">String</span>, Value&gt; &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">zk</span> = ZooKeeper::<span class="title function_ invoke__">connect</span>(ZK_SERVERS, Duration::<span class="title function_ invoke__">from_secs</span>(<span class="number">5</span>), LoggingWatcher).<span class="title function_ invoke__">unwrap</span>();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> <span class="variable">children</span> = zk.<span class="title function_ invoke__">get_children</span>(<span class="string">&quot;/services/provider-service&quot;</span>, <span class="literal">false</span>).<span class="title function_ invoke__">unwrap</span>();</span><br><span class="line">    <span class="keyword">if</span> children.<span class="title function_ invoke__">is_empty</span>() &#123;</span><br><span class="line">        <span class="built_in">panic!</span>(<span class="string">&quot;No provider services found!&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// For simplicity, we just take the first child (i.e., service instance). </span></span><br><span class="line">    <span class="comment">// In a real-world scenario, load balancing strategies would determine which service instance to use.</span></span><br><span class="line">    <span class="keyword">let</span> <span class="variable">data</span> = zk.<span class="title function_ invoke__">get_data</span>(&amp;<span class="built_in">format!</span>(<span class="string">&quot;/services/provider-service/&#123;&#125;&quot;</span>, children[<span class="number">0</span>]), <span class="literal">false</span>).<span class="title function_ invoke__">unwrap</span>();</span><br><span class="line">    serde_json::<span class="title function_ invoke__">from_slice</span>(&amp;data.<span class="number">0</span>).<span class="title function_ invoke__">unwrap</span>()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">async</span> <span class="keyword">fn</span> <span class="title function_">request_provider</span>(provider_data: &amp;HashMap&lt;<span class="type">String</span>, Value&gt;) <span class="punctuation">-&gt;</span> <span class="type">String</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">address</span> = provider_data.<span class="title function_ invoke__">get</span>(<span class="string">&quot;address&quot;</span>).<span class="title function_ invoke__">unwrap</span>().<span class="title function_ invoke__">as_str</span>().<span class="title function_ invoke__">unwrap</span>();</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">port</span> = provider_data.<span class="title function_ invoke__">get</span>(<span class="string">&quot;port&quot;</span>).<span class="title function_ invoke__">unwrap</span>().<span class="title function_ invoke__">as_i64</span>().<span class="title function_ invoke__">unwrap</span>();</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">url</span> = <span class="built_in">format!</span>(<span class="string">&quot;http://&#123;&#125;:&#123;&#125;/hello&quot;</span>, address, port);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> <span class="variable">response</span> = reqwest::<span class="title function_ invoke__">get</span>(&amp;url).<span class="keyword">await</span>.<span class="title function_ invoke__">unwrap</span>();</span><br><span class="line">    response.<span class="title function_ invoke__">text</span>().<span class="keyword">await</span>.<span class="title function_ invoke__">unwrap</span>()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/self-extracting-executable-file/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="shoothzj">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/self-extracting-executable-file/" class="post-title-link" itemprop="url">创建自解压的可执行文件</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2023-10-23 20:18:50" itemprop="dateCreated datePublished" datetime="2023-10-23T20:18:50+00:00">2023-10-23</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-21 10:58:33" itemprop="dateModified" datetime="2024-03-21T10:58:33+00:00">2024-03-21</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1><span id="wei-shi-me-xu-yao-zi-jie-ya-de-ke-zhi-xing-wen-jian">为什么需要自解压的可执行文件</span><a href="#wei-shi-me-xu-yao-zi-jie-ya-de-ke-zhi-xing-wen-jian" class="header-anchor">#</a></h1><p>大部分软件的安装包是一个压缩包，用户需要自己解压，然后再执行安装脚本。常见的两种格式是<code>tar.gz</code>和<code>zip</code>。常见的解压执行脚本如下</p>
-<h2><span id="tar-gz">tar.gz</span><a href="#tar-gz" class="header-anchor">#</a></h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"></span><br><span class="line">tar -zxvf xxx.tar.gz</span><br><span class="line"><span class="built_in">cd</span> xxx</span><br><span class="line">./install.sh</span><br></pre></td></tr></table></figure>
-
-<h2><span id="zip">zip</span><a href="#zip" class="header-anchor">#</a></h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"></span><br><span class="line">unzip xxx.zip</span><br><span class="line"><span class="built_in">cd</span> xxx</span><br><span class="line">./install.sh</span><br></pre></td></tr></table></figure>
-
-<p>在有些场景下，为了方便分发、安装，我们需要将多个文件和目录打包并与一个启动脚本结合。这样子就可以实现一键安装，而不需要用户自己解压文件，然后再执行启动脚本。</p>
-<p>核心原理是，通过固定分隔符分隔脚本和压缩包部分，脚本通过分隔符将压缩包部分提取出来，然后解压，执行安装脚本，脚本不会超过固定分隔符。解压可以通过临时文件(zip)或流式解压(tar.gz)的方式实现。</p>
-<h1><span id="chuang-jian-bao-han-zip-ya-suo-bao-de-zi-jie-ya-ke-zhi-xing-wen-jian">创建包含zip压缩包的自解压可执行文件</span><a href="#chuang-jian-bao-han-zip-ya-suo-bao-de-zi-jie-ya-ke-zhi-xing-wen-jian" class="header-anchor">#</a></h1><h2><span id="gou-zao-yi-ge-zip-ya-suo-bao">构造一个zip压缩包</span><a href="#gou-zao-yi-ge-zip-ya-suo-bao" class="header-anchor">#</a></h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">&quot;hello zip&quot;</span> &gt; temp.txt</span><br><span class="line">zip -r temp.zip temp.txt</span><br><span class="line"><span class="built_in">rm</span> -f temp.txt</span><br></pre></td></tr></table></figure>
-
-<h2><span id="gou-zao-ke-zhi-xing-wen-jian-self-extracting-sh">构造可执行文件 <code>self_extracting.sh</code></span><a href="#gou-zao-ke-zhi-xing-wen-jian-self-extracting-sh" class="header-anchor">#</a></h2><p>以使用<code>__ARCHIVE_BELOW__</code>做分隔符为例，<code>self_extracting.sh</code>里面内容:</p>
-<p>推荐把临时文件放在内存文件路径下，这样子可以避免磁盘IO</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line">CURRENT_DIR=<span class="string">&quot;<span class="subst">$(dirname <span class="string">&quot;<span class="variable">$0</span>&quot;</span>)</span>&quot;</span></span><br><span class="line"></span><br><span class="line">ARCHIVE_START_LINE=$(awk <span class="string">&#x27;/^__ARCHIVE_BELOW__/ &#123;print NR + 1; exit 0; &#125;&#x27;</span> <span class="variable">$0</span>)</span><br><span class="line"></span><br><span class="line"><span class="built_in">tail</span> -n+<span class="variable">$ARCHIVE_START_LINE</span> <span class="variable">$0</span> &gt; /tmp/temp.zip</span><br><span class="line">unzip /tmp/temp.zip<span class="string">&quot; -d &quot;</span><span class="variable">$CURRENT_DIR</span><span class="string">&quot;</span></span><br><span class="line"><span class="string">rm &quot;</span><span class="variable">$CURRENT_DIR</span>/temp.zip<span class="string">&quot;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string"># replace the following line with your own code</span></span><br><span class="line"><span class="string">cat temp.txt</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">exit 0</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">__ARCHIVE_BELOW__</span></span><br></pre></td></tr></table></figure>
-
-<p>将zip文件追加到<code>self_extracting.sh</code>文件的尾部</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cat temp.zip &gt;&gt; self_extracting.sh</span><br><span class="line">chmod +x self_extracting.sh</span><br></pre></td></tr></table></figure>
-
-<h1><span id="chuang-jian-bao-han-tar-gz-ya-suo-bao-de-zi-jie-ya-ke-zhi-xing-wen-jian">创建包含tar.gz压缩包的自解压可执行文件</span><a href="#chuang-jian-bao-han-tar-gz-ya-suo-bao-de-zi-jie-ya-ke-zhi-xing-wen-jian" class="header-anchor">#</a></h1><h2><span id="gou-zao-yi-ge-tar-gz-ya-suo-bao">构造一个tar.gz压缩包</span><a href="#gou-zao-yi-ge-tar-gz-ya-suo-bao" class="header-anchor">#</a></h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">&quot;hello tar.gz&quot;</span> &gt; temp.txt</span><br><span class="line">tar -czf temp.tar.gz temp.txt</span><br><span class="line"><span class="built_in">rm</span> -f temp.txt</span><br></pre></td></tr></table></figure>
-
-<h2><span id="gou-zao-ke-zhi-xing-wen-jian-self-extracting-sh">构造可执行文件 <code>self_extracting.sh</code></span><a href="#gou-zao-ke-zhi-xing-wen-jian-self-extracting-sh" class="header-anchor">#</a></h2><p>以使用<code>__ARCHIVE_BELOW__</code>做分隔符为例，<code>self_extracting.sh</code>里面内容:</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line">CURRENT_DIR=<span class="string">&quot;<span class="subst">$(dirname <span class="string">&quot;<span class="variable">$0</span>&quot;</span>)</span>&quot;</span></span><br><span class="line"></span><br><span class="line">ARCHIVE_START_LINE=$(awk <span class="string">&#x27;/^__ARCHIVE_BELOW__/ &#123;print NR + 1; exit 0; &#125;&#x27;</span> <span class="variable">$0</span>)</span><br><span class="line"><span class="built_in">tail</span> -n+<span class="variable">$ARCHIVE_START_LINE</span> <span class="variable">$0</span> | tar xz -C <span class="string">&quot;<span class="variable">$CURRENT_DIR</span>&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># replace the following line with your own code</span></span><br><span class="line"><span class="built_in">cat</span> temp.txt</span><br><span class="line"></span><br><span class="line"><span class="built_in">exit</span> 0</span><br><span class="line"></span><br><span class="line">__ARCHIVE_BELOW__</span><br></pre></td></tr></table></figure>
 
       
     </div>

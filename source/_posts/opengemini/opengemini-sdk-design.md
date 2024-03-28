@@ -8,7 +8,8 @@ tags:
 
 # 背景
 
-由于Influxdb 1.X的客户端已经基本处于维护状态，同时openGemini仍在不断发展中，为了能够更好地支持openGemini，如支持对接多个服务端地址、支持对接Apache Arrow Flight协议等，社区决定开发属于openGemini自己的客户端SDK。
+由于Influxdb 1.X的客户端已经基本处于维护状态，同时openGemini仍在不断发展中，为了能够更好地支持openGemini，如支持对接多个服务端地址、支持对接Apache
+Arrow Flight协议等，社区决定开发属于openGemini自己的客户端SDK。
 
 # 客户端SDK规划功能
 
@@ -36,27 +37,27 @@ classDiagram
         + TlsConfig tlsConfig // language specific
         + void close()
     }
-    
+
     class Address {
         + String host
         + int Port // in rust, it is u16
     }
-    
+
     class AuthConfig {
-        + AuthType authType // enum None, Password,Token
+        + AuthType authType // enum None, Password, Token
         + String username
         + String password
         + String token
     }
-    
+
     class BatchConfig {
         + Duration batchInterval // must be greater than 0
         + int batchSize // must be greater than 0
     }
 
-    OpenGeminiClient "1" *-- "many" Address : contains
-    OpenGeminiClient *-- AuthConfig : contains
-    OpenGeminiClient *-- BatchConfig : contains
+    OpenGeminiClient "1" *-- "many" Address: contains
+    OpenGeminiClient *-- AuthConfig: contains
+    OpenGeminiClient *-- BatchConfig: contains
 ```
 
 # Database & RetentionPolicy management design
@@ -92,7 +93,7 @@ classDiagram
         + List~Point~ points
         + AddPoint(Point)
     }
-    
+
     class Point {
         + String measurement
         + Precision precision // enum, second, millisecond, microsecond, nanosecond, default is nanosecond
@@ -109,7 +110,7 @@ classDiagram
         + SetMeasurement(name)
     }
 
-    BatchPoints "1" *-- "many" Point : contains
+    BatchPoints "1" *-- "many" Point: contains
 ```
 
 # Sql-like query design
@@ -139,8 +140,8 @@ classDiagram
         + List~String~ columns
         + List~List~ values
     }
-    QueryResult "1" *-- "0..*" SeriesResult : contains
-    SeriesResult "1" *-- "0..*" Series : contains
+    QueryResult "1" *-- "0..*" SeriesResult: contains
+    SeriesResult "1" *-- "0..*" Series: contains
 ```
 
 # Ping design
@@ -159,11 +160,11 @@ classDiagram
 ```mermaid
 classDiagram
     class InnerHttpClient {
-        + void executeHttpGetByIdx(int idx,...) // specify server index
-        + void executeHttpRequestByIdx(int idx, String method,...) // specify server index
-        + void executeHttpGet(String method,...) // load balance
-        + void executeHttpRequest(String method,...) // load balance
-        - void executeHttpRequestInner(String url, String method,...) // inner method
+        + void executeHttpGetByIdx(int idx, ...) // specify server index
+        + void executeHttpRequestByIdx(int idx, String method, ...) // specify server index
+        + void executeHttpGet(String method, ...) // load balance
+        + void executeHttpRequest(String method, ...) // load balance
+        - void executeHttpRequestInner(String url, String method, ...) // inner method
     }
 ```
 
@@ -173,4 +174,28 @@ graph TD
     executeHttpRequestByIdx --> executeHttpRequestInner
     executeHttpGet --> executeHttpRequest
     executeHttpRequest --> executeHttpRequestInner
+```
+
+# Error handling
+
+## Error message
+
+### Scene1 http request failed
+
+```
+$operation request failed, error: $error_details
+```
+
+### Scene2 http response code is not 200~300
+
+```
+$operation error resp, code: $code, body: $body
+```
+
+### Scene3 other error
+
+```
+$operation failed, error: $error_details
+# example:
+writePoint failed, unmarshall response body error: json: cannot unmarshal number ...
 ```

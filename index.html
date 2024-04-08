@@ -214,9 +214,15 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2024-03-28 17:47:18 / 修改时间：09:49:30" itemprop="dateCreated datePublished" datetime="2024-03-28T17:47:18+00:00">2024-03-28</time>
+      <time title="创建时间：2024-03-28 17:47:18" itemprop="dateCreated datePublished" datetime="2024-03-28T17:47:18+00:00">2024-03-28</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2024-04-08 05:40:40" itemprop="dateModified" datetime="2024-04-08T05:40:40+00:00">2024-04-08</time>
     </span>
 
   
@@ -292,7 +298,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-28 09:49:30" itemprop="dateModified" datetime="2024-03-28T09:49:30+00:00">2024-03-28</time>
+      <time title="修改时间：2024-04-08 05:40:40" itemprop="dateModified" datetime="2024-04-08T05:40:40+00:00">2024-04-08</time>
     </span>
 
   
@@ -378,7 +384,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-28 09:49:30" itemprop="dateModified" datetime="2024-03-28T09:49:30+00:00">2024-03-28</time>
+      <time title="修改时间：2024-04-08 05:40:40" itemprop="dateModified" datetime="2024-04-08T05:40:40+00:00">2024-04-08</time>
     </span>
 
   
@@ -428,7 +434,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/code/crud-yaml-example/">
+    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/code/backend-dev-entity-naming/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -446,7 +452,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/code/crud-yaml-example/" class="post-title-link" itemprop="url">CRUD接口的api yaml心得</a>
+          <a href="/code/backend-dev-entity-naming/" class="post-title-link" itemprop="url">后端开发实体命名</a>
         </h2>
 
         <div class="post-meta-container">
@@ -464,7 +470,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-28 09:49:30" itemprop="dateModified" datetime="2024-03-28T09:49:30+00:00">2024-03-28</time>
+      <time title="修改时间：2024-04-08 05:40:40" itemprop="dateModified" datetime="2024-04-08T05:40:40+00:00">2024-04-08</time>
     </span>
 
   
@@ -477,23 +483,73 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>在写swagger的时候，经常碰到增删改查的简单接口，我将增删改查简单接口总结如下：</p>
-<p>一般来说，增删改查有如下几个接口</p>
+          <p>对于一个资源实体来说，在解决方案里，常见的操作场景有：</p>
 <ul>
-<li>创建资源，operationId为createXxx</li>
-<li>删除资源</li>
-<li>更新资源</li>
-<li>查询单个资源</li>
-<li>查询资源列表（可能不会查询出所有字段），operationId为listXxx</li>
+<li>由外部&#x2F;客户发起的增删改查、列表查询，访问协议一般为HTTP协议。</li>
+<li>由系统内部组件发起的增删改查、列表查询，协议可能为HTTP协议，也可能是RPC协议如gRPC等。</li>
+<li>由资源实体的owner服务跟数据库进行实体读写。</li>
+<li>由资源实体的owner服务将变更广播到消息中间件里。</li>
 </ul>
-<p>根据接口，一般可以设计如下的实体类</p>
+<p>可以将实体命名如下：<br><img src="/code/backend-dev-entity-naming/naming.png" alt="naming"></p>
+<p>实体类详细说明：</p>
 <ul>
 <li>CreateXxxReq 创建资源请求，包含除资源id之外的所有字段，有些变种里面可能会包含id字段。</li>
 <li>UpdateXxxReq 更新资源请求，包含除资源id之外支持更新的所有字段。</li>
 <li>XxxResp 资源响应，可用于Crate、Update接口的返回，包含所有字段。</li>
-<li>ListXxxResp 资源列表响应，包含资源列表。</li>
+<li>ListXxxsResp 资源列表响应，包含资源列表。</li>
 <li>List<briefxxxresp> 资源列表响应，包含资源列表，每个资源包含部分字段，一般是id、name、createdTime、updatedTime等。</briefxxxresp></li>
 </ul>
+<p>出于复杂性的考虑，可以将XxxNotify类跟InnerXxx进行简化合并，转化为:</p>
+<p><img src="/naming-omit-notify.png" alt="naming-omit-notify"></p>
+<p>swagger&#x2F;openapi里，operationId可使用如下</p>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>operationId</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>创建资源</td>
+<td>CreateXxx</td>
+</tr>
+<tr>
+<td>删除资源</td>
+<td>DeleteXxx</td>
+</tr>
+<tr>
+<td>更新资源</td>
+<td>UpdateXxx</td>
+</tr>
+<tr>
+<td>查询单个资源</td>
+<td>ShowXxx</td>
+</tr>
+<tr>
+<td>查询资源列表</td>
+<td>ListXxx</td>
+</tr>
+<tr>
+<td>内部创建资源</td>
+<td>CreateInnerXxx</td>
+</tr>
+<tr>
+<td>内部删除资源</td>
+<td>DeleteInnerXxx</td>
+</tr>
+<tr>
+<td>内部更新资源</td>
+<td>UpdateInnerXxx</td>
+</tr>
+<tr>
+<td>内部查询单个资源</td>
+<td>ShowInnerXxx</td>
+</tr>
+<tr>
+<td>内部查询资源列表</td>
+<td>ListInnerXxx</td>
+</tr>
+</tbody></table>
 
       
     </div>
@@ -556,7 +612,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-28 09:49:30" itemprop="dateModified" datetime="2024-03-28T09:49:30+00:00">2024-03-28</time>
+      <time title="修改时间：2024-04-08 05:40:40" itemprop="dateModified" datetime="2024-04-08T05:40:40+00:00">2024-04-08</time>
     </span>
 
   
@@ -655,7 +711,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-28 09:49:30" itemprop="dateModified" datetime="2024-03-28T09:49:30+00:00">2024-03-28</time>
+      <time title="修改时间：2024-04-08 05:40:40" itemprop="dateModified" datetime="2024-04-08T05:40:40+00:00">2024-04-08</time>
     </span>
 
   
@@ -850,7 +906,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-28 09:49:30" itemprop="dateModified" datetime="2024-03-28T09:49:30+00:00">2024-03-28</time>
+      <time title="修改时间：2024-04-08 05:40:40" itemprop="dateModified" datetime="2024-04-08T05:40:40+00:00">2024-04-08</time>
     </span>
 
   
@@ -936,7 +992,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-28 09:49:30" itemprop="dateModified" datetime="2024-03-28T09:49:30+00:00">2024-03-28</time>
+      <time title="修改时间：2024-04-08 05:40:40" itemprop="dateModified" datetime="2024-04-08T05:40:40+00:00">2024-04-08</time>
     </span>
 
   
@@ -1032,7 +1088,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-28 09:49:30" itemprop="dateModified" datetime="2024-03-28T09:49:30+00:00">2024-03-28</time>
+      <time title="修改时间：2024-04-08 05:40:40" itemprop="dateModified" datetime="2024-04-08T05:40:40+00:00">2024-04-08</time>
     </span>
 
   
@@ -1123,7 +1179,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-03-28 09:49:30" itemprop="dateModified" datetime="2024-03-28T09:49:30+00:00">2024-03-28</time>
+      <time title="修改时间：2024-04-08 05:40:40" itemprop="dateModified" datetime="2024-04-08T05:40:40+00:00">2024-04-08</time>
     </span>
 
   

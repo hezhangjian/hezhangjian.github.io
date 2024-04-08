@@ -617,25 +617,75 @@
       </tags>
   </entry>
   <entry>
-    <title>CRUD接口的api yaml心得</title>
-    <url>/code/crud-yaml-example/</url>
-    <content><![CDATA[<p>在写swagger的时候，经常碰到增删改查的简单接口，我将增删改查简单接口总结如下：</p>
-<p>一般来说，增删改查有如下几个接口</p>
+    <title>后端开发实体命名</title>
+    <url>/code/backend-dev-entity-naming/</url>
+    <content><![CDATA[<p>对于一个资源实体来说，在解决方案里，常见的操作场景有：</p>
 <ul>
-<li>创建资源，operationId为createXxx</li>
-<li>删除资源</li>
-<li>更新资源</li>
-<li>查询单个资源</li>
-<li>查询资源列表（可能不会查询出所有字段），operationId为listXxx</li>
+<li>由外部&#x2F;客户发起的增删改查、列表查询，访问协议一般为HTTP协议。</li>
+<li>由系统内部组件发起的增删改查、列表查询，协议可能为HTTP协议，也可能是RPC协议如gRPC等。</li>
+<li>由资源实体的owner服务跟数据库进行实体读写。</li>
+<li>由资源实体的owner服务将变更广播到消息中间件里。</li>
 </ul>
-<p>根据接口，一般可以设计如下的实体类</p>
+<p>可以将实体命名如下：<br><img src="/code/backend-dev-entity-naming/naming.png" alt="naming"></p>
+<p>实体类详细说明：</p>
 <ul>
 <li>CreateXxxReq 创建资源请求，包含除资源id之外的所有字段，有些变种里面可能会包含id字段。</li>
 <li>UpdateXxxReq 更新资源请求，包含除资源id之外支持更新的所有字段。</li>
 <li>XxxResp 资源响应，可用于Crate、Update接口的返回，包含所有字段。</li>
-<li>ListXxxResp 资源列表响应，包含资源列表。</li>
+<li>ListXxxsResp 资源列表响应，包含资源列表。</li>
 <li>List<briefxxxresp> 资源列表响应，包含资源列表，每个资源包含部分字段，一般是id、name、createdTime、updatedTime等。</briefxxxresp></li>
 </ul>
+<p>出于复杂性的考虑，可以将XxxNotify类跟InnerXxx进行简化合并，转化为:</p>
+<p><img src="/naming-omit-notify.png" alt="naming-omit-notify"></p>
+<p>swagger&#x2F;openapi里，operationId可使用如下</p>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>operationId</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>创建资源</td>
+<td>CreateXxx</td>
+</tr>
+<tr>
+<td>删除资源</td>
+<td>DeleteXxx</td>
+</tr>
+<tr>
+<td>更新资源</td>
+<td>UpdateXxx</td>
+</tr>
+<tr>
+<td>查询单个资源</td>
+<td>ShowXxx</td>
+</tr>
+<tr>
+<td>查询资源列表</td>
+<td>ListXxx</td>
+</tr>
+<tr>
+<td>内部创建资源</td>
+<td>CreateInnerXxx</td>
+</tr>
+<tr>
+<td>内部删除资源</td>
+<td>DeleteInnerXxx</td>
+</tr>
+<tr>
+<td>内部更新资源</td>
+<td>UpdateInnerXxx</td>
+</tr>
+<tr>
+<td>内部查询单个资源</td>
+<td>ShowInnerXxx</td>
+</tr>
+<tr>
+<td>内部查询资源列表</td>
+<td>ListInnerXxx</td>
+</tr>
+</tbody></table>
 ]]></content>
       <tags>
         <tag>openapi</tag>
@@ -1111,6 +1161,30 @@
       </tags>
   </entry>
   <entry>
+    <title>Apache Ignite在华为云IoT服务产品部的使用</title>
+    <url>/ignite/ignite-huaweicloud-usage/</url>
+    <content><![CDATA[<h1><span id="apache-ignite-jian-jie">Apache Ignite简介</span><a href="#apache-ignite-jian-jie" class="header-anchor">#</a></h1><p>Apache Ignite是一个开源分布式的数据库、缓存和计算平台。它的核心是一个内存数据网格，它可以将内存作为分布式的持久化存储，以提供高性能和可扩展性。它还提供了一个分布式的键值存储、SQL数据库、流式数据处理和复杂的事件处理等功能。</p>
+<p>Ignite的核心竞争力包括：</p>
+<ul>
+<li>兼容Mysql、Oracle语法</li>
+<li>性能强大，可以水平扩展</li>
+<li>缓存与数据库同源，可通过KV、SQL、JDBC、ODBC等方式访问</li>
+</ul>
+<p>同时，为了便于开发，除了jdbc、odbc、restful方式外，Ignite还官方提供了Java、C++、.Net、Python、Node.js、PHP等语言的客户端，可以方便的与Ignite进行交互。</p>
+<p><img src="/ignite/ignite-huaweicloud-usage/ignite-storage-access.png" alt="ignite-storage-access"></p>
+<h1><span id="apache-ignite-de-wen-ti">Apache Ignite的问题</span><a href="#apache-ignite-de-wen-ti" class="header-anchor">#</a></h1><h2><span id="pin-fan-chuang-jian-shan-chu-biao-dao-zhi-ignite-discovery-history-size-chao-guo-xian-zhi">频繁创建删除表，导致IGNITE_DISCOVERY_HISTORY_SIZE超过限制</span><a href="#pin-fan-chuang-jian-shan-chu-biao-dao-zhi-ignite-discovery-history-size-chao-guo-xian-zhi" class="header-anchor">#</a></h2><p>根据Ignite2的拓扑模型，集群的拓扑版本会在创建表&#x2F;删除表的时候发生变化，该变化版本号递增，且仅会保留最近$IgniteDiscoveryHistorySize条记录，程序某处会写死读取版本为0的数据，读取不到时，ignite集群会重启。默认值为500。<br>社区issue: <a href="https://github.com/apache/ignite/issues/10894">https://github.com/apache/ignite/issues/10894</a><br>笔者暂时没有时间来修复这个issue，可以通过将IGNITE_DISCOVERY_HISTORY_SIZE设置地比较大，来规避这个问题。</p>
+<h2><span id="ignite2-ke-hu-duan-yi-yong-xing-wen-ti">Ignite2客户端易用性问题</span><a href="#ignite2-ke-hu-duan-yi-yong-xing-wen-ti" class="header-anchor">#</a></h2><h3><span id="ignite2-ke-hu-duan-chao-shi-mo-ren-zhi-bu-he-li">Ignite2客户端超时默认值不合理</span><a href="#ignite2-ke-hu-duan-chao-shi-mo-ren-zhi-bu-he-li" class="header-anchor">#</a></h3><p>Ignite2客户端的连接超时、执行sql超时默认都是0，没有精心研究过配置的用户在异常场景下，应用程序可能会hang住。从易用性的角度来说，网络通信的任何操作，默认都应该有超时时间。</p>
+<h3><span id="ignite2-ke-hu-duan-bu-zhi-chi-yong-yuan-de-chong-shi">Ignite2客户端不支持永远的重试</span><a href="#ignite2-ke-hu-duan-bu-zhi-chi-yong-yuan-de-chong-shi" class="header-anchor">#</a></h3><p>Ignite通过预先计算出所有需要重连的时间点来实现重连，如果想配置成永远的重连，会因为时间点的计算导致内存溢出。从易用性的角度来说，应该支持永远的重连。</p>
+<h2><span id="ignite2-ke-hu-duan-zai-mou-xie-yi-chang-xia-wu-fa-zi-yu">Ignite2客户端在某些异常下无法自愈</span><a href="#ignite2-ke-hu-duan-zai-mou-xie-yi-chang-xia-wu-fa-zi-yu" class="header-anchor">#</a></h2><p>当client执行sql的时候，碰到如下异常的时候，无法自愈。可以通过执行SQL对client进行定期检查并重建。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Caused by: org.apache.ignite.internal.client.thin.ClientServerError: Ignite failed to process request [47]: 50000: Can not perform the operation because the cluster is inactive. Note, that the cluster is considered inactive by default if Ignite Persistent Store is used to let all the nodes join the cluster. To activate the cluster call Ignite.cluster.state(ClusterState.ACTIVE)</span><br></pre></td></tr></table></figure>
+
+<h2><span id="ignite2-socketchannel-xie-lu-wen-ti">Ignite2 SocketChannel泄露问题</span><a href="#ignite2-socketchannel-xie-lu-wen-ti" class="header-anchor">#</a></h2><p>Ignite客户端在连接时，如果对应的Server端没有启动，会导致SocketChannel泄露，已由笔者提交代码修复：<a href="https://github.com/apache/ignite/pull/11016/files">https://github.com/apache/ignite/pull/11016/files</a></p>
+]]></content>
+      <tags>
+        <tag>Ignite</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>开发一个filebeat output websocket插件</title>
     <url>/filebeat/filebeat-output-websocket/</url>
     <content><![CDATA[<p>开发一个filebeat的<code>websocket</code>插件， 代码仓地址: <a href="https://github.com/shoothzj/beats_output_websocket">https://github.com/shoothzj/beats_output_websocket</a></p>
@@ -1158,30 +1232,6 @@
       <tags>
         <tag>filebeat</tag>
         <tag>websocket</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Apache Ignite在华为云IoT服务产品部的使用</title>
-    <url>/ignite/ignite-huaweicloud-usage/</url>
-    <content><![CDATA[<h1><span id="apache-ignite-jian-jie">Apache Ignite简介</span><a href="#apache-ignite-jian-jie" class="header-anchor">#</a></h1><p>Apache Ignite是一个开源分布式的数据库、缓存和计算平台。它的核心是一个内存数据网格，它可以将内存作为分布式的持久化存储，以提供高性能和可扩展性。它还提供了一个分布式的键值存储、SQL数据库、流式数据处理和复杂的事件处理等功能。</p>
-<p>Ignite的核心竞争力包括：</p>
-<ul>
-<li>兼容Mysql、Oracle语法</li>
-<li>性能强大，可以水平扩展</li>
-<li>缓存与数据库同源，可通过KV、SQL、JDBC、ODBC等方式访问</li>
-</ul>
-<p>同时，为了便于开发，除了jdbc、odbc、restful方式外，Ignite还官方提供了Java、C++、.Net、Python、Node.js、PHP等语言的客户端，可以方便的与Ignite进行交互。</p>
-<p><img src="/ignite/ignite-huaweicloud-usage/ignite-storage-access.png" alt="ignite-storage-access"></p>
-<h1><span id="apache-ignite-de-wen-ti">Apache Ignite的问题</span><a href="#apache-ignite-de-wen-ti" class="header-anchor">#</a></h1><h2><span id="pin-fan-chuang-jian-shan-chu-biao-dao-zhi-ignite-discovery-history-size-chao-guo-xian-zhi">频繁创建删除表，导致IGNITE_DISCOVERY_HISTORY_SIZE超过限制</span><a href="#pin-fan-chuang-jian-shan-chu-biao-dao-zhi-ignite-discovery-history-size-chao-guo-xian-zhi" class="header-anchor">#</a></h2><p>根据Ignite2的拓扑模型，集群的拓扑版本会在创建表&#x2F;删除表的时候发生变化，该变化版本号递增，且仅会保留最近$IgniteDiscoveryHistorySize条记录，程序某处会写死读取版本为0的数据，读取不到时，ignite集群会重启。默认值为500。<br>社区issue: <a href="https://github.com/apache/ignite/issues/10894">https://github.com/apache/ignite/issues/10894</a><br>笔者暂时没有时间来修复这个issue，可以通过将IGNITE_DISCOVERY_HISTORY_SIZE设置地比较大，来规避这个问题。</p>
-<h2><span id="ignite2-ke-hu-duan-yi-yong-xing-wen-ti">Ignite2客户端易用性问题</span><a href="#ignite2-ke-hu-duan-yi-yong-xing-wen-ti" class="header-anchor">#</a></h2><h3><span id="ignite2-ke-hu-duan-chao-shi-mo-ren-zhi-bu-he-li">Ignite2客户端超时默认值不合理</span><a href="#ignite2-ke-hu-duan-chao-shi-mo-ren-zhi-bu-he-li" class="header-anchor">#</a></h3><p>Ignite2客户端的连接超时、执行sql超时默认都是0，没有精心研究过配置的用户在异常场景下，应用程序可能会hang住。从易用性的角度来说，网络通信的任何操作，默认都应该有超时时间。</p>
-<h3><span id="ignite2-ke-hu-duan-bu-zhi-chi-yong-yuan-de-chong-shi">Ignite2客户端不支持永远的重试</span><a href="#ignite2-ke-hu-duan-bu-zhi-chi-yong-yuan-de-chong-shi" class="header-anchor">#</a></h3><p>Ignite通过预先计算出所有需要重连的时间点来实现重连，如果想配置成永远的重连，会因为时间点的计算导致内存溢出。从易用性的角度来说，应该支持永远的重连。</p>
-<h2><span id="ignite2-ke-hu-duan-zai-mou-xie-yi-chang-xia-wu-fa-zi-yu">Ignite2客户端在某些异常下无法自愈</span><a href="#ignite2-ke-hu-duan-zai-mou-xie-yi-chang-xia-wu-fa-zi-yu" class="header-anchor">#</a></h2><p>当client执行sql的时候，碰到如下异常的时候，无法自愈。可以通过执行SQL对client进行定期检查并重建。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Caused by: org.apache.ignite.internal.client.thin.ClientServerError: Ignite failed to process request [47]: 50000: Can not perform the operation because the cluster is inactive. Note, that the cluster is considered inactive by default if Ignite Persistent Store is used to let all the nodes join the cluster. To activate the cluster call Ignite.cluster.state(ClusterState.ACTIVE)</span><br></pre></td></tr></table></figure>
-
-<h2><span id="ignite2-socketchannel-xie-lu-wen-ti">Ignite2 SocketChannel泄露问题</span><a href="#ignite2-socketchannel-xie-lu-wen-ti" class="header-anchor">#</a></h2><p>Ignite客户端在连接时，如果对应的Server端没有启动，会导致SocketChannel泄露，已由笔者提交代码修复：<a href="https://github.com/apache/ignite/pull/11016/files">https://github.com/apache/ignite/pull/11016/files</a></p>
-]]></content>
-      <tags>
-        <tag>Ignite</tag>
       </tags>
   </entry>
   <entry>
@@ -1326,6 +1376,27 @@
       </tags>
   </entry>
   <entry>
+    <title>高可用无单点架构之kubernetes集群</title>
+    <url>/kubernetes/kubernetes-ha/</url>
+    <content><![CDATA[<h1><span id="k8s-gao-ke-yong-wu-dan-dian-gu-zhang-she-ji-na-xie-chang-jing">k8s高可用无单点故障涉及那些场景</span><a href="#k8s-gao-ke-yong-wu-dan-dian-gu-zhang-she-ji-na-xie-chang-jing" class="header-anchor">#</a></h1><h2><span id="k8s-jie-dian-tian-jia-pod-tian-jia-deng-zeng-shan-cha-gai-wu-dan-dian-gu-zhang">k8s 节点添加、pod添加等增删查改无单点故障</span><a href="#k8s-jie-dian-tian-jia-pod-tian-jia-deng-zeng-shan-cha-gai-wu-dan-dian-gu-zhang" class="header-anchor">#</a></h2><p>需要元数据的存储和处理能力高可用</p>
+<h2><span id="k8s-dui-wai-de-apiserver-ru-worker-wu-dan-dian-gu-zhang">k8s对外的apiServer（如worker）无单点故障</span><a href="#k8s-dui-wai-de-apiserver-ru-worker-wu-dan-dian-gu-zhang" class="header-anchor">#</a></h2><p>worker node和其他组件访问<code>apiServer</code>路径高可用</p>
+<h1><span id="k8s-wu-dan-dian-gu-zhang-ji-zhu-guan-jian-dian">k8s无单点故障技术关键点</span><a href="#k8s-wu-dan-dian-gu-zhang-ji-zhu-guan-jian-dian" class="header-anchor">#</a></h1><h2><span id="yuan-shu-ju-cun-chu">元数据存储</span><a href="#yuan-shu-ju-cun-chu" class="header-anchor">#</a></h2><p>通过etcd存储元数据，etcd三节点集群保证高可用</p>
+<h2><span id="yuan-shu-ju-chu-li">元数据处理</span><a href="#yuan-shu-ju-chu-li" class="header-anchor">#</a></h2><p>通过多个<code>kube-controller</code>和<code>kube-scheduler</code>节点来保证高可用</p>
+<h2><span id="worker-jie-dian-qing-qiu-shu-ju-tong-guo-duo-ip-huo-fu-zai-jun-heng-lai-bao-zheng">worker节点请求数据通过多ip或负载均衡来保证</span><a href="#worker-jie-dian-qing-qiu-shu-ju-tong-guo-duo-ip-huo-fu-zai-jun-heng-lai-bao-zheng" class="header-anchor">#</a></h2><p>节点请求通信通过多Ip或负载均衡来保证高可用，这里也有几种方式</p>
+<h3><span id="iaas-han-shang-ke-ti-gong-fu-zai-jun-heng-de-chang-jing-xia">IaaS厂商可提供负载均衡的场景下</span><a href="#iaas-han-shang-ke-ti-gong-fu-zai-jun-heng-de-chang-jing-xia" class="header-anchor">#</a></h3><p>如下图所示，可将worker node的访问地址指向负载均衡的地址</p>
+<p><img src="/kubernetes/kubernetes-ha/kubernetes-ha-iaas-lb.png" alt="kubernetes-ha-iaas-lb"></p>
+<h3><span id="si-you-hua-bu-shu-keepalived">私有化部署KeepAlived</span><a href="#si-you-hua-bu-shu-keepalived" class="header-anchor">#</a></h3><p>私有化部署场景常用keepAlived提供浮动IP来给<code>worker node</code>或其他组件访问，如下图所示</p>
+<p><img src="/kubernetes/kubernetes-ha/kubernetes-ha-keepalived.png" alt="kubernetes-ha-keepalived"></p>
+<h3><span id="si-you-hua-bu-shu-jia-shang-fu-zai-jun-heng-zu-jian">私有化部署加上负载均衡组件</span><a href="#si-you-hua-bu-shu-jia-shang-fu-zai-jun-heng-zu-jian" class="header-anchor">#</a></h3><p>如果你觉得同一时刻只有单个apiServer工作会成瓶颈，也可以使用<code>KeepAlived</code>加<code>Nginx</code>或<code>HaProxy</code>来对<code>ApiServer</code>做负载均衡</p>
+<p><img src="/kubernetes/kubernetes-ha/kubernetes-ha-keepalived-nginx.png" alt="kubernetes-ha-keepalived-nginx"></p>
+<p>为了简化图像，只画出了master1上的Nginx向后转发的场景。</p>
+<p>至于Nginx和KeepAlived如何部署，推荐采用容器化的部署模式，方便进行监控和运维；但是镜像不从镜像仓库拉取，而是保存在<code>master</code>节点上，这样虽然升级复杂一点，但是这样子<code>kubernetes</code>的高可用就不依赖镜像仓库了，不会和镜像仓库形成循环依赖，更不会影响镜像仓库的高可用方案，大大简化了后续的技术方案。（因为镜像仓库可能会占据较大的存储空间，可能会和<code>master</code>节点分离部署，这时会作为<code>worker</code>节点连接<code>master</code>节点）。</p>
+]]></content>
+      <tags>
+        <tag>Kubernetes</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>记一次kubernetes获取internal Ip错误流程</title>
     <url>/kubernetes/kubernetes-internal-ip-error/</url>
     <content><![CDATA[<p>偶尔也回首一下处理的棘手问题吧。问题的现象是，通过kubernetes get node输出的ip不是期望的ip地址。大概如下所示</p>
@@ -1349,27 +1420,6 @@
 
 <p>举个例子，假如机器的ip地址是 <code>172.18.45.2/24</code>，它会更青睐于<code>172.18.45.6</code>而不是<code>172.31.80.8</code>。这个RFC存在较大的争议，它与dns轮询策略不兼容，如：dns服务器轮询返回多个ip地址，客户端总是选择第一个ip连接。与这个策略存在很大的冲突。并且社区内也有投票试图停止对<strong>RFC3484</strong> rule9的适配, 但是最终被拒绝了。</p>
 <p>根据分析，认为是ip2的地址小于ip1的地址，最终glibc排序的时候把ip2放在了前面。最终我们给kubelet配置了eth0地址的–node-ip，解决了这个问题。</p>
-]]></content>
-      <tags>
-        <tag>Kubernetes</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>高可用无单点架构之kubernetes集群</title>
-    <url>/kubernetes/kubernetes-ha/</url>
-    <content><![CDATA[<h1><span id="k8s-gao-ke-yong-wu-dan-dian-gu-zhang-she-ji-na-xie-chang-jing">k8s高可用无单点故障涉及那些场景</span><a href="#k8s-gao-ke-yong-wu-dan-dian-gu-zhang-she-ji-na-xie-chang-jing" class="header-anchor">#</a></h1><h2><span id="k8s-jie-dian-tian-jia-pod-tian-jia-deng-zeng-shan-cha-gai-wu-dan-dian-gu-zhang">k8s 节点添加、pod添加等增删查改无单点故障</span><a href="#k8s-jie-dian-tian-jia-pod-tian-jia-deng-zeng-shan-cha-gai-wu-dan-dian-gu-zhang" class="header-anchor">#</a></h2><p>需要元数据的存储和处理能力高可用</p>
-<h2><span id="k8s-dui-wai-de-apiserver-ru-worker-wu-dan-dian-gu-zhang">k8s对外的apiServer（如worker）无单点故障</span><a href="#k8s-dui-wai-de-apiserver-ru-worker-wu-dan-dian-gu-zhang" class="header-anchor">#</a></h2><p>worker node和其他组件访问<code>apiServer</code>路径高可用</p>
-<h1><span id="k8s-wu-dan-dian-gu-zhang-ji-zhu-guan-jian-dian">k8s无单点故障技术关键点</span><a href="#k8s-wu-dan-dian-gu-zhang-ji-zhu-guan-jian-dian" class="header-anchor">#</a></h1><h2><span id="yuan-shu-ju-cun-chu">元数据存储</span><a href="#yuan-shu-ju-cun-chu" class="header-anchor">#</a></h2><p>通过etcd存储元数据，etcd三节点集群保证高可用</p>
-<h2><span id="yuan-shu-ju-chu-li">元数据处理</span><a href="#yuan-shu-ju-chu-li" class="header-anchor">#</a></h2><p>通过多个<code>kube-controller</code>和<code>kube-scheduler</code>节点来保证高可用</p>
-<h2><span id="worker-jie-dian-qing-qiu-shu-ju-tong-guo-duo-ip-huo-fu-zai-jun-heng-lai-bao-zheng">worker节点请求数据通过多ip或负载均衡来保证</span><a href="#worker-jie-dian-qing-qiu-shu-ju-tong-guo-duo-ip-huo-fu-zai-jun-heng-lai-bao-zheng" class="header-anchor">#</a></h2><p>节点请求通信通过多Ip或负载均衡来保证高可用，这里也有几种方式</p>
-<h3><span id="iaas-han-shang-ke-ti-gong-fu-zai-jun-heng-de-chang-jing-xia">IaaS厂商可提供负载均衡的场景下</span><a href="#iaas-han-shang-ke-ti-gong-fu-zai-jun-heng-de-chang-jing-xia" class="header-anchor">#</a></h3><p>如下图所示，可将worker node的访问地址指向负载均衡的地址</p>
-<p><img src="/kubernetes/kubernetes-ha/kubernetes-ha-iaas-lb.png" alt="kubernetes-ha-iaas-lb"></p>
-<h3><span id="si-you-hua-bu-shu-keepalived">私有化部署KeepAlived</span><a href="#si-you-hua-bu-shu-keepalived" class="header-anchor">#</a></h3><p>私有化部署场景常用keepAlived提供浮动IP来给<code>worker node</code>或其他组件访问，如下图所示</p>
-<p><img src="/kubernetes/kubernetes-ha/kubernetes-ha-keepalived.png" alt="kubernetes-ha-keepalived"></p>
-<h3><span id="si-you-hua-bu-shu-jia-shang-fu-zai-jun-heng-zu-jian">私有化部署加上负载均衡组件</span><a href="#si-you-hua-bu-shu-jia-shang-fu-zai-jun-heng-zu-jian" class="header-anchor">#</a></h3><p>如果你觉得同一时刻只有单个apiServer工作会成瓶颈，也可以使用<code>KeepAlived</code>加<code>Nginx</code>或<code>HaProxy</code>来对<code>ApiServer</code>做负载均衡</p>
-<p><img src="/kubernetes/kubernetes-ha/kubernetes-ha-keepalived-nginx.png" alt="kubernetes-ha-keepalived-nginx"></p>
-<p>为了简化图像，只画出了master1上的Nginx向后转发的场景。</p>
-<p>至于Nginx和KeepAlived如何部署，推荐采用容器化的部署模式，方便进行监控和运维；但是镜像不从镜像仓库拉取，而是保存在<code>master</code>节点上，这样虽然升级复杂一点，但是这样子<code>kubernetes</code>的高可用就不依赖镜像仓库了，不会和镜像仓库形成循环依赖，更不会影响镜像仓库的高可用方案，大大简化了后续的技术方案。（因为镜像仓库可能会占据较大的存储空间，可能会和<code>master</code>节点分离部署，这时会作为<code>worker</code>节点连接<code>master</code>节点）。</p>
 ]]></content>
       <tags>
         <tag>Kubernetes</tag>
@@ -2266,6 +2316,38 @@
       </tags>
   </entry>
   <entry>
+    <title>java进行数据库操作的并发控制</title>
+    <url>/code/java/find-save-concurrent/</url>
+    <content><![CDATA[<p>在现代应用编码中，从数据库里面find出来，进行一些业务逻辑操作，最后再save回去。即：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="type">Person</span> <span class="variable">person</span> <span class="operator">=</span> personRepo.findById(id);</span><br><span class="line">person.setAge(<span class="number">18</span>);</span><br><span class="line">personRepo.save(person);</span><br></pre></td></tr></table></figure>
+
+<p>但是这样的业务操作，如果一个线程修改年龄，另一个线程修改昵称，最后save回去，可能会导致年龄&#x2F;昵称某一个的修改被覆盖。</p>
+<pre class="mermaid">sequenceDiagram
+    participant A as Thread A
+    participant B as Thread B
+    participant DB as Database
+
+    A->>DB: find person by id
+    Note over A: person.setAge(18)
+    B->>DB: find person by id
+    Note over B: person.setNickname("NewName")
+
+    A->>DB: save person
+    B->>DB: save person
+
+    Note over DB: Potential Overwrite Issue</pre>
+
+<p>常见的解决方案有两种</p>
+<h1><span id="zhi-xing-qian-tian-jia-bei-guan-suo">执行前添加悲观锁</span><a href="#zhi-xing-qian-tian-jia-bei-guan-suo" class="header-anchor">#</a></h1><p>通过分布式锁等方式，保证同一时间只有一个线程能够对数据进行修改。</p>
+<h1><span id="le-guan-suo-si-lu-shi-xian">乐观锁思路实现</span><a href="#le-guan-suo-si-lu-shi-xian" class="header-anchor">#</a></h1><p>版本控制是另一种流行的处理并发问题的方法。它通过在每次更新记录时递增版本号来确保数据的一致性。</p>
+<p>这在JPA中，可以通过在field上添加<code>@Version</code>注解来实现，但这也就要求①数据库中必须有version字段，②对于查找后更新类操作，必须使用JPA的save方法来进行更新。</p>
+<p>当然也可以通过<code>update_time</code>来模拟乐观锁实现，这可能需要你在更新的时候添加<code>update_time</code>的条件，并且，<code>update_time</code>在极端场景下，理论正确性没那么严谨。</p>
+<script type="module"> import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.esm.min.mjs';	mermaid.initialize({startOnLoad: true, flowchart: {curve: 'linear'}}); </script>]]></content>
+      <tags>
+        <tag>database</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Go 项目结构组织</title>
     <url>/code/go/go-project-structure/</url>
     <content><![CDATA[<div class="toc">
@@ -2307,38 +2389,6 @@
 ]]></content>
       <tags>
         <tag>Go</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>java进行数据库操作的并发控制</title>
-    <url>/code/java/find-save-concurrent/</url>
-    <content><![CDATA[<p>在现代应用编码中，从数据库里面find出来，进行一些业务逻辑操作，最后再save回去。即：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="type">Person</span> <span class="variable">person</span> <span class="operator">=</span> personRepo.findById(id);</span><br><span class="line">person.setAge(<span class="number">18</span>);</span><br><span class="line">personRepo.save(person);</span><br></pre></td></tr></table></figure>
-
-<p>但是这样的业务操作，如果一个线程修改年龄，另一个线程修改昵称，最后save回去，可能会导致年龄&#x2F;昵称某一个的修改被覆盖。</p>
-<pre class="mermaid">sequenceDiagram
-    participant A as Thread A
-    participant B as Thread B
-    participant DB as Database
-
-    A->>DB: find person by id
-    Note over A: person.setAge(18)
-    B->>DB: find person by id
-    Note over B: person.setNickname("NewName")
-
-    A->>DB: save person
-    B->>DB: save person
-
-    Note over DB: Potential Overwrite Issue</pre>
-
-<p>常见的解决方案有两种</p>
-<h1><span id="zhi-xing-qian-tian-jia-bei-guan-suo">执行前添加悲观锁</span><a href="#zhi-xing-qian-tian-jia-bei-guan-suo" class="header-anchor">#</a></h1><p>通过分布式锁等方式，保证同一时间只有一个线程能够对数据进行修改。</p>
-<h1><span id="le-guan-suo-si-lu-shi-xian">乐观锁思路实现</span><a href="#le-guan-suo-si-lu-shi-xian" class="header-anchor">#</a></h1><p>版本控制是另一种流行的处理并发问题的方法。它通过在每次更新记录时递增版本号来确保数据的一致性。</p>
-<p>这在JPA中，可以通过在field上添加<code>@Version</code>注解来实现，但这也就要求①数据库中必须有version字段，②对于查找后更新类操作，必须使用JPA的save方法来进行更新。</p>
-<p>当然也可以通过<code>update_time</code>来模拟乐观锁实现，这可能需要你在更新的时候添加<code>update_time</code>的条件，并且，<code>update_time</code>在极端场景下，理论正确性没那么严谨。</p>
-<script type="module"> import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.esm.min.mjs';	mermaid.initialize({startOnLoad: true, flowchart: {curve: 'linear'}}); </script>]]></content>
-      <tags>
-        <tag>database</tag>
       </tags>
   </entry>
   <entry>
@@ -2410,7 +2460,7 @@ reactor --> common</pre>
 <h1><span id="maven-dependency-check">maven dependency-check</span><a href="#maven-dependency-check" class="header-anchor">#</a></h1><h2><span id="yin-ru-dependnecy-check-cha-jian">引入dependnecy-check插件</span><a href="#yin-ru-dependnecy-check-cha-jian" class="header-anchor">#</a></h2><p>项目中原有的依赖是这样的</p>
 <figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>io.netty<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>netty-all<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>4.1.41.Final<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
 
-<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">plugin</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.owasp<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>dependency-check-maven<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">version</span>&gt;</span>$&#123;dependency-check-maven.version&#125;<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span><br><span class="line">              <span class="tag">&lt;<span class="name">suppressionFiles</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">suppressionFile</span>&gt;</span>src/owasp-dependency-check-suppressions.xml<span class="tag">&lt;/<span class="name">suppressionFile</span>&gt;</span></span><br><span class="line">              <span class="tag">&lt;/<span class="name">suppressionFiles</span>&gt;</span></span><br><span class="line">              <span class="tag">&lt;<span class="name">failBuildOnCVSS</span>&gt;</span>7<span class="tag">&lt;/<span class="name">failBuildOnCVSS</span>&gt;</span></span><br><span class="line">              <span class="tag">&lt;<span class="name">msbuildAnalyzerEnabled</span>&gt;</span>false<span class="tag">&lt;/<span class="name">msbuildAnalyzerEnabled</span>&gt;</span></span><br><span class="line">              <span class="tag">&lt;<span class="name">nodeAnalyzerEnabled</span>&gt;</span>false<span class="tag">&lt;/<span class="name">nodeAnalyzerEnabled</span>&gt;</span></span><br><span class="line">              <span class="tag">&lt;<span class="name">yarnAuditAnalyzerEnabled</span>&gt;</span>false<span class="tag">&lt;/<span class="name">yarnAuditAnalyzerEnabled</span>&gt;</span></span><br><span class="line">              <span class="tag">&lt;<span class="name">pyDistributionAnalyzerEnabled</span>&gt;</span>false<span class="tag">&lt;/<span class="name">pyDistributionAnalyzerEnabled</span>&gt;</span></span><br><span class="line">              <span class="tag">&lt;<span class="name">pyPackageAnalyzerEnabled</span>&gt;</span>false<span class="tag">&lt;/<span class="name">pyPackageAnalyzerEnabled</span>&gt;</span></span><br><span class="line">              <span class="tag">&lt;<span class="name">pipAnalyzerEnabled</span>&gt;</span>false<span class="tag">&lt;/<span class="name">pipAnalyzerEnabled</span>&gt;</span></span><br><span class="line">              <span class="tag">&lt;<span class="name">pipfileAnalyzerEnabled</span>&gt;</span>false<span class="tag">&lt;/<span class="name">pipfileAnalyzerEnabled</span>&gt;</span></span><br><span class="line">              <span class="tag">&lt;<span class="name">retireJsAnalyzerEnabled</span>&gt;</span>false<span class="tag">&lt;/<span class="name">retireJsAnalyzerEnabled</span>&gt;</span></span><br><span class="line">              <span class="tag">&lt;<span class="name">msbuildAnalyzerEnabled</span>&gt;</span>false<span class="tag">&lt;/<span class="name">msbuildAnalyzerEnabled</span>&gt;</span></span><br><span class="line">              <span class="tag">&lt;<span class="name">mixAuditAnalyzerEnabled</span>&gt;</span>false<span class="tag">&lt;/<span class="name">mixAuditAnalyzerEnabled</span>&gt;</span></span><br><span class="line">              <span class="tag">&lt;<span class="name">nugetconfAnalyzerEnabled</span>&gt;</span>false<span class="tag">&lt;/<span class="name">nugetconfAnalyzerEnabled</span>&gt;</span></span><br><span class="line">              <span class="tag">&lt;<span class="name">assemblyAnalyzerEnabled</span>&gt;</span>false<span class="tag">&lt;/<span class="name">assemblyAnalyzerEnabled</span>&gt;</span></span><br><span class="line">              <span class="tag">&lt;<span class="name">skipSystemScope</span>&gt;</span>true<span class="tag">&lt;/<span class="name">skipSystemScope</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">executions</span>&gt;</span></span><br><span class="line">              <span class="tag">&lt;<span class="name">execution</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">goals</span>&gt;</span></span><br><span class="line">                  <span class="tag">&lt;<span class="name">goal</span>&gt;</span>aggregate<span class="tag">&lt;/<span class="name">goal</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;/<span class="name">goals</span>&gt;</span></span><br><span class="line">              <span class="tag">&lt;/<span class="name">execution</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">executions</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;/<span class="name">plugin</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">plugin</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.owasp<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>dependency-check-maven<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>$&#123;dependency-check-maven.version&#125;<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">suppressionFiles</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">suppressionFile</span>&gt;</span>src/owasp-dependency-check-suppressions.xml<span class="tag">&lt;/<span class="name">suppressionFile</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">suppressionFiles</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">failBuildOnCVSS</span>&gt;</span>7<span class="tag">&lt;/<span class="name">failBuildOnCVSS</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">msbuildAnalyzerEnabled</span>&gt;</span>false<span class="tag">&lt;/<span class="name">msbuildAnalyzerEnabled</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">nodeAnalyzerEnabled</span>&gt;</span>false<span class="tag">&lt;/<span class="name">nodeAnalyzerEnabled</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">yarnAuditAnalyzerEnabled</span>&gt;</span>false<span class="tag">&lt;/<span class="name">yarnAuditAnalyzerEnabled</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">pyDistributionAnalyzerEnabled</span>&gt;</span>false<span class="tag">&lt;/<span class="name">pyDistributionAnalyzerEnabled</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">pyPackageAnalyzerEnabled</span>&gt;</span>false<span class="tag">&lt;/<span class="name">pyPackageAnalyzerEnabled</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">pipAnalyzerEnabled</span>&gt;</span>false<span class="tag">&lt;/<span class="name">pipAnalyzerEnabled</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">pipfileAnalyzerEnabled</span>&gt;</span>false<span class="tag">&lt;/<span class="name">pipfileAnalyzerEnabled</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">retireJsAnalyzerEnabled</span>&gt;</span>false<span class="tag">&lt;/<span class="name">retireJsAnalyzerEnabled</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">msbuildAnalyzerEnabled</span>&gt;</span>false<span class="tag">&lt;/<span class="name">msbuildAnalyzerEnabled</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">mixAuditAnalyzerEnabled</span>&gt;</span>false<span class="tag">&lt;/<span class="name">mixAuditAnalyzerEnabled</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">nugetconfAnalyzerEnabled</span>&gt;</span>false<span class="tag">&lt;/<span class="name">nugetconfAnalyzerEnabled</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">assemblyAnalyzerEnabled</span>&gt;</span>false<span class="tag">&lt;/<span class="name">assemblyAnalyzerEnabled</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">skipSystemScope</span>&gt;</span>true<span class="tag">&lt;/<span class="name">skipSystemScope</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">executions</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">execution</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">goals</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">goal</span>&gt;</span>aggregate<span class="tag">&lt;/<span class="name">goal</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">goals</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">execution</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">executions</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">plugin</span>&gt;</span></span><br></pre></td></tr></table></figure>
 
 <p>然后可以通过<code>mvn clean install verify -DskipTests</code>来检测。这个demo下，会输出</p>
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[ERROR] One or more dependencies were identified with vulnerabilities that have a CVSS score greater than or equal to &#x27;7.0&#x27;: </span><br><span class="line">[ERROR] </span><br><span class="line">[ERROR] netty-all-4.1.41.Final.jar: CVE-2019-16869(7.5), CVE-2021-37136(7.5), CVE-2020-11612(7.5), CVE-2021-37137(7.5), CVE-2019-20445(9.1), CVE-2019-20444(9.1), CVE-2020-7238(7.5)</span><br><span class="line">[ERROR] </span><br><span class="line">[ERROR] See the dependency-check report for more details.</span><br></pre></td></tr></table></figure>

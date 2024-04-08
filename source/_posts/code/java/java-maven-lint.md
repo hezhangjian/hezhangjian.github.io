@@ -401,45 +401,45 @@ page at http://checkstyle.sourceforge.net/config.html -->
 项目中原有的依赖是这样的
 
 ```xml
-        <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-all</artifactId>
-            <version>4.1.41.Final</version>
-        </dependency>
+<dependency>
+    <groupId>io.netty</groupId>
+    <artifactId>netty-all</artifactId>
+    <version>4.1.41.Final</version>
+</dependency>
 ```
 
 ```xml
 <plugin>
-            <groupId>org.owasp</groupId>
-            <artifactId>dependency-check-maven</artifactId>
-            <version>${dependency-check-maven.version}</version>
-            <configuration>
-              <suppressionFiles>
-                <suppressionFile>src/owasp-dependency-check-suppressions.xml</suppressionFile>
-              </suppressionFiles>
-              <failBuildOnCVSS>7</failBuildOnCVSS>
-              <msbuildAnalyzerEnabled>false</msbuildAnalyzerEnabled>
-              <nodeAnalyzerEnabled>false</nodeAnalyzerEnabled>
-              <yarnAuditAnalyzerEnabled>false</yarnAuditAnalyzerEnabled>
-              <pyDistributionAnalyzerEnabled>false</pyDistributionAnalyzerEnabled>
-              <pyPackageAnalyzerEnabled>false</pyPackageAnalyzerEnabled>
-              <pipAnalyzerEnabled>false</pipAnalyzerEnabled>
-              <pipfileAnalyzerEnabled>false</pipfileAnalyzerEnabled>
-              <retireJsAnalyzerEnabled>false</retireJsAnalyzerEnabled>
-              <msbuildAnalyzerEnabled>false</msbuildAnalyzerEnabled>
-              <mixAuditAnalyzerEnabled>false</mixAuditAnalyzerEnabled>
-              <nugetconfAnalyzerEnabled>false</nugetconfAnalyzerEnabled>
-              <assemblyAnalyzerEnabled>false</assemblyAnalyzerEnabled>
-              <skipSystemScope>true</skipSystemScope>
-            </configuration>
-            <executions>
-              <execution>
-                <goals>
-                  <goal>aggregate</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
+    <groupId>org.owasp</groupId>
+    <artifactId>dependency-check-maven</artifactId>
+    <version>${dependency-check-maven.version}</version>
+    <configuration>
+        <suppressionFiles>
+            <suppressionFile>src/owasp-dependency-check-suppressions.xml</suppressionFile>
+        </suppressionFiles>
+        <failBuildOnCVSS>7</failBuildOnCVSS>
+        <msbuildAnalyzerEnabled>false</msbuildAnalyzerEnabled>
+        <nodeAnalyzerEnabled>false</nodeAnalyzerEnabled>
+        <yarnAuditAnalyzerEnabled>false</yarnAuditAnalyzerEnabled>
+        <pyDistributionAnalyzerEnabled>false</pyDistributionAnalyzerEnabled>
+        <pyPackageAnalyzerEnabled>false</pyPackageAnalyzerEnabled>
+        <pipAnalyzerEnabled>false</pipAnalyzerEnabled>
+        <pipfileAnalyzerEnabled>false</pipfileAnalyzerEnabled>
+        <retireJsAnalyzerEnabled>false</retireJsAnalyzerEnabled>
+        <msbuildAnalyzerEnabled>false</msbuildAnalyzerEnabled>
+        <mixAuditAnalyzerEnabled>false</mixAuditAnalyzerEnabled>
+        <nugetconfAnalyzerEnabled>false</nugetconfAnalyzerEnabled>
+        <assemblyAnalyzerEnabled>false</assemblyAnalyzerEnabled>
+        <skipSystemScope>true</skipSystemScope>
+    </configuration>
+    <executions>
+        <execution>
+            <goals>
+                <goal>aggregate</goal>
+            </goals>
+        </execution>
+    </executions>
+</plugin>
 ```
 
 然后可以通过`mvn clean install verify -DskipTests`来检测。这个demo下，会输出

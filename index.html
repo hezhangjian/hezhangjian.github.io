@@ -146,13 +146,13 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">68</span>
+          <span class="site-state-item-count">69</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">38</span>
+        <span class="site-state-item-count">39</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -177,6 +177,90 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/code/java/java-log/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="shoothzj">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/code/java/java-log/" class="post-title-link" itemprop="url">java日志打印心得</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2024-04-09 14:33:33 / 修改时间：11:12:23" itemprop="dateCreated datePublished" datetime="2024-04-09T14:33:33+00:00">2024-04-09</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>对于一个组件来说，日志打印常见的有三种选择：</p>
+<ol>
+<li>不打印日志，只提供回调函数。将打印日志还是忽略的权利交给组件的使用者</li>
+<li>可以由使用者设置一些参数，但组件自己管理整个日志的生命周期</li>
+<li>适配生态内的日志框架，组件打印日志，但将输出的控制权控制反转给使用者</li>
+</ol>
+<p>java生态slf4j已经成为事实上的标准，像Apache Ignite在最开始的时候也将日志作为自己的Spi定义，是向着2来发展的，但在Ignite3版本也去掉。Go生态由于去没有这样的标准，很多library只能选择2，导致引入了一个go library，它的日志会怎么出来，对于使用者来说是一个未知数。</p>
+<p>java生态的基本原则如下：</p>
+<ol>
+<li>library，不会独立部署的组件，只引入<code>slf4j-api</code>，不引入具体的实现，可以在单元测试里面引入某个实现，用于测试打印日志。</li>
+<li>简单的sdk不打印日志，复杂的sdk可以打印一些关键日志，但QPS级别的日志不要打印，不要替用户做选择。</li>
+</ol>
+<blockquote>
+<p>如果在一个高度一致的团队内，可以无视上面两条</p>
+</blockquote>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -222,7 +306,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-04-08 05:40:40" itemprop="dateModified" datetime="2024-04-08T05:40:40+00:00">2024-04-08</time>
+      <time title="修改时间：2024-04-09 11:12:23" itemprop="dateModified" datetime="2024-04-09T11:12:23+00:00">2024-04-09</time>
     </span>
 
   
@@ -298,7 +382,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-04-08 05:40:40" itemprop="dateModified" datetime="2024-04-08T05:40:40+00:00">2024-04-08</time>
+      <time title="修改时间：2024-04-09 11:12:23" itemprop="dateModified" datetime="2024-04-09T11:12:23+00:00">2024-04-09</time>
     </span>
 
   
@@ -384,7 +468,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-04-08 05:40:40" itemprop="dateModified" datetime="2024-04-08T05:40:40+00:00">2024-04-08</time>
+      <time title="修改时间：2024-04-09 11:12:23" itemprop="dateModified" datetime="2024-04-09T11:12:23+00:00">2024-04-09</time>
     </span>
 
   
@@ -470,7 +554,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-04-08 05:40:40" itemprop="dateModified" datetime="2024-04-08T05:40:40+00:00">2024-04-08</time>
+      <time title="修改时间：2024-04-09 11:12:23" itemprop="dateModified" datetime="2024-04-09T11:12:23+00:00">2024-04-09</time>
     </span>
 
   
@@ -612,7 +696,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-04-08 05:40:40" itemprop="dateModified" datetime="2024-04-08T05:40:40+00:00">2024-04-08</time>
+      <time title="修改时间：2024-04-09 11:12:23" itemprop="dateModified" datetime="2024-04-09T11:12:23+00:00">2024-04-09</time>
     </span>
 
   
@@ -711,7 +795,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-04-08 05:40:40" itemprop="dateModified" datetime="2024-04-08T05:40:40+00:00">2024-04-08</time>
+      <time title="修改时间：2024-04-09 11:12:23" itemprop="dateModified" datetime="2024-04-09T11:12:23+00:00">2024-04-09</time>
     </span>
 
   
@@ -906,7 +990,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-04-08 05:40:40" itemprop="dateModified" datetime="2024-04-08T05:40:40+00:00">2024-04-08</time>
+      <time title="修改时间：2024-04-09 11:12:23" itemprop="dateModified" datetime="2024-04-09T11:12:23+00:00">2024-04-09</time>
     </span>
 
   
@@ -992,7 +1076,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-04-08 05:40:40" itemprop="dateModified" datetime="2024-04-08T05:40:40+00:00">2024-04-08</time>
+      <time title="修改时间：2024-04-09 11:12:23" itemprop="dateModified" datetime="2024-04-09T11:12:23+00:00">2024-04-09</time>
     </span>
 
   
@@ -1088,7 +1172,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-04-08 05:40:40" itemprop="dateModified" datetime="2024-04-08T05:40:40+00:00">2024-04-08</time>
+      <time title="修改时间：2024-04-09 11:12:23" itemprop="dateModified" datetime="2024-04-09T11:12:23+00:00">2024-04-09</time>
     </span>
 
   
@@ -1117,132 +1201,6 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Caused by: org.apache.ignite.internal.client.thin.ClientServerError: Ignite failed to process request [47]: 50000: Can not perform the operation because the cluster is inactive. Note, that the cluster is considered inactive by default if Ignite Persistent Store is used to let all the nodes join the cluster. To activate the cluster call Ignite.cluster.state(ClusterState.ACTIVE)</span><br></pre></td></tr></table></figure>
 
 <h2><span id="ignite2-socketchannel-xie-lu-wen-ti">Ignite2 SocketChannel泄露问题</span><a href="#ignite2-socketchannel-xie-lu-wen-ti" class="header-anchor">#</a></h2><p>Ignite客户端在连接时，如果对应的Server端没有启动，会导致SocketChannel泄露，已由笔者提交代码修复：<a target="_blank" rel="noopener" href="https://github.com/apache/ignite/pull/11016/files">https://github.com/apache/ignite/pull/11016/files</a></p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/code/github-actions-reference/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="shoothzj">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/code/github-actions-reference/" class="post-title-link" itemprop="url">GitHub Actions 参考大全</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2023-11-24 21:29:21" itemprop="dateCreated datePublished" datetime="2023-11-24T21:29:21+00:00">2023-11-24</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-04-08 05:40:40" itemprop="dateModified" datetime="2024-04-08T05:40:40+00:00">2024-04-08</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <div class="toc">
-
-<!-- toc -->
-
-<ul>
-<li><a href="#tong-yong-github-actions">通用 GitHub Actions</a><ul>
-<li><a href="#commit-lint">commit lint</a></li>
-<li><a href="#line-lint">line lint</a></li>
-</ul>
-</li>
-<li><a href="#go">Go</a><ul>
-<li><a href="#golangci-lint">golangci-lint</a></li>
-<li><a href="#go-mod-check">go mod check</a></li>
-<li><a href="#go-unit-tests">go unit tests</a></li>
-</ul>
-</li>
-<li><a href="#java-github-actions">Java GitHub Actions</a><ul>
-<li><a href="#maven-checkstyle">maven checkstyle</a></li>
-<li><a href="#maven-spotbugs">maven spotbugs</a></li>
-<li><a href="#maven-unit-tests">maven unit tests</a></li>
-</ul>
-</li>
-<li><a href="#typescript-github-actions">TypeScript GitHub Actions</a><ul>
-<li><a href="#npm-build-test">npm build test</a></li>
-<li><a href="#prettier">prettier</a></li>
-</ul>
-</li>
-</ul>
-<!-- tocstop -->
-
-</div>
-
-<h1><span id="tong-yong-github-actions">通用 GitHub Actions</span><a href="#tong-yong-github-actions" class="header-anchor">#</a></h1><h2><span id="commit-lint">commit lint</span><a href="#commit-lint" class="header-anchor">#</a></h2><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">name:</span> <span class="string">commit</span> <span class="string">lint</span></span><br><span class="line"><span class="attr">on:</span></span><br><span class="line">  <span class="attr">pull_request:</span></span><br><span class="line">    <span class="attr">branches:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">main</span></span><br><span class="line"></span><br><span class="line"><span class="attr">jobs:</span></span><br><span class="line">  <span class="attr">commitlint:</span></span><br><span class="line">    <span class="attr">runs-on:</span> <span class="string">ubuntu-latest</span></span><br><span class="line">    <span class="attr">steps:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">uses:</span> <span class="string">actions/checkout@v4</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">uses:</span> <span class="string">wagoid/commitlint-github-action@v5</span></span><br></pre></td></tr></table></figure>
-
-<h2><span id="line-lint">line lint</span><a href="#line-lint" class="header-anchor">#</a></h2><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">name:</span> <span class="string">line</span> <span class="string">lint</span></span><br><span class="line"><span class="attr">on:</span></span><br><span class="line">  <span class="attr">push:</span></span><br><span class="line">    <span class="attr">branches:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">main</span></span><br><span class="line">  <span class="attr">pull_request:</span></span><br><span class="line">    <span class="attr">branches:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">main</span></span><br><span class="line"><span class="attr">jobs:</span></span><br><span class="line">  <span class="attr">build:</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">line</span> <span class="string">lint</span></span><br><span class="line">    <span class="attr">runs-on:</span> <span class="string">ubuntu-latest</span></span><br><span class="line">    <span class="attr">steps:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">uses:</span> <span class="string">actions/checkout@v4</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">linelint</span></span><br><span class="line">        <span class="attr">uses:</span> <span class="string">fernandrone/linelint@master</span></span><br></pre></td></tr></table></figure>
-
-<h1><span id="go">Go</span><a href="#go" class="header-anchor">#</a></h1><h2><span id="golangci-lint">golangci-lint</span><a href="#golangci-lint" class="header-anchor">#</a></h2><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">name:</span> <span class="string">go</span> <span class="string">ci</span> <span class="string">Lint</span></span><br><span class="line"><span class="attr">on:</span></span><br><span class="line">  <span class="attr">push:</span></span><br><span class="line">    <span class="attr">branches:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">main</span></span><br><span class="line">  <span class="attr">pull_request:</span></span><br><span class="line">    <span class="attr">branches:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">main</span></span><br><span class="line"><span class="attr">jobs:</span></span><br><span class="line">  <span class="attr">golangci:</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">lint</span></span><br><span class="line">    <span class="attr">runs-on:</span> <span class="string">ubuntu-latest</span></span><br><span class="line">    <span class="attr">steps:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">uses:</span> <span class="string">actions/checkout@v4</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">uses:</span> <span class="string">actions/setup-go@v4</span></span><br><span class="line">        <span class="attr">with:</span></span><br><span class="line">          <span class="attr">go-version:</span> <span class="string">&#x27;1.21&#x27;</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">golangci-lint</span></span><br><span class="line">        <span class="attr">uses:</span> <span class="string">golangci/golangci-lint-action@v3</span></span><br><span class="line">        <span class="attr">with:</span></span><br><span class="line">          <span class="attr">version:</span> <span class="string">latest</span></span><br><span class="line">          <span class="attr">args:</span> <span class="string">--timeout</span> <span class="string">3m0s</span></span><br></pre></td></tr></table></figure>
-
-<h2><span id="go-mod-check">go mod check</span><a href="#go-mod-check" class="header-anchor">#</a></h2><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">name:</span> <span class="string">go</span> <span class="string">mod</span> <span class="string">check</span></span><br><span class="line"></span><br><span class="line"><span class="attr">on:</span></span><br><span class="line">  <span class="attr">push:</span></span><br><span class="line">    <span class="attr">branches:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">main</span></span><br><span class="line">  <span class="attr">pull_request:</span></span><br><span class="line">    <span class="attr">branches:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">main</span></span><br><span class="line"></span><br><span class="line"><span class="attr">jobs:</span></span><br><span class="line">  <span class="attr">go_mod_check:</span></span><br><span class="line">    <span class="attr">runs-on:</span> <span class="string">ubuntu-latest</span></span><br><span class="line">    <span class="attr">steps:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">uses:</span> <span class="string">actions/checkout@v4</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Run</span> <span class="string">Go</span> <span class="string">Mod</span> <span class="string">Check</span> <span class="string">Action</span></span><br><span class="line">        <span class="attr">uses:</span> <span class="string">shoothzj/go-mod-check-action@main</span></span><br><span class="line">        <span class="attr">with:</span></span><br><span class="line">          <span class="attr">prohibitIndirectDepUpdate:</span> <span class="string">&#x27;true&#x27;</span></span><br></pre></td></tr></table></figure>
-
-<h2><span id="go-unit-tests">go unit tests</span><a href="#go-unit-tests" class="header-anchor">#</a></h2><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">name:</span> <span class="string">go</span> <span class="string">unit</span> <span class="string">test</span></span><br><span class="line"></span><br><span class="line"><span class="attr">on:</span></span><br><span class="line">  <span class="attr">push:</span></span><br><span class="line">    <span class="attr">branches:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">main</span></span><br><span class="line">  <span class="attr">pull_request:</span></span><br><span class="line">    <span class="attr">branches:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">main</span></span><br><span class="line"></span><br><span class="line"><span class="attr">jobs:</span></span><br><span class="line">  <span class="attr">go_unit_test:</span></span><br><span class="line">    <span class="attr">runs-on:</span> <span class="string">ubuntu-latest</span></span><br><span class="line">    <span class="attr">steps:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">uses:</span> <span class="string">actions/checkout@v4</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">uses:</span> <span class="string">actions/setup-go@v4</span></span><br><span class="line">        <span class="attr">with:</span></span><br><span class="line">          <span class="attr">go-version:</span> <span class="string">&#x27;1.21&#x27;</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">setup</span> <span class="string">OpenGemini</span></span><br><span class="line">        <span class="attr">uses:</span> <span class="string">shoothzj/setup-opengemini-action@main</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Run</span> <span class="string">coverage</span></span><br><span class="line">        <span class="attr">run:</span> <span class="string">go</span> <span class="string">test</span> <span class="string">./...</span> <span class="string">-coverpkg=./padmin/...</span> <span class="string">-race</span> <span class="string">-coverprofile=coverage.out</span> <span class="string">-covermode=atomic</span></span><br></pre></td></tr></table></figure>
-
-<h1><span id="java-github-actions">Java GitHub Actions</span><a href="#java-github-actions" class="header-anchor">#</a></h1><h2><span id="maven-checkstyle">maven checkstyle</span><a href="#maven-checkstyle" class="header-anchor">#</a></h2><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">name:</span> <span class="string">java</span> <span class="string">checkstyle</span></span><br><span class="line"><span class="attr">on:</span></span><br><span class="line">  <span class="attr">push:</span></span><br><span class="line">    <span class="attr">branches:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">main</span></span><br><span class="line">  <span class="attr">pull_request:</span></span><br><span class="line">    <span class="attr">branches:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">main</span></span><br><span class="line"></span><br><span class="line"><span class="attr">jobs:</span></span><br><span class="line">  <span class="attr">java_checkstyle:</span></span><br><span class="line">    <span class="attr">runs-on:</span> <span class="string">ubuntu-latest</span></span><br><span class="line">    <span class="attr">steps:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">uses:</span> <span class="string">actions/checkout@v4</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Set</span> <span class="string">up</span> <span class="string">Maven</span> <span class="string">Central</span> <span class="string">Repository</span></span><br><span class="line">        <span class="attr">uses:</span> <span class="string">actions/setup-java@v3</span></span><br><span class="line">        <span class="attr">with:</span></span><br><span class="line">          <span class="attr">java-version:</span> <span class="string">&#x27;17&#x27;</span></span><br><span class="line">          <span class="attr">distribution:</span> <span class="string">&#x27;temurin&#x27;</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">checkstyle</span></span><br><span class="line">        <span class="attr">run:</span> <span class="string">mvn</span> <span class="string">-B</span> <span class="string">clean</span> <span class="string">checkstyle:check</span></span><br></pre></td></tr></table></figure>
-
-<h2><span id="maven-spotbugs">maven spotbugs</span><a href="#maven-spotbugs" class="header-anchor">#</a></h2><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">name:</span> <span class="string">java</span> <span class="string">spotbugs</span></span><br><span class="line"><span class="attr">on:</span></span><br><span class="line">  <span class="attr">push:</span></span><br><span class="line">    <span class="attr">branches:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">main</span></span><br><span class="line">  <span class="attr">pull_request:</span></span><br><span class="line">    <span class="attr">branches:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">main</span></span><br><span class="line"></span><br><span class="line"><span class="attr">jobs:</span></span><br><span class="line">  <span class="attr">java_spotbugs:</span></span><br><span class="line">    <span class="attr">runs-on:</span> <span class="string">ubuntu-latest</span></span><br><span class="line">    <span class="attr">steps:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">uses:</span> <span class="string">actions/checkout@v4</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Set</span> <span class="string">up</span> <span class="string">Maven</span> <span class="string">Central</span> <span class="string">Repository</span></span><br><span class="line">        <span class="attr">uses:</span> <span class="string">actions/setup-java@v3</span></span><br><span class="line">        <span class="attr">with:</span></span><br><span class="line">          <span class="attr">java-version:</span> <span class="string">&#x27;17&#x27;</span></span><br><span class="line">          <span class="attr">distribution:</span> <span class="string">&#x27;temurin&#x27;</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">spotbugs</span></span><br><span class="line">        <span class="attr">run:</span> <span class="string">mvn</span> <span class="string">-B</span> <span class="string">-DskipTests</span> <span class="string">clean</span> <span class="string">verify</span> <span class="string">spotbugs:spotbugs</span></span><br></pre></td></tr></table></figure>
-
-<h2><span id="maven-unit-tests">maven unit tests</span><a href="#maven-unit-tests" class="header-anchor">#</a></h2><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">name:</span> <span class="string">java</span> <span class="string">unit</span> <span class="string">tests</span></span><br><span class="line"><span class="attr">on:</span></span><br><span class="line">  <span class="attr">push:</span></span><br><span class="line">    <span class="attr">branches:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">main</span></span><br><span class="line">  <span class="attr">pull_request:</span></span><br><span class="line">    <span class="attr">branches:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">main</span></span><br><span class="line"></span><br><span class="line"><span class="attr">jobs:</span></span><br><span class="line">  <span class="attr">java_unit_tests:</span></span><br><span class="line">    <span class="attr">runs-on:</span> <span class="string">ubuntu-latest</span></span><br><span class="line">    <span class="attr">steps:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">uses:</span> <span class="string">actions/checkout@v4</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Set</span> <span class="string">up</span> <span class="string">Maven</span> <span class="string">Central</span> <span class="string">Repository</span></span><br><span class="line">        <span class="attr">uses:</span> <span class="string">actions/setup-java@v3</span></span><br><span class="line">        <span class="attr">with:</span></span><br><span class="line">          <span class="attr">java-version:</span> <span class="string">&#x27;17&#x27;</span></span><br><span class="line">          <span class="attr">distribution:</span> <span class="string">&#x27;temurin&#x27;</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">unit</span> <span class="string">tests</span></span><br><span class="line">        <span class="attr">run:</span> <span class="string">mvn</span> <span class="string">-B</span> <span class="string">clean</span> <span class="string">test</span></span><br></pre></td></tr></table></figure>
-
-<h1><span id="typescript-github-actions">TypeScript GitHub Actions</span><a href="#typescript-github-actions" class="header-anchor">#</a></h1><h2><span id="npm-build-test">npm build test</span><a href="#npm-build-test" class="header-anchor">#</a></h2><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">name:</span> <span class="string">npm</span> <span class="string">build</span> <span class="string">test</span></span><br><span class="line"><span class="attr">on:</span></span><br><span class="line">  <span class="attr">push:</span></span><br><span class="line">    <span class="attr">branches:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">main</span></span><br><span class="line">  <span class="attr">pull_request:</span></span><br><span class="line">    <span class="attr">branches:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">main</span></span><br><span class="line"></span><br><span class="line"><span class="attr">jobs:</span></span><br><span class="line">  <span class="attr">npm_buid_test:</span></span><br><span class="line">    <span class="attr">runs-on:</span> <span class="string">ubuntu-latest</span></span><br><span class="line">    <span class="attr">steps:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">uses:</span> <span class="string">actions/checkout@v4</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">uses:</span> <span class="string">actions/setup-node@v4</span></span><br><span class="line">        <span class="attr">with:</span></span><br><span class="line">          <span class="attr">node-version:</span> <span class="string">latest</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">run:</span> <span class="string">npm</span> <span class="string">install</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">run:</span> <span class="string">npm</span> <span class="string">run</span> <span class="string">build</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">setup</span> <span class="string">pulsar</span></span><br><span class="line">        <span class="attr">uses:</span> <span class="string">shoothzj/setup-pulsar-action@main</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">run:</span> <span class="string">npm</span> <span class="string">run</span> <span class="string">test</span></span><br></pre></td></tr></table></figure>
-
-<h2><span id="prettier">prettier</span><a href="#prettier" class="header-anchor">#</a></h2><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">name:</span> <span class="string">prettier</span></span><br><span class="line"><span class="attr">on:</span></span><br><span class="line">  <span class="attr">push:</span></span><br><span class="line">    <span class="attr">branches:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">main</span></span><br><span class="line">  <span class="attr">pull_request:</span></span><br><span class="line">    <span class="attr">branches:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">main</span></span><br><span class="line"></span><br><span class="line"><span class="attr">jobs:</span></span><br><span class="line">  <span class="attr">prettier:</span></span><br><span class="line">    <span class="attr">runs-on:</span> <span class="string">ubuntu-latest</span></span><br><span class="line">    <span class="attr">steps:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">uses:</span> <span class="string">actions/checkout@v4</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">uses:</span> <span class="string">actions/setup-node@v4</span></span><br><span class="line">        <span class="attr">with:</span></span><br><span class="line">          <span class="attr">node-version:</span> <span class="string">latest</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">run:</span> <span class="string">npm</span> <span class="string">install</span> <span class="string">--save-dev</span> <span class="string">prettier</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">run:</span> <span class="string">npm</span> <span class="string">install</span> <span class="string">--global</span> <span class="string">prettier</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">run:</span> <span class="string">prettier</span> <span class="string">--check</span> <span class="string">&#x27;**/*.ts&#x27;</span></span><br></pre></td></tr></table></figure>
 
       
     </div>

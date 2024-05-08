@@ -146,13 +146,13 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">69</span>
+          <span class="site-state-item-count">70</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">39</span>
+        <span class="site-state-item-count">40</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -177,6 +177,89 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/linux/linux-process-exist/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="shoothzj">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/linux/linux-process-exist/" class="post-title-link" itemprop="url">比调用Shell更高效的判断进程是否存在的方式</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-08-12 17:24:44" itemprop="dateCreated datePublished" datetime="2021-08-12T17:24:44+00:00">2021-08-12</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2024-05-08 00:55:03" itemprop="dateModified" datetime="2024-05-08T00:55:03+00:00">2024-05-08</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>有很多场景需要我们的代码检测一个进程是否存在，常用的一种方式是通过调用脚本通过<code>ps -ef</code>的方式查看，然而其实这种做法并不怎么高效，会fork一个进程出来，还会影响<code>go</code>协程的调度</p>
+<p>一种更好的方式是可以通过解析<code>/proc</code>文件夹来得到想要的信息，其实可以通过<code>strace</code>命令查看，<code>ps -ef</code>也是读取了这个路径下的信息</p>
+<p><img src="/linux/linux-process-exist/linux-ps-ef-strace.png" alt="linux-ps-ef-strace"></p>
+<p>下面分别是java和go的轮子示例</p>
+<p>使用正则表达式<code>[0-9]+</code>的原因是<code>/proc</code>路径下还有一些其他文件，其中pid都是数字。</p>
+<h2><span id="java">java</span><a href="#java" class="header-anchor">#</a></h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Pattern</span> <span class="variable">numberPattern</span> <span class="operator">=</span> Pattern.compile(<span class="string">&quot;[0-9]+&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="type">boolean</span> <span class="title function_">processExists</span><span class="params">(String processName)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="keyword">final</span> <span class="type">File</span> <span class="variable">procFile</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">File</span>(<span class="string">&quot;/proc&quot;</span>);</span><br><span class="line">        <span class="keyword">if</span> (!procFile.isDirectory()) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">Exception</span>(<span class="string">&quot;why proc dir is not directory&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">final</span> File[] listFiles = procFile.listFiles();</span><br><span class="line">        <span class="keyword">if</span> (listFiles == <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">final</span> List&lt;File&gt; procDir = Arrays.stream(listFiles).filter(f -&gt; numberPattern.matcher(f.getName()).matches()).collect(Collectors.toList());</span><br><span class="line">        <span class="comment">// find the proc cmdline</span></span><br><span class="line">        <span class="keyword">for</span> (File file : procDir) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="keyword">final</span> <span class="type">byte</span>[] byteArray = FileUtils.readFileToByteArray(<span class="keyword">new</span> <span class="title class_">File</span>(file.getCanonicalPath() + File.separator + <span class="string">&quot;cmdline&quot;</span>));</span><br><span class="line">                <span class="keyword">final</span> <span class="type">byte</span>[] bytes = <span class="keyword">new</span> <span class="title class_">byte</span>[byteArray.length];</span><br><span class="line">                <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; byteArray.length; i++) &#123;</span><br><span class="line">                    <span class="keyword">if</span> (byteArray[i] != <span class="number">0x00</span>) &#123;</span><br><span class="line">                        bytes[i] = byteArray[i];</span><br><span class="line">                    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                        bytes[i] = (<span class="type">byte</span>) <span class="number">0x20</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">final</span> <span class="type">String</span> <span class="variable">cmdLine</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">String</span>(bytes, StandardCharsets.UTF_8);</span><br><span class="line">                <span class="keyword">if</span> (cmdLine.contains(processName)) &#123;</span><br><span class="line">                    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">                <span class="comment">// the proc may end during the loop, ignore it</span></span><br><span class="line">                log.error(<span class="string">&quot;read file exception &quot;</span>, e);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<h2><span id="go">go</span><a href="#go" class="header-anchor">#</a></h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">ProcessExists</span><span class="params">(processName <span class="type">string</span>)</span></span> (<span class="type">bool</span>, <span class="type">error</span>) &#123;</span><br><span class="line">	result := <span class="literal">false</span></span><br><span class="line">	fileInfos, err := ioutil.ReadDir(<span class="string">&quot;/proc&quot;</span>)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">false</span>, err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">for</span> _, info := <span class="keyword">range</span> fileInfos &#123;</span><br><span class="line">		name := info.Name()</span><br><span class="line">		matched, err := regexp.MatchString(<span class="string">&quot;[0-9]+&quot;</span>, name)</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">false</span>, err</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> !matched &#123;</span><br><span class="line">			<span class="keyword">continue</span></span><br><span class="line">		&#125;</span><br><span class="line">		cmdLine, err := parseCmdLine(<span class="string">&quot;/proc/&quot;</span> + info.Name() + <span class="string">&quot;/cmdline&quot;</span>)</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			glog.Error(<span class="string">&quot;read cmd line failed &quot;</span>, err)</span><br><span class="line">			<span class="comment">// the proc may end during the loop, ignore it</span></span><br><span class="line">			<span class="keyword">continue</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> strings.Contains(cmdLine, processName) &#123;</span><br><span class="line">			result = <span class="literal">true</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> result, err</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">parseCmdLine</span><span class="params">(path <span class="type">string</span>)</span></span> (<span class="type">string</span>, <span class="type">error</span>) &#123;</span><br><span class="line">	cmdData, err := ioutil.ReadFile(path)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="string">&quot;&quot;</span>, err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(cmdData) &lt; <span class="number">1</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="string">&quot;&quot;</span>, <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	split := strings.Split(<span class="type">string</span>(bytes.TrimRight(cmdData, <span class="type">string</span>(<span class="string">&quot;\x00&quot;</span>))), <span class="type">string</span>(<span class="type">byte</span>(<span class="number">0</span>)))</span><br><span class="line">	<span class="keyword">return</span> strings.Join(split, <span class="string">&quot; &quot;</span>), <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -222,7 +305,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-04-09 11:12:23" itemprop="dateModified" datetime="2024-04-09T11:12:23+00:00">2024-04-09</time>
+      <time title="修改时间：2024-05-08 00:55:03" itemprop="dateModified" datetime="2024-05-08T00:55:03+00:00">2024-05-08</time>
     </span>
 
   
@@ -335,7 +418,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-04-09 11:12:23" itemprop="dateModified" datetime="2024-04-09T11:12:23+00:00">2024-04-09</time>
+      <time title="修改时间：2024-05-08 00:55:03" itemprop="dateModified" datetime="2024-05-08T00:55:03+00:00">2024-05-08</time>
     </span>
 
   
@@ -442,7 +525,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-04-09 11:12:23" itemprop="dateModified" datetime="2024-04-09T11:12:23+00:00">2024-04-09</time>
+      <time title="修改时间：2024-05-08 00:55:03" itemprop="dateModified" datetime="2024-05-08T00:55:03+00:00">2024-05-08</time>
     </span>
 
   
@@ -558,7 +641,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-04-09 11:12:23" itemprop="dateModified" datetime="2024-04-09T11:12:23+00:00">2024-04-09</time>
+      <time title="修改时间：2024-05-08 00:55:03" itemprop="dateModified" datetime="2024-05-08T00:55:03+00:00">2024-05-08</time>
     </span>
 
   
@@ -666,7 +749,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-04-09 11:12:23" itemprop="dateModified" datetime="2024-04-09T11:12:23+00:00">2024-04-09</time>
+      <time title="修改时间：2024-05-08 00:55:03" itemprop="dateModified" datetime="2024-05-08T00:55:03+00:00">2024-05-08</time>
     </span>
 
   
@@ -821,7 +904,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-04-09 11:12:23" itemprop="dateModified" datetime="2024-04-09T11:12:23+00:00">2024-04-09</time>
+      <time title="修改时间：2024-05-08 00:55:03" itemprop="dateModified" datetime="2024-05-08T00:55:03+00:00">2024-05-08</time>
     </span>
 
   
@@ -919,7 +1002,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-04-09 11:12:23" itemprop="dateModified" datetime="2024-04-09T11:12:23+00:00">2024-04-09</time>
+      <time title="修改时间：2024-05-08 00:55:03" itemprop="dateModified" datetime="2024-05-08T00:55:03+00:00">2024-05-08</time>
     </span>
 
   
@@ -1012,7 +1095,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-04-09 11:12:23" itemprop="dateModified" datetime="2024-04-09T11:12:23+00:00">2024-04-09</time>
+      <time title="修改时间：2024-05-08 00:55:03" itemprop="dateModified" datetime="2024-05-08T00:55:03+00:00">2024-05-08</time>
     </span>
 
   
@@ -1120,7 +1203,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-04-09 11:12:23" itemprop="dateModified" datetime="2024-04-09T11:12:23+00:00">2024-04-09</time>
+      <time title="修改时间：2024-05-08 00:55:03" itemprop="dateModified" datetime="2024-05-08T00:55:03+00:00">2024-05-08</time>
     </span>
 
   
@@ -1230,96 +1313,6 @@
 <h2><span id="zookeeper-de-prometheus-quan-0-jian-ting">zookeeper的Prometheus全0监听</span><a href="#zookeeper-de-prometheus-quan-0-jian-ting" class="header-anchor">#</a></h2><p>不满足网络监听最小可见原则。修改策略，添加一个可配置参数来配置监听的IP <code>metricsProvider.httpHost</code>，PR已合入，见 <a target="_blank" rel="noopener" href="https://github.com/apache/zookeeper/pull/1574/files">https://github.com/apache/zookeeper/pull/1574/files</a></p>
 <h2><span id="ke-hu-duan-ban-ben-hao-guo-di-yu-ming-wu-fa-ji-shi-shua-xin">客户端版本号过低，域名无法及时刷新</span><a href="#ke-hu-duan-ban-ben-hao-guo-di-yu-ming-wu-fa-ji-shi-shua-xin" class="header-anchor">#</a></h2><p>客户端使用域名进行连接，但在客户端版本号过低的情况下，客户端并不会刷新新的ip，还是会用旧的ip尝试连接。升级客户端版本号到curator-4.3.0以上、zookeeper-3.6.2以上版本后解决。</p>
 <h1><span id="zong-jie">总结</span><a href="#zong-jie" class="header-anchor">#</a></h1><p>本文详细介绍了华为云IoT服务产品部如何使用Apache ZooKeeper来优化其云原生微服务架构。ZooKeeper作为分布式协调服务，在华为云IoT服务中发挥了重要作用，用于主备选举、分布式锁、任务分配和缓存通知等。文中还讨论了ZooKeeper在分布式ID生成、微服务注册中心、数据库连接均衡等方面的应用。此外，文章还覆盖了ZooKeeper在华为云IoT产品部的部署、运维策略和所遇到的挑战，包括容器化部署、监控指标和配置问题。</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/rpc-lossless/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="shoothzj">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/rpc-lossless/" class="post-title-link" itemprop="url">优雅启停VS重试，谁能更好地保证RPC无损</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-03-22 18:57:18" itemprop="dateCreated datePublished" datetime="2021-03-22T18:57:18+00:00">2021-03-22</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-04-09 11:12:23" itemprop="dateModified" datetime="2024-04-09T11:12:23+00:00">2024-04-09</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1><span id="bei-jing">背景</span><a href="#bei-jing" class="header-anchor">#</a></h1><p>我们的业务有些时候总是在升级期间<code>rpc</code>业务有一些呼损，想总结一下让<code>rpc</code>调用零呼损的两种方式：重试和优雅启停。我先介绍这两种方式，再描述一下这两种方式的优缺点</p>
-<p><img src="/rpc-lossless/rpc-lossless.png" alt="rpc-lossless"></p>
-<p>A是一个微服务</p>
-<p>B也是一个微服务</p>
-<p>蓝色的是常见的注册中心，有<code>zookeeper</code>、<code>eureka</code>等实现。</p>
-<h2><span id="chong-shi">重试</span><a href="#chong-shi" class="header-anchor">#</a></h2><p>重试，在发生可重试错误的时候，重试一次。什么是可重试错误呢？就是重试一次，可能会成功。比如400 BadRequest，那出现这种错误，基本上重试也没有用，就不要浪费我们宝贵的服务器资源了。常见的如<code>servicecomb</code>框架就有重试几次、重试间隔这样的参数。值得一提的是，如果你指望通过重试让升级零呼损，那么你的重试次数，要比你的并行升级实例数大才行。</p>
-<p>这也很容易理解，比如A服务调用B服务，B服务有5个实例,B1~B5。这个时候，同时升级B1和B2，A第一次调用了B1，接下来重试，如果运气不好，恰好重试到了B2节点，那么业务还是会失败的。如果防异常故障，就得重试三次才行。</p>
-<p>如果是防止单数据中心宕机，重试次数大于同时宕机节点数，这个规则可能就没那么靠谱了。现在，企业部署十几个乃至二十几个微服务实例，已经不是什么新闻了，假设分3数据中心部署，总不能重试接近10次吧，这种时候，最好重试策略和数据中心相关，重试的时候，选择另一个az的实例。目前<code>servicecomb</code>还不支持这种功能。</p>
-<h2><span id="you-ya-qi-ting">优雅启停</span><a href="#you-ya-qi-ting" class="header-anchor">#</a></h2><h3><span id="you-ya-ting-zhi">优雅停止</span><a href="#you-ya-ting-zhi" class="header-anchor">#</a></h3><p>优雅停止，就是说当微服务快要宕机的时候，先从注册中心进行去注册，然后把发送给微服务的消息，处理完毕后，再彻底关闭。这个方式，可以有效地防止升级期间，发送到老节点的呼损。</p>
-<h3><span id="you-ya-qi-dong">优雅启动</span><a href="#you-ya-qi-dong" class="header-anchor">#</a></h3><p>优雅启动，当微服务实例，能够处理<code>rpc</code>请求的时候，再将实例自己注册到注册中心。避免请求发进来，实例却无法处理。</p>
-<p>这里有一个要求，就是调用方发现被调用方（即A发现B）的注册中心，要和B注册、去注册的注册中心是一个注册中心。有案例是，发现采用k8s发现，注册、去注册却使用微服务引擎，导致呼损。</p>
-<h1><span id="you-lie-dui-bi">优劣对比</span><a href="#you-lie-dui-bi" class="header-anchor">#</a></h1><h2><span id="ke-yu-zhi-jie-dian-sheng-ji-de-chang-jing">可预知节点升级的场景</span><a href="#ke-yu-zhi-jie-dian-sheng-ji-de-chang-jing" class="header-anchor">#</a></h2><p>重试相对于优雅启停，在预知节点升级的场景没那么优雅，重试次数可能还要和并行升级的节点挂钩，非常的不优雅，且难以维护</p>
-<h2><span id="bu-ke-yu-zhi-jie-dian-sheng-ji-de-chang-jing">不可预知节点升级的场景</span><a href="#bu-ke-yu-zhi-jie-dian-sheng-ji-de-chang-jing" class="header-anchor">#</a></h2><p>优雅启停无法对不可预知节点升级的场景生效。只有重试能在这个场景发挥作用</p>
-<h2><span id="qi-ta-chang-jing">其他场景</span><a href="#qi-ta-chang-jing" class="header-anchor">#</a></h2><p>重试可以很好地处理网络闪断、长链接中断等场景</p>
-<h1><span id="zong-jie">总结</span><a href="#zong-jie" class="header-anchor">#</a></h1><p>想要实现<code>rpc</code>调用零呼损，重试和优雅启停都不可或缺，都需要实现。</p>
 
       
     </div>

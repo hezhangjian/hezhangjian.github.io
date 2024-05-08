@@ -146,13 +146,13 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">69</span>
+          <span class="site-state-item-count">70</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">39</span>
+        <span class="site-state-item-count">40</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -177,6 +177,117 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/code/java/java-weird-timestamp-change/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="shoothzj">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/code/java/java-weird-timestamp-change/" class="post-title-link" itemprop="url">记一次诡异的Java时间戳变化问题</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2024-05-08 08:11:47 / 修改时间：00:55:03" itemprop="dateCreated datePublished" datetime="2024-05-08T08:11:47+00:00">2024-05-08</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1><span id="wen-ti-xian-xiang">问题现象</span><a href="#wen-ti-xian-xiang" class="header-anchor">#</a></h1><p>在一个使用Spring R2dbc与Mysql8.x的项目中，当创建 一个REST资源，进行创建，返回的毫秒精度时间戳，和下一瞬间查询的时间戳不一致。sql及代码大概如下</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> person (</span><br><span class="line">    id <span class="type">INT</span> <span class="keyword">PRIMARY</span> KEY,</span><br><span class="line">    name <span class="type">VARCHAR</span>(<span class="number">255</span>),</span><br><span class="line">    created_time DATETIME(<span class="number">3</span>),</span><br><span class="line">    updated_time DATETIME(<span class="number">3</span>)</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>实体类定义</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Entity</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">PersonEntity</span> &#123;</span><br><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="keyword">private</span> Long id;</span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    <span class="meta">@CreatedDate</span></span><br><span class="line">    <span class="keyword">private</span> LocalDateTime createdTime;</span><br><span class="line">    <span class="meta">@LastModifiedDate</span></span><br><span class="line">    <span class="keyword">private</span> LocalDateTime updatedTime;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里使用了<code>@CreatedDate</code>、<code>@LastModifiedDate</code>注解，并在Application类上配置了<code>@EnableR2dbcAuditing</code>注解用于在Repo操作实体的时候，自动更新时间戳。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">PersonRepo</span> <span class="keyword">extends</span> <span class="title class_">ReactiveCrudRepository</span>&lt;PersonEntity, Long&gt; &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>创建代码类比如下，大概就是使用r2dbc操作数据，并将r2dbc返回的实体用于转换毫秒时间戳</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">return createPersonReq</span><br><span class="line">               .flatMap(req -&gt; &#123;</span><br><span class="line">                   PersonPo personPo = new PersonPo();</span><br><span class="line">                   personPo.setAge(18);</span><br><span class="line">                   personPo.setName(req.getName());</span><br><span class="line">                   return personRepo.save(personPo);</span><br><span class="line">               &#125;)</span><br><span class="line">               .map(person -&gt; &#123;</span><br><span class="line">                   PersonResp personResp = new PersonResp();</span><br><span class="line">                   personResp.setName(person.getName());</span><br><span class="line">                   personResp.setCreatedTime(TimeUtil.format(person.getCreatedTime()));</span><br><span class="line">                   return new ResponseEntity&lt;&gt;(personResp, null, HttpStatus.CREATED);</span><br><span class="line">               &#125;);</span><br></pre></td></tr></table></figure>
+
+<p>然而创建的时候返回的时间戳和查询的时间戳不一致，现象举例：<br>创建的时候返回：<code>2024-05-08T08:11:47.333Z</code>，<br>查询的时候却返回：<code>2024-05-08T08:11:47.334Z</code>，</p>
+<p>走读代码，发现代码基本上万无一失，那么问题出在哪里呢？</p>
+<p>通过仔细观察时间戳的区别，发现时间戳的变化都在最后一位，且相差为一，醒悟到这估计是由于内存中纳秒时间戳精度在转化为数据库毫秒时间戳的时候，部分库的行为是截断，部分库的行为是四舍五入，导致了这个问题。</p>
+<p>最终通过写demo，docker抓包复现了这个问题，如下图所示，mysql server会将接收的时间戳进行四舍五入，而java常见的format工具类都是截断，导致了这一不一致。同时，这也体现了，r2dbc返回的entity可能并不是实际存入数据的内容，而是”原始”的entity。</p>
+<p><img src="/java-weird-timestamp-change.png" alt="r2dbc-weird-timestamp-change.jpeg"></p>
+<h1><span id="r2dbc-yu-mysql-de-shi-jian-jing-du-shi-diao-wen-ti">r2dbc与mysql的时间精度失调问题</span><a href="#r2dbc-yu-mysql-de-shi-jian-jing-du-shi-diao-wen-ti" class="header-anchor">#</a></h1><p>在这个问题里面，存在三个时间精度：</p>
+<ul>
+<li>内存中的时间精度</li>
+<li>r2dbc发给mysql的时间精度，有趣的是，r2dbc发给mysql的时间精度，并不是sql中列定义的精度，而是mysql server所能支持的最高精度即微秒精度。</li>
+<li>mysql实际存储的时间精度</li>
+</ul>
+<p>r2dbc返回的entity可能并不是实际存入数据的内容，而是经过r2dbc处理之后，发送到数据库之前的entity。问题的关键就在r2dbc并不根据列定义的精度处理数据，而是根据mysql server支持的最高精度处理数据。</p>
+<p>解决问题的方式有几种：</p>
+<ul>
+<li>将mysql列定义到微秒级别精度</li>
+<li>在进入r2dbc之前，将时间戳截断到mysql列定义的精度</li>
+<li>在r2dbc返回的entity中，将时间戳截断到mysql支持的精度。这其实对开发者的心智负担较重，返回的entity并不是实际存储的，使用前要做进位，限制也比较大。</li>
+</ul>
+<p>在进入r2dbc之前，将时间戳截断到数据库表定义的精度，也有两种方式</p>
+<ul>
+<li>不使用<code>@CreatedDate</code>、<code>@LastModifiedDate</code>注解，而是在应用程序中手动设置时间戳</li>
+<li>继续使用<code>@CreatedDate</code>、<code>@LastModifiedDate</code>注解，通过拦截器统一进位</li>
+</ul>
+<p>通过拦截器的代码如下，定义基类，不然每个实体类都要书写拦截器。一般来说，一个项目里，时间戳的精度都应该统一，所以可以定义一个统一的拦截器。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">import</span> lombok.ToString;</span><br><span class="line"><span class="keyword">import</span> org.springframework.data.annotation.CreatedDate;</span><br><span class="line"><span class="keyword">import</span> org.springframework.data.annotation.LastModifiedDate;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.time.LocalDateTime;</span><br><span class="line"></span><br><span class="line"><span class="meta">@ToString</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">class</span> <span class="title class_">AuditableEntity</span> &#123;</span><br><span class="line">    <span class="meta">@CreatedDate</span></span><br><span class="line">    <span class="keyword">protected</span> LocalDateTime createdTime;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@LastModifiedDate</span></span><br><span class="line">    <span class="keyword">protected</span> LocalDateTime updatedTime;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> LocalDateTime <span class="title function_">getCreatedTime</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> createdTime;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setCreatedTime</span><span class="params">(LocalDateTime createdTime)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.createdTime = createdTime;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> LocalDateTime <span class="title function_">getUpdatedTime</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> updatedTime;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setUpdatedTime</span><span class="params">(LocalDateTime updatedTime)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.updatedTime = updatedTime;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.reactivestreams.Publisher;</span><br><span class="line"><span class="keyword">import</span> org.springframework.data.r2dbc.mapping.OutboundRow;</span><br><span class="line"><span class="keyword">import</span> org.springframework.data.r2dbc.mapping.event.BeforeSaveCallback;</span><br><span class="line"><span class="keyword">import</span> org.springframework.data.relational.core.mapping.event.BeforeConvertCallback;</span><br><span class="line"><span class="keyword">import</span> org.springframework.data.relational.core.sql.SqlIdentifier;</span><br><span class="line"><span class="keyword">import</span> org.springframework.stereotype.Component;</span><br><span class="line"><span class="keyword">import</span> reactor.core.publisher.Mono;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.time.LocalDateTime;</span><br><span class="line"><span class="keyword">import</span> java.time.temporal.ChronoUnit;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">AuditableEntityCallback</span> <span class="keyword">implements</span> <span class="title class_">BeforeSaveCallback</span>&lt;AuditableEntity&gt;, BeforeConvertCallback&lt;AuditableEntity&gt; &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> Publisher&lt;AuditableEntity&gt; <span class="title function_">onBeforeSave</span><span class="params">(AuditableEntity entity, OutboundRow row, SqlIdentifier table)</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;before save &quot;</span> + entity.getCreatedTime());</span><br><span class="line">        entity.setCreatedTime(roundToMilliseconds(entity.getCreatedTime()));</span><br><span class="line">        entity.setUpdatedTime(roundToMilliseconds(entity.getUpdatedTime()));</span><br><span class="line">        System.out.println(<span class="string">&quot;before save &quot;</span> + entity.getCreatedTime());</span><br><span class="line">        <span class="keyword">return</span> Mono.just(entity);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> AuditableEntity <span class="title function_">onBeforeConvert</span><span class="params">(AuditableEntity entity)</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;before convert &quot;</span> + entity.getCreatedTime());</span><br><span class="line">        entity.setCreatedTime(roundToMilliseconds(entity.getCreatedTime()));</span><br><span class="line">        entity.setUpdatedTime(roundToMilliseconds(entity.getUpdatedTime()));</span><br><span class="line">        System.out.println(<span class="string">&quot;before convert &quot;</span> + entity.getCreatedTime());</span><br><span class="line">        <span class="keyword">return</span> entity;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> LocalDateTime <span class="title function_">roundToMilliseconds</span><span class="params">(LocalDateTime dateTime)</span> &#123;</span><br><span class="line">        <span class="type">LocalDateTime</span> <span class="variable">localDateTime</span> <span class="operator">=</span> dateTime.truncatedTo(ChronoUnit.MILLIS);</span><br><span class="line">        <span class="type">int</span> <span class="variable">dateTimeNano</span> <span class="operator">=</span> dateTime.getNano() % <span class="number">1000_000</span>;</span><br><span class="line">        <span class="keyword">if</span> (dateTimeNano &gt;= <span class="number">500_000</span>) &#123;</span><br><span class="line">            localDateTime = localDateTime.plusNanos(<span class="number">1_000_000</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> localDateTime;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1><span id="jpa-you-mei-you-wen-ti-ni">jpa有没有问题呢？</span><a href="#jpa-you-mei-you-wen-ti-ni" class="header-anchor">#</a></h1><p>出于好奇，我也做了jpa的尝试，jpa也是一样的行为</p>
+<p><img src="/java-weird-timestamp-change.png" alt="jpa-weird-timestamp-change.jpeg"></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -214,9 +325,15 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2024-04-09 14:33:33 / 修改时间：11:12:23" itemprop="dateCreated datePublished" datetime="2024-04-09T14:33:33+00:00">2024-04-09</time>
+      <time title="创建时间：2024-04-09 14:33:33" itemprop="dateCreated datePublished" datetime="2024-04-09T14:33:33+00:00">2024-04-09</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2024-05-08 00:55:03" itemprop="dateModified" datetime="2024-05-08T00:55:03+00:00">2024-05-08</time>
     </span>
 
   
@@ -306,7 +423,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-04-09 11:12:23" itemprop="dateModified" datetime="2024-04-09T11:12:23+00:00">2024-04-09</time>
+      <time title="修改时间：2024-05-08 00:55:03" itemprop="dateModified" datetime="2024-05-08T00:55:03+00:00">2024-05-08</time>
     </span>
 
   
@@ -382,7 +499,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-04-09 11:12:23" itemprop="dateModified" datetime="2024-04-09T11:12:23+00:00">2024-04-09</time>
+      <time title="修改时间：2024-05-08 00:55:03" itemprop="dateModified" datetime="2024-05-08T00:55:03+00:00">2024-05-08</time>
     </span>
 
   
@@ -468,7 +585,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-04-09 11:12:23" itemprop="dateModified" datetime="2024-04-09T11:12:23+00:00">2024-04-09</time>
+      <time title="修改时间：2024-05-08 00:55:03" itemprop="dateModified" datetime="2024-05-08T00:55:03+00:00">2024-05-08</time>
     </span>
 
   
@@ -554,7 +671,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-04-09 11:12:23" itemprop="dateModified" datetime="2024-04-09T11:12:23+00:00">2024-04-09</time>
+      <time title="修改时间：2024-05-08 00:55:03" itemprop="dateModified" datetime="2024-05-08T00:55:03+00:00">2024-05-08</time>
     </span>
 
   
@@ -696,7 +813,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-04-09 11:12:23" itemprop="dateModified" datetime="2024-04-09T11:12:23+00:00">2024-04-09</time>
+      <time title="修改时间：2024-05-08 00:55:03" itemprop="dateModified" datetime="2024-05-08T00:55:03+00:00">2024-05-08</time>
     </span>
 
   
@@ -795,7 +912,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-04-09 11:12:23" itemprop="dateModified" datetime="2024-04-09T11:12:23+00:00">2024-04-09</time>
+      <time title="修改时间：2024-05-08 00:55:03" itemprop="dateModified" datetime="2024-05-08T00:55:03+00:00">2024-05-08</time>
     </span>
 
   
@@ -990,7 +1107,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-04-09 11:12:23" itemprop="dateModified" datetime="2024-04-09T11:12:23+00:00">2024-04-09</time>
+      <time title="修改时间：2024-05-08 00:55:03" itemprop="dateModified" datetime="2024-05-08T00:55:03+00:00">2024-05-08</time>
     </span>
 
   
@@ -1076,7 +1193,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-04-09 11:12:23" itemprop="dateModified" datetime="2024-04-09T11:12:23+00:00">2024-04-09</time>
+      <time title="修改时间：2024-05-08 00:55:03" itemprop="dateModified" datetime="2024-05-08T00:55:03+00:00">2024-05-08</time>
     </span>
 
   
@@ -1110,97 +1227,6 @@
 <h3><span id="yi-ding-yao-xian-ba-qing-qiu-fang-dao-dui-lie-x2f-map-zhong">一定要先把请求放到队列&#x2F;map中</span><a href="#yi-ding-yao-xian-ba-qing-qiu-fang-dao-dui-lie-x2f-map-zhong" class="header-anchor">#</a></h3><p>避免网络请求响应过快，导致callback还没注册上，就已经收到响应了。</p>
 <h3><span id="dui-lie-zhong-de-xiao-xi-yi-ding-yao-you-chao-shi-ji-zhi">队列中的消息一定要有超时机制</span><a href="#dui-lie-zhong-de-xiao-xi-yi-ding-yao-you-chao-shi-ji-zhi" class="header-anchor">#</a></h3><p>避免由于丢包等原因，导致请求一直没有响应，而导致队列中的请求越来越多，最终内存溢出。</p>
 <h3><span id="wait-dui-lie-sheng-ming-zhou-qi-yu-di-ceng-wang-luo-client-sheng-ming-zhou-qi-yi-zhi">wait队列生命周期与底层网络client生命周期一致</span><a href="#wait-dui-lie-sheng-ming-zhou-qi-yu-di-ceng-wang-luo-client-sheng-ming-zhou-qi-yi-zhi" class="header-anchor">#</a></h3><p>wait队列中请求一定是依附于client的，一旦client重建，队列也需要重建，并触发callback、future的失败回调。</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/ignite/ignite-huaweicloud-usage/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="shoothzj">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/ignite/ignite-huaweicloud-usage/" class="post-title-link" itemprop="url">Apache Ignite在华为云IoT服务产品部的使用</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2023-12-07 14:01:05" itemprop="dateCreated datePublished" datetime="2023-12-07T14:01:05+00:00">2023-12-07</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-04-09 11:12:23" itemprop="dateModified" datetime="2024-04-09T11:12:23+00:00">2024-04-09</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1><span id="apache-ignite-jian-jie">Apache Ignite简介</span><a href="#apache-ignite-jian-jie" class="header-anchor">#</a></h1><p>Apache Ignite是一个开源分布式的数据库、缓存和计算平台。它的核心是一个内存数据网格，它可以将内存作为分布式的持久化存储，以提供高性能和可扩展性。它还提供了一个分布式的键值存储、SQL数据库、流式数据处理和复杂的事件处理等功能。</p>
-<p>Ignite的核心竞争力包括：</p>
-<ul>
-<li>兼容Mysql、Oracle语法</li>
-<li>性能强大，可以水平扩展</li>
-<li>缓存与数据库同源，可通过KV、SQL、JDBC、ODBC等方式访问</li>
-</ul>
-<p>同时，为了便于开发，除了jdbc、odbc、restful方式外，Ignite还官方提供了Java、C++、.Net、Python、Node.js、PHP等语言的客户端，可以方便的与Ignite进行交互。</p>
-<p><img src="/ignite/ignite-huaweicloud-usage/ignite-storage-access.png" alt="ignite-storage-access"></p>
-<h1><span id="apache-ignite-de-wen-ti">Apache Ignite的问题</span><a href="#apache-ignite-de-wen-ti" class="header-anchor">#</a></h1><h2><span id="pin-fan-chuang-jian-shan-chu-biao-dao-zhi-ignite-discovery-history-size-chao-guo-xian-zhi">频繁创建删除表，导致IGNITE_DISCOVERY_HISTORY_SIZE超过限制</span><a href="#pin-fan-chuang-jian-shan-chu-biao-dao-zhi-ignite-discovery-history-size-chao-guo-xian-zhi" class="header-anchor">#</a></h2><p>根据Ignite2的拓扑模型，集群的拓扑版本会在创建表&#x2F;删除表的时候发生变化，该变化版本号递增，且仅会保留最近$IgniteDiscoveryHistorySize条记录，程序某处会写死读取版本为0的数据，读取不到时，ignite集群会重启。默认值为500。<br>社区issue: <a target="_blank" rel="noopener" href="https://github.com/apache/ignite/issues/10894">https://github.com/apache/ignite/issues/10894</a><br>笔者暂时没有时间来修复这个issue，可以通过将IGNITE_DISCOVERY_HISTORY_SIZE设置地比较大，来规避这个问题。</p>
-<h2><span id="ignite2-ke-hu-duan-yi-yong-xing-wen-ti">Ignite2客户端易用性问题</span><a href="#ignite2-ke-hu-duan-yi-yong-xing-wen-ti" class="header-anchor">#</a></h2><h3><span id="ignite2-ke-hu-duan-chao-shi-mo-ren-zhi-bu-he-li">Ignite2客户端超时默认值不合理</span><a href="#ignite2-ke-hu-duan-chao-shi-mo-ren-zhi-bu-he-li" class="header-anchor">#</a></h3><p>Ignite2客户端的连接超时、执行sql超时默认都是0，没有精心研究过配置的用户在异常场景下，应用程序可能会hang住。从易用性的角度来说，网络通信的任何操作，默认都应该有超时时间。</p>
-<h3><span id="ignite2-ke-hu-duan-bu-zhi-chi-yong-yuan-de-chong-shi">Ignite2客户端不支持永远的重试</span><a href="#ignite2-ke-hu-duan-bu-zhi-chi-yong-yuan-de-chong-shi" class="header-anchor">#</a></h3><p>Ignite通过预先计算出所有需要重连的时间点来实现重连，如果想配置成永远的重连，会因为时间点的计算导致内存溢出。从易用性的角度来说，应该支持永远的重连。</p>
-<h2><span id="ignite2-ke-hu-duan-zai-mou-xie-yi-chang-xia-wu-fa-zi-yu">Ignite2客户端在某些异常下无法自愈</span><a href="#ignite2-ke-hu-duan-zai-mou-xie-yi-chang-xia-wu-fa-zi-yu" class="header-anchor">#</a></h2><p>当client执行sql的时候，碰到如下异常的时候，无法自愈。可以通过执行SQL对client进行定期检查并重建。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Caused by: org.apache.ignite.internal.client.thin.ClientServerError: Ignite failed to process request [47]: 50000: Can not perform the operation because the cluster is inactive. Note, that the cluster is considered inactive by default if Ignite Persistent Store is used to let all the nodes join the cluster. To activate the cluster call Ignite.cluster.state(ClusterState.ACTIVE)</span><br></pre></td></tr></table></figure>
-
-<h2><span id="ignite2-socketchannel-xie-lu-wen-ti">Ignite2 SocketChannel泄露问题</span><a href="#ignite2-socketchannel-xie-lu-wen-ti" class="header-anchor">#</a></h2><p>Ignite客户端在连接时，如果对应的Server端没有启动，会导致SocketChannel泄露，已由笔者提交代码修复：<a target="_blank" rel="noopener" href="https://github.com/apache/ignite/pull/11016/files">https://github.com/apache/ignite/pull/11016/files</a></p>
 
       
     </div>

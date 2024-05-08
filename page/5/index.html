@@ -146,13 +146,13 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">69</span>
+          <span class="site-state-item-count">70</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">39</span>
+        <span class="site-state-item-count">40</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -177,6 +177,91 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/kubernetes/kubernetes-etcd-config-modify/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="shoothzj">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/kubernetes/kubernetes-etcd-config-modify/" class="post-title-link" itemprop="url">修改运行中kubernetes集群中etcd的参数</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-01-04 19:32:24" itemprop="dateCreated datePublished" datetime="2023-01-04T19:32:24+00:00">2023-01-04</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2024-05-08 00:55:03" itemprop="dateModified" datetime="2024-05-08T00:55:03+00:00">2024-05-08</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>在一些场景下，您的kubernetes集群已经搭建完成了，但是还需要修改一些核心组件的参数，如etcd、kube-apiserver、kube-scheduler、kube-controller-manager等。</p>
+<p>通过<code>kubectl get pod -owide -n kube-system</code> 可以查看到这些核心容器。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">NAME                               READY   STATUS    RESTARTS       AGE</span><br><span class="line">coredns-78fcd69978-rdmjm           1/1     Running   11 (23s ago)   281d</span><br><span class="line">etcd-<span class="variable">$NODE1</span>                        1/1     Running   13 (23s ago)   281d</span><br><span class="line">etcd-<span class="variable">$NODE2</span>                        1/1     Running   13 (23s ago)   281d</span><br><span class="line">etcd-<span class="variable">$NODE3</span>                        1/1     Running   13 (23s ago)   281d</span><br><span class="line">.....</span><br></pre></td></tr></table></figure>
+
+<p>以etcd为例，etcd的参数就在pod中的commands参数里。可以通过<code>kubectl describe pod etcd-$NODENAME -n kube-system</code>来查看(省略部分参数)</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Name: etcd-<span class="variable">$NODENAME</span></span><br><span class="line">Namespace: kube-system</span><br><span class="line">Containers:</span><br><span class="line">etcd:</span><br><span class="line">Command:</span><br><span class="line">--client-cert-auth=<span class="literal">true</span></span><br><span class="line">--trusted-ca-file=/etc/kubernetes/pki/etcd/ca.crt</span><br></pre></td></tr></table></figure>
+
+<p>然而，如果您尝试编辑pod中的参数，会发现它们是不可修改的。</p>
+<p>不过，如果您需要修改参数，还有另一个办法，通过修改<code>/etc/kubernetes/manifests/</code>下的yaml文件来修改运行中kubernetes集群中”系统”Pod的参数。原理是，当您把yaml文件修改后，kubelet会自动监听yaml文件的变更，并重新拉起本机器上的pod。</p>
+<p>举个例子，如果您希望关闭etcd集群对客户端的认证，那么您可以修改<code>/etc/kubernetes/mainfiest/etcd.yaml</code>,将<strong>client-cert-auth</strong>设置为false，把<strong>trusted-ca-file</strong>去掉。注意：三台master机器节点都需要执行此操作</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -222,7 +307,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-04-09 11:12:23" itemprop="dateModified" datetime="2024-04-09T11:12:23+00:00">2024-04-09</time>
+      <time title="修改时间：2024-05-08 00:55:03" itemprop="dateModified" datetime="2024-05-08T00:55:03+00:00">2024-05-08</time>
     </span>
 
   
@@ -318,7 +403,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-04-09 11:12:23" itemprop="dateModified" datetime="2024-04-09T11:12:23+00:00">2024-04-09</time>
+      <time title="修改时间：2024-05-08 00:55:03" itemprop="dateModified" datetime="2024-05-08T00:55:03+00:00">2024-05-08</time>
     </span>
 
   
@@ -412,7 +497,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-04-09 11:12:23" itemprop="dateModified" datetime="2024-04-09T11:12:23+00:00">2024-04-09</time>
+      <time title="修改时间：2024-05-08 00:55:03" itemprop="dateModified" datetime="2024-05-08T00:55:03+00:00">2024-05-08</time>
     </span>
 
   
@@ -517,7 +602,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-04-09 11:12:23" itemprop="dateModified" datetime="2024-04-09T11:12:23+00:00">2024-04-09</time>
+      <time title="修改时间：2024-05-08 00:55:03" itemprop="dateModified" datetime="2024-05-08T00:55:03+00:00">2024-05-08</time>
     </span>
 
   
@@ -654,7 +739,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-04-09 11:12:23" itemprop="dateModified" datetime="2024-04-09T11:12:23+00:00">2024-04-09</time>
+      <time title="修改时间：2024-05-08 00:55:03" itemprop="dateModified" datetime="2024-05-08T00:55:03+00:00">2024-05-08</time>
     </span>
 
   
@@ -782,7 +867,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-04-09 11:12:23" itemprop="dateModified" datetime="2024-04-09T11:12:23+00:00">2024-04-09</time>
+      <time title="修改时间：2024-05-08 00:55:03" itemprop="dateModified" datetime="2024-05-08T00:55:03+00:00">2024-05-08</time>
     </span>
 
   
@@ -893,7 +978,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-04-09 11:12:23" itemprop="dateModified" datetime="2024-04-09T11:12:23+00:00">2024-04-09</time>
+      <time title="修改时间：2024-05-08 00:55:03" itemprop="dateModified" datetime="2024-05-08T00:55:03+00:00">2024-05-08</time>
     </span>
 
   
@@ -996,7 +1081,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-04-09 11:12:23" itemprop="dateModified" datetime="2024-04-09T11:12:23+00:00">2024-04-09</time>
+      <time title="修改时间：2024-05-08 00:55:03" itemprop="dateModified" datetime="2024-05-08T00:55:03+00:00">2024-05-08</time>
     </span>
 
   
@@ -1093,7 +1178,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-04-09 11:12:23" itemprop="dateModified" datetime="2024-04-09T11:12:23+00:00">2024-04-09</time>
+      <time title="修改时间：2024-05-08 00:55:03" itemprop="dateModified" datetime="2024-05-08T00:55:03+00:00">2024-05-08</time>
     </span>
 
   
@@ -1119,89 +1204,6 @@
 <p><img src="/kubernetes/kubernetes-ha/kubernetes-ha-keepalived-nginx.png" alt="kubernetes-ha-keepalived-nginx"></p>
 <p>为了简化图像，只画出了master1上的Nginx向后转发的场景。</p>
 <p>至于Nginx和KeepAlived如何部署，推荐采用容器化的部署模式，方便进行监控和运维；但是镜像不从镜像仓库拉取，而是保存在<code>master</code>节点上，这样虽然升级复杂一点，但是这样子<code>kubernetes</code>的高可用就不依赖镜像仓库了，不会和镜像仓库形成循环依赖，更不会影响镜像仓库的高可用方案，大大简化了后续的技术方案。（因为镜像仓库可能会占据较大的存储空间，可能会和<code>master</code>节点分离部署，这时会作为<code>worker</code>节点连接<code>master</code>节点）。</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/linux/linux-process-exist/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="shoothzj">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/linux/linux-process-exist/" class="post-title-link" itemprop="url">比调用Shell更高效的判断进程是否存在的方式</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-08-12 17:24:44" itemprop="dateCreated datePublished" datetime="2021-08-12T17:24:44+00:00">2021-08-12</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-04-09 11:12:23" itemprop="dateModified" datetime="2024-04-09T11:12:23+00:00">2024-04-09</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>有很多场景需要我们的代码检测一个进程是否存在，常用的一种方式是通过调用脚本通过<code>ps -ef</code>的方式查看，然而其实这种做法并不怎么高效，会fork一个进程出来，还会影响<code>go</code>协程的调度</p>
-<p>一种更好的方式是可以通过解析<code>/proc</code>文件夹来得到想要的信息，其实可以通过<code>strace</code>命令查看，<code>ps -ef</code>也是读取了这个路径下的信息</p>
-<p><img src="/linux/linux-process-exist/linux-ps-ef-strace.png" alt="linux-ps-ef-strace"></p>
-<p>下面分别是java和go的轮子示例</p>
-<p>使用正则表达式<code>[0-9]+</code>的原因是<code>/proc</code>路径下还有一些其他文件，其中pid都是数字。</p>
-<h2><span id="java">java</span><a href="#java" class="header-anchor">#</a></h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Pattern</span> <span class="variable">numberPattern</span> <span class="operator">=</span> Pattern.compile(<span class="string">&quot;[0-9]+&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="type">boolean</span> <span class="title function_">processExists</span><span class="params">(String processName)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="keyword">final</span> <span class="type">File</span> <span class="variable">procFile</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">File</span>(<span class="string">&quot;/proc&quot;</span>);</span><br><span class="line">        <span class="keyword">if</span> (!procFile.isDirectory()) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">Exception</span>(<span class="string">&quot;why proc dir is not directory&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">final</span> File[] listFiles = procFile.listFiles();</span><br><span class="line">        <span class="keyword">if</span> (listFiles == <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">final</span> List&lt;File&gt; procDir = Arrays.stream(listFiles).filter(f -&gt; numberPattern.matcher(f.getName()).matches()).collect(Collectors.toList());</span><br><span class="line">        <span class="comment">// find the proc cmdline</span></span><br><span class="line">        <span class="keyword">for</span> (File file : procDir) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="keyword">final</span> <span class="type">byte</span>[] byteArray = FileUtils.readFileToByteArray(<span class="keyword">new</span> <span class="title class_">File</span>(file.getCanonicalPath() + File.separator + <span class="string">&quot;cmdline&quot;</span>));</span><br><span class="line">                <span class="keyword">final</span> <span class="type">byte</span>[] bytes = <span class="keyword">new</span> <span class="title class_">byte</span>[byteArray.length];</span><br><span class="line">                <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; byteArray.length; i++) &#123;</span><br><span class="line">                    <span class="keyword">if</span> (byteArray[i] != <span class="number">0x00</span>) &#123;</span><br><span class="line">                        bytes[i] = byteArray[i];</span><br><span class="line">                    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                        bytes[i] = (<span class="type">byte</span>) <span class="number">0x20</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">final</span> <span class="type">String</span> <span class="variable">cmdLine</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">String</span>(bytes, StandardCharsets.UTF_8);</span><br><span class="line">                <span class="keyword">if</span> (cmdLine.contains(processName)) &#123;</span><br><span class="line">                    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">                <span class="comment">// the proc may end during the loop, ignore it</span></span><br><span class="line">                log.error(<span class="string">&quot;read file exception &quot;</span>, e);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-
-<h2><span id="go">go</span><a href="#go" class="header-anchor">#</a></h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">ProcessExists</span><span class="params">(processName <span class="type">string</span>)</span></span> (<span class="type">bool</span>, <span class="type">error</span>) &#123;</span><br><span class="line">	result := <span class="literal">false</span></span><br><span class="line">	fileInfos, err := ioutil.ReadDir(<span class="string">&quot;/proc&quot;</span>)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">false</span>, err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">for</span> _, info := <span class="keyword">range</span> fileInfos &#123;</span><br><span class="line">		name := info.Name()</span><br><span class="line">		matched, err := regexp.MatchString(<span class="string">&quot;[0-9]+&quot;</span>, name)</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">false</span>, err</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> !matched &#123;</span><br><span class="line">			<span class="keyword">continue</span></span><br><span class="line">		&#125;</span><br><span class="line">		cmdLine, err := parseCmdLine(<span class="string">&quot;/proc/&quot;</span> + info.Name() + <span class="string">&quot;/cmdline&quot;</span>)</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			glog.Error(<span class="string">&quot;read cmd line failed &quot;</span>, err)</span><br><span class="line">			<span class="comment">// the proc may end during the loop, ignore it</span></span><br><span class="line">			<span class="keyword">continue</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> strings.Contains(cmdLine, processName) &#123;</span><br><span class="line">			result = <span class="literal">true</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> result, err</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">parseCmdLine</span><span class="params">(path <span class="type">string</span>)</span></span> (<span class="type">string</span>, <span class="type">error</span>) &#123;</span><br><span class="line">	cmdData, err := ioutil.ReadFile(path)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="string">&quot;&quot;</span>, err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(cmdData) &lt; <span class="number">1</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="string">&quot;&quot;</span>, <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	split := strings.Split(<span class="type">string</span>(bytes.TrimRight(cmdData, <span class="type">string</span>(<span class="string">&quot;\x00&quot;</span>))), <span class="type">string</span>(<span class="type">byte</span>(<span class="number">0</span>)))</span><br><span class="line">	<span class="keyword">return</span> strings.Join(split, <span class="string">&quot; &quot;</span>), <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
       
     </div>

@@ -216,7 +216,7 @@
       <span class="post-meta-item-text">发表于</span>
       
 
-      <time title="创建时间：2024-05-08 08:11:47 / 修改时间：00:59:58" itemprop="dateCreated datePublished" datetime="2024-05-08T08:11:47+00:00">2024-05-08</time>
+      <time title="创建时间：2024-05-08 08:11:47 / 修改时间：01:15:43" itemprop="dateCreated datePublished" datetime="2024-05-08T08:11:47+00:00">2024-05-08</time>
     </span>
 
   
@@ -245,7 +245,7 @@
 <p>走读代码，发现代码基本上万无一失，那么问题出在哪里呢？</p>
 <p>通过仔细观察时间戳的区别，发现时间戳的变化都在最后一位，且相差为一，醒悟到这估计是由于内存中纳秒时间戳精度在转化为数据库毫秒时间戳的时候，部分库的行为是截断，部分库的行为是四舍五入，导致了这个问题。</p>
 <p>最终通过写demo，docker抓包复现了这个问题，如下图所示，mysql server会将接收的时间戳进行四舍五入，而java常见的format工具类都是截断，导致了这一不一致。同时，这也体现了，r2dbc返回的entity可能并不是实际存入数据的内容，而是”原始”的entity。</p>
-<p><img src="/r2dbc-weird-timestamp-change.png" alt="r2dbc-weird-timestamp-change.jpeg"></p>
+<p><img src="/code/java/java-weird-timestamp-change/r2dbc-weird-timestamp-change.jpeg" alt="r2dbc-weird-timestamp-change.jpeg"></p>
 <h1><span id="r2dbc-yu-mysql-de-shi-jian-jing-du-shi-diao-wen-ti">r2dbc与mysql的时间精度失调问题</span><a href="#r2dbc-yu-mysql-de-shi-jian-jing-du-shi-diao-wen-ti" class="header-anchor">#</a></h1><p>在这个问题里面，存在三个时间精度：</p>
 <ul>
 <li>内存中的时间精度</li>
@@ -333,7 +333,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-05-08 00:59:58" itemprop="dateModified" datetime="2024-05-08T00:59:58+00:00">2024-05-08</time>
+      <time title="修改时间：2024-05-08 01:15:43" itemprop="dateModified" datetime="2024-05-08T01:15:43+00:00">2024-05-08</time>
     </span>
 
   
@@ -423,7 +423,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-05-08 00:59:58" itemprop="dateModified" datetime="2024-05-08T00:59:58+00:00">2024-05-08</time>
+      <time title="修改时间：2024-05-08 01:15:43" itemprop="dateModified" datetime="2024-05-08T01:15:43+00:00">2024-05-08</time>
     </span>
 
   
@@ -499,7 +499,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-05-08 00:59:58" itemprop="dateModified" datetime="2024-05-08T00:59:58+00:00">2024-05-08</time>
+      <time title="修改时间：2024-05-08 01:15:43" itemprop="dateModified" datetime="2024-05-08T01:15:43+00:00">2024-05-08</time>
     </span>
 
   
@@ -585,7 +585,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-05-08 00:59:58" itemprop="dateModified" datetime="2024-05-08T00:59:58+00:00">2024-05-08</time>
+      <time title="修改时间：2024-05-08 01:15:43" itemprop="dateModified" datetime="2024-05-08T01:15:43+00:00">2024-05-08</time>
     </span>
 
   
@@ -671,7 +671,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-05-08 00:59:58" itemprop="dateModified" datetime="2024-05-08T00:59:58+00:00">2024-05-08</time>
+      <time title="修改时间：2024-05-08 01:15:43" itemprop="dateModified" datetime="2024-05-08T01:15:43+00:00">2024-05-08</time>
     </span>
 
   
@@ -813,7 +813,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-05-08 00:59:58" itemprop="dateModified" datetime="2024-05-08T00:59:58+00:00">2024-05-08</time>
+      <time title="修改时间：2024-05-08 01:15:43" itemprop="dateModified" datetime="2024-05-08T01:15:43+00:00">2024-05-08</time>
     </span>
 
   
@@ -912,7 +912,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-05-08 00:59:58" itemprop="dateModified" datetime="2024-05-08T00:59:58+00:00">2024-05-08</time>
+      <time title="修改时间：2024-05-08 01:15:43" itemprop="dateModified" datetime="2024-05-08T01:15:43+00:00">2024-05-08</time>
     </span>
 
   
@@ -1107,7 +1107,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-05-08 00:59:58" itemprop="dateModified" datetime="2024-05-08T00:59:58+00:00">2024-05-08</time>
+      <time title="修改时间：2024-05-08 01:15:43" itemprop="dateModified" datetime="2024-05-08T01:15:43+00:00">2024-05-08</time>
     </span>
 
   
@@ -1193,7 +1193,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-05-08 00:59:58" itemprop="dateModified" datetime="2024-05-08T00:59:58+00:00">2024-05-08</time>
+      <time title="修改时间：2024-05-08 01:15:43" itemprop="dateModified" datetime="2024-05-08T01:15:43+00:00">2024-05-08</time>
     </span>
 
   

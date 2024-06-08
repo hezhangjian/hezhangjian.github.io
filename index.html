@@ -146,13 +146,13 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">70</span>
+          <span class="site-state-item-count">71</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">40</span>
+        <span class="site-state-item-count">41</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -177,6 +177,81 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/code/java/java-webflux-best-practice/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="shoothzj">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/code/java/java-webflux-best-practice/" class="post-title-link" itemprop="url">WebFlux最佳实践</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2024-06-08 15:50:57 / 修改时间：08:27:10" itemprop="dateCreated datePublished" datetime="2024-06-08T15:50:57+00:00">2024-06-08</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>WebFlux是Spring 5引入的新的响应式编程框架，它提供了一种基于反应式流的编程模型，可以用于构建高性能、高吞吐量的Web应用程序。</p>
+<h1><span id="fang-zhi-da-liang-qing-qiu-dui-ji">防止大量请求堆积</span><a href="#fang-zhi-da-liang-qing-qiu-dui-ji" class="header-anchor">#</a></h1><h2><span id="xian-zhi-tong-yi-shi-jian-de-bing-fa-chu-li-ge-shu">限制同一时间的并发处理个数</span><a href="#xian-zhi-tong-yi-shi-jian-de-bing-fa-chu-li-ge-shu" class="header-anchor">#</a></h2><p>由于WebFlux可以处理大量的请求，如果后端处理较慢（如写db较慢等），可能会导致大量的请求堆积，可以通过限制同一时间的并发处理个数来防止请求堆积。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.springframework.http.HttpStatus;</span><br><span class="line"><span class="keyword">import</span> org.springframework.stereotype.Component;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.server.ServerWebExchange;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.server.WebFilter;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.server.WebFilterChain;</span><br><span class="line"><span class="keyword">import</span> reactor.core.publisher.Mono;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.Semaphore;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ConcurrencyLimitingFilter</span> <span class="keyword">implements</span> <span class="title class_">WebFilter</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Semaphore semaphore;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">ConcurrencyLimitingFilter</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.semaphore = <span class="keyword">new</span> <span class="title class_">Semaphore</span>(<span class="number">10</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> Mono&lt;Void&gt; <span class="title function_">filter</span><span class="params">(ServerWebExchange exchange, WebFilterChain chain)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (semaphore.tryAcquire()) &#123;</span><br><span class="line">            <span class="keyword">return</span> chain.filter(exchange)</span><br><span class="line">                    .doFinally(sig -&gt; semaphore.release());</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            exchange.getResponse().setStatusCode(HttpStatus.TOO_MANY_REQUESTS);</span><br><span class="line">            <span class="keyword">return</span> exchange.getResponse().setComplete();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2><span id="pei-zhi-chao-shi-shi-jian">配置超时时间</span><a href="#pei-zhi-chao-shi-shi-jian" class="header-anchor">#</a></h2><p>网络编程中，任何操作都应该有超时时间。WebFlux允许大量的请求进入，如果不设置超时时间，可能会导致大量的请求排队处理（可能客户端早已放弃），可以通过统一Filter来设置最大超时时间。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> lombok.extern.slf4j.Slf4j;</span><br><span class="line"><span class="keyword">import</span> org.springframework.http.HttpStatus;</span><br><span class="line"><span class="keyword">import</span> org.springframework.stereotype.Component;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.server.ResponseStatusException;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.server.ServerWebExchange;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.server.WebFilter;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.server.WebFilterChain;</span><br><span class="line"><span class="keyword">import</span> reactor.core.publisher.Mono;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.time.Duration;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.TimeoutException;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">WebRequestTimeoutFilter</span> <span class="keyword">implements</span> <span class="title class_">WebFilter</span> &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> Mono&lt;Void&gt; <span class="title function_">filter</span><span class="params">(ServerWebExchange exchange, WebFilterChain chain)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> chain.filter(exchange)</span><br><span class="line">                .timeout(Duration.ofSeconds(<span class="number">10</span>))</span><br><span class="line">                .onErrorResume(TimeoutException.class, e -&gt; &#123;</span><br><span class="line">                    log.error(<span class="string">&quot;Request timeout&quot;</span>, e);</span><br><span class="line">                    <span class="keyword">return</span> Mono.error(<span class="keyword">new</span> <span class="title class_">ResponseStatusException</span>(HttpStatus.GATEWAY_TIMEOUT, <span class="string">&quot;Request timeout&quot;</span>));</span><br><span class="line">                &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -214,9 +289,15 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2024-05-08 08:11:47 / 修改时间：01:15:43" itemprop="dateCreated datePublished" datetime="2024-05-08T08:11:47+00:00">2024-05-08</time>
+      <time title="创建时间：2024-05-08 08:11:47" itemprop="dateCreated datePublished" datetime="2024-05-08T08:11:47+00:00">2024-05-08</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2024-06-08 08:27:10" itemprop="dateModified" datetime="2024-06-08T08:27:10+00:00">2024-06-08</time>
     </span>
 
   
@@ -333,7 +414,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-05-08 01:15:43" itemprop="dateModified" datetime="2024-05-08T01:15:43+00:00">2024-05-08</time>
+      <time title="修改时间：2024-06-08 08:27:10" itemprop="dateModified" datetime="2024-06-08T08:27:10+00:00">2024-06-08</time>
     </span>
 
   
@@ -423,7 +504,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-05-08 01:15:43" itemprop="dateModified" datetime="2024-05-08T01:15:43+00:00">2024-05-08</time>
+      <time title="修改时间：2024-06-08 08:27:10" itemprop="dateModified" datetime="2024-06-08T08:27:10+00:00">2024-06-08</time>
     </span>
 
   
@@ -499,7 +580,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-05-08 01:15:43" itemprop="dateModified" datetime="2024-05-08T01:15:43+00:00">2024-05-08</time>
+      <time title="修改时间：2024-06-08 08:27:10" itemprop="dateModified" datetime="2024-06-08T08:27:10+00:00">2024-06-08</time>
     </span>
 
   
@@ -585,7 +666,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-05-08 01:15:43" itemprop="dateModified" datetime="2024-05-08T01:15:43+00:00">2024-05-08</time>
+      <time title="修改时间：2024-06-08 08:27:10" itemprop="dateModified" datetime="2024-06-08T08:27:10+00:00">2024-06-08</time>
     </span>
 
   
@@ -671,7 +752,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-05-08 01:15:43" itemprop="dateModified" datetime="2024-05-08T01:15:43+00:00">2024-05-08</time>
+      <time title="修改时间：2024-06-08 08:27:10" itemprop="dateModified" datetime="2024-06-08T08:27:10+00:00">2024-06-08</time>
     </span>
 
   
@@ -813,7 +894,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-05-08 01:15:43" itemprop="dateModified" datetime="2024-05-08T01:15:43+00:00">2024-05-08</time>
+      <time title="修改时间：2024-06-08 08:27:10" itemprop="dateModified" datetime="2024-06-08T08:27:10+00:00">2024-06-08</time>
     </span>
 
   
@@ -912,7 +993,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-05-08 01:15:43" itemprop="dateModified" datetime="2024-05-08T01:15:43+00:00">2024-05-08</time>
+      <time title="修改时间：2024-06-08 08:27:10" itemprop="dateModified" datetime="2024-06-08T08:27:10+00:00">2024-06-08</time>
     </span>
 
   
@@ -1107,7 +1188,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-05-08 01:15:43" itemprop="dateModified" datetime="2024-05-08T01:15:43+00:00">2024-05-08</time>
+      <time title="修改时间：2024-06-08 08:27:10" itemprop="dateModified" datetime="2024-06-08T08:27:10+00:00">2024-06-08</time>
     </span>
 
   
@@ -1149,104 +1230,8 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/code/async-network-code/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="shoothzj">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/code/async-network-code/" class="post-title-link" itemprop="url">异步网络请求编码</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2023-12-10 08:32:54" itemprop="dateCreated datePublished" datetime="2023-12-10T08:32:54+00:00">2023-12-10</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-05-08 01:15:43" itemprop="dateModified" datetime="2024-05-08T01:15:43+00:00">2024-05-08</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>本文介绍常见的异步网络请求编码手法。尽管像golang这些的语言，支持协程，可以使得Programmer以同步的方式编写代码，大大降低编码者的心智负担。但网络编程中，批量又非常常见，这就导致即使在Golang中，也不得不进行协程的切换来满足批量的诉求，在Golang中往往对外以callback的方式暴露接口。</p>
-<p>无论是callback、还是返回future、还是返回Mono&#x2F;Flux，亦或是从channel中读取，这是不同的异步编程范式，编码的时候，可以从项目整体、团队编码风格、个人喜好来依次考虑。本文将以callback为主，但移植到其他异步编码范式，并不困难。</p>
-<p>使用callback模式后，对外的方法签名类似:</p>
-<p>go</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Client)</span></span> Get(ctx context.Context, req *Request, callback <span class="function"><span class="keyword">func</span><span class="params">(resp *Response, err <span class="type">error</span>)</span></span>) <span class="type">error</span></span><br></pre></td></tr></table></figure>
-
-<p>java</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">Client</span> &#123;</span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">get</span><span class="params">(Request req, Callback callback)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2><span id="wang-luo-bian-cheng-zhong-de-pi-liang">网络编程中的批量</span><a href="#wang-luo-bian-cheng-zhong-de-pi-liang" class="header-anchor">#</a></h2><p>对于网络请求来说，批量可以提高性能。 批量处理是指将多个请求或任务组合在一起，作为单一的工作单元进行处理。批量尽量对用户透明，用户只需要简单地对批量进行配置，而不需要关心批量的实现细节。</p>
-<p>常见的批量相关配置</p>
-<ul>
-<li>batch interval: 批量的时间间隔，比如每隔1s，批量一次</li>
-<li>batch size: 批量的最大大小，比如每次最多批量100个请求</li>
-</ul>
-<p>批量可以通过定时任务实现，也可以做一些优化，比如队列中无请求时，暂停定时任务，有请求时，启动定时任务。</p>
-<h2><span id="bian-ma-xi-jie">编码细节</span><a href="#bian-ma-xi-jie" class="header-anchor">#</a></h2><p>整体流程大概如下图所示：</p>
-<p><img src="/code/async-network-code/async-network-code.png" alt="async-network-code"></p>
-<h3><span id="yi-ding-yao-xian-ba-qing-qiu-fang-dao-dui-lie-x2f-map-zhong">一定要先把请求放到队列&#x2F;map中</span><a href="#yi-ding-yao-xian-ba-qing-qiu-fang-dao-dui-lie-x2f-map-zhong" class="header-anchor">#</a></h3><p>避免网络请求响应过快，导致callback还没注册上，就已经收到响应了。</p>
-<h3><span id="dui-lie-zhong-de-xiao-xi-yi-ding-yao-you-chao-shi-ji-zhi">队列中的消息一定要有超时机制</span><a href="#dui-lie-zhong-de-xiao-xi-yi-ding-yao-you-chao-shi-ji-zhi" class="header-anchor">#</a></h3><p>避免由于丢包等原因，导致请求一直没有响应，而导致队列中的请求越来越多，最终内存溢出。</p>
-<h3><span id="wait-dui-lie-sheng-ming-zhou-qi-yu-di-ceng-wang-luo-client-sheng-ming-zhou-qi-yi-zhi">wait队列生命周期与底层网络client生命周期一致</span><a href="#wait-dui-lie-sheng-ming-zhou-qi-yu-di-ceng-wang-luo-client-sheng-ming-zhou-qi-yi-zhi" class="header-anchor">#</a></h3><p>wait队列中请求一定是依附于client的，一旦client重建，队列也需要重建，并触发callback、future的失败回调。</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><a class="extend next" rel="next" title="下一页" aria-label="下一页" href="/page/2/"><i class="fa fa-angle-right"></i></a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/8/">8</a><a class="extend next" rel="next" title="下一页" aria-label="下一页" href="/page/2/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 </div>

@@ -146,13 +146,13 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">70</span>
+          <span class="site-state-item-count">71</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">40</span>
+        <span class="site-state-item-count">41</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -177,6 +177,116 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/kubernetes/kubernetes-container-get-ip/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="shoothzj">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/kubernetes/kubernetes-container-get-ip/" class="post-title-link" itemprop="url">kubernetes容器获取IP地址</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-01-06 19:05:07" itemprop="dateCreated datePublished" datetime="2023-01-06T19:05:07+00:00">2023-01-06</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2024-06-08 08:27:10" itemprop="dateModified" datetime="2024-06-08T08:27:10+00:00">2024-06-08</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#kubernetes-huan-jing-bian-liang-zhu-ru">kubernetes环境变量注入</a></li>
+<li><a href="#tong-guo-shell-jiao-ben-huo-qu">通过shell脚本获取</a><ul>
+<li><a href="#tong-guo-ip-ming-ling-tui-jian">通过ip命令（推荐）</a></li>
+<li><a href="#tong-guo-ifconfig-ming-ling-bu-tui-jian">通过ifconfig命令（不推荐）</a></li>
+</ul>
+</li>
+<li><a href="#tldr">TLDR</a></li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<p>kubernetes中容器获取IP地址是一个常见的需求，常见的有两种获取IP地址的方式</p>
+<h2><span id="kubernetes-huan-jing-bian-liang-zhu-ru">kubernetes环境变量注入</span><a href="#kubernetes-huan-jing-bian-liang-zhu-ru" class="header-anchor">#</a></h2><p>通过在部署时，<strong>container</strong>下的<strong>env</strong>中配置如下yaml</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="bullet">-</span> <span class="attr">name:</span> <span class="string">POD_IP</span></span><br><span class="line">  <span class="attr">valueFrom:</span></span><br><span class="line">    <span class="attr">fieldRef:</span></span><br><span class="line">      <span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line">      <span class="attr">fieldPath:</span> <span class="string">status.podIP</span></span><br></pre></td></tr></table></figure>
+
+<p>进入容器就可以根据环境变量获取到容器IP</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># echo $POD_IP</span><br><span class="line">172.17.0.2</span><br></pre></td></tr></table></figure>
+
+<h2><span id="tong-guo-shell-jiao-ben-huo-qu">通过shell脚本获取</span><a href="#tong-guo-shell-jiao-ben-huo-qu" class="header-anchor">#</a></h2><h3><span id="tong-guo-ip-ming-ling-tui-jian">通过ip命令（推荐）</span><a href="#tong-guo-ip-ming-ling-tui-jian" class="header-anchor">#</a></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ip addr show eth0 | grep &quot;inet\b&quot; | awk &#x27;&#123;print $2&#125;&#x27; | cut -d/ -f1</span></span><br><span class="line">172.17.0.2</span><br></pre></td></tr></table></figure>
+
+<p>注意这里一定要用<strong>inet\b</strong>，不要用<strong>inet</strong>。使用<strong>inet</strong>的话，在Ipv6双栈场景下会因为匹配到<strong>inet6</strong>获取到错误的结果, Ipv6双栈场景下ip命令的部分输出结果如下图所示</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">inet 172.17.0.2/16 brd 172.17.255.255 scope global eth0</span><br><span class="line">inet6 fe80::ffff prefixlen 64 scopeid 0x20&lt;lin&gt;</span><br></pre></td></tr></table></figure>
+
+<h3><span id="tong-guo-ifconfig-ming-ling-bu-tui-jian">通过ifconfig命令（不推荐）</span><a href="#tong-guo-ifconfig-ming-ling-bu-tui-jian" class="header-anchor">#</a></h3><p>不推荐使用ifconfig命令的原因是，这个命令已经废弃，将会逐步删除</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ifconfig eth0 | grep <span class="string">&#x27;inet\b&#x27;</span> | awk <span class="string">&#x27;&#123;print $2&#125;&#x27;</span> | <span class="built_in">cut</span> -d/ -f1</span><br></pre></td></tr></table></figure>
+
+<p>同样需要使用<strong>inet\b</strong>，不要使用<strong>inet</strong></p>
+<h2><span id="tldr">TLDR</span><a href="#tldr" class="header-anchor">#</a></h2><p>优先配置如下yaml进行环境变量注入，其次使用<strong>ip addr show eth0 | grep “inet\b” | awk ‘{print $2}’ | cut -d&#x2F; -f1</strong>命令获取</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="bullet">-</span> <span class="attr">name:</span> <span class="string">POD_IP</span></span><br><span class="line">  <span class="attr">valueFrom:</span></span><br><span class="line">    <span class="attr">fieldRef:</span></span><br><span class="line">      <span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line">      <span class="attr">fieldPath:</span> <span class="string">status.podIP</span></span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -222,7 +332,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-05-08 01:15:43" itemprop="dateModified" datetime="2024-05-08T01:15:43+00:00">2024-05-08</time>
+      <time title="修改时间：2024-06-08 08:27:10" itemprop="dateModified" datetime="2024-06-08T08:27:10+00:00">2024-06-08</time>
     </span>
 
   
@@ -307,7 +417,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-05-08 01:15:43" itemprop="dateModified" datetime="2024-05-08T01:15:43+00:00">2024-05-08</time>
+      <time title="修改时间：2024-06-08 08:27:10" itemprop="dateModified" datetime="2024-06-08T08:27:10+00:00">2024-06-08</time>
     </span>
 
   
@@ -403,7 +513,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-05-08 01:15:43" itemprop="dateModified" datetime="2024-05-08T01:15:43+00:00">2024-05-08</time>
+      <time title="修改时间：2024-06-08 08:27:10" itemprop="dateModified" datetime="2024-06-08T08:27:10+00:00">2024-06-08</time>
     </span>
 
   
@@ -497,7 +607,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-05-08 01:15:43" itemprop="dateModified" datetime="2024-05-08T01:15:43+00:00">2024-05-08</time>
+      <time title="修改时间：2024-06-08 08:27:10" itemprop="dateModified" datetime="2024-06-08T08:27:10+00:00">2024-06-08</time>
     </span>
 
   
@@ -602,7 +712,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-05-08 01:15:43" itemprop="dateModified" datetime="2024-05-08T01:15:43+00:00">2024-05-08</time>
+      <time title="修改时间：2024-06-08 08:27:10" itemprop="dateModified" datetime="2024-06-08T08:27:10+00:00">2024-06-08</time>
     </span>
 
   
@@ -739,7 +849,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-05-08 01:15:43" itemprop="dateModified" datetime="2024-05-08T01:15:43+00:00">2024-05-08</time>
+      <time title="修改时间：2024-06-08 08:27:10" itemprop="dateModified" datetime="2024-06-08T08:27:10+00:00">2024-06-08</time>
     </span>
 
   
@@ -867,7 +977,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-05-08 01:15:43" itemprop="dateModified" datetime="2024-05-08T01:15:43+00:00">2024-05-08</time>
+      <time title="修改时间：2024-06-08 08:27:10" itemprop="dateModified" datetime="2024-06-08T08:27:10+00:00">2024-06-08</time>
     </span>
 
   
@@ -978,7 +1088,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-05-08 01:15:43" itemprop="dateModified" datetime="2024-05-08T01:15:43+00:00">2024-05-08</time>
+      <time title="修改时间：2024-06-08 08:27:10" itemprop="dateModified" datetime="2024-06-08T08:27:10+00:00">2024-06-08</time>
     </span>
 
   
@@ -1081,7 +1191,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-05-08 01:15:43" itemprop="dateModified" datetime="2024-05-08T01:15:43+00:00">2024-05-08</time>
+      <time title="修改时间：2024-06-08 08:27:10" itemprop="dateModified" datetime="2024-06-08T08:27:10+00:00">2024-06-08</time>
     </span>
 
   
@@ -1134,96 +1244,8 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/kubernetes/kubernetes-ha/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="shoothzj">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/kubernetes/kubernetes-ha/" class="post-title-link" itemprop="url">高可用无单点架构之kubernetes集群</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-08-28 08:20:33" itemprop="dateCreated datePublished" datetime="2021-08-28T08:20:33+00:00">2021-08-28</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-05-08 01:15:43" itemprop="dateModified" datetime="2024-05-08T01:15:43+00:00">2024-05-08</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1><span id="k8s-gao-ke-yong-wu-dan-dian-gu-zhang-she-ji-na-xie-chang-jing">k8s高可用无单点故障涉及那些场景</span><a href="#k8s-gao-ke-yong-wu-dan-dian-gu-zhang-she-ji-na-xie-chang-jing" class="header-anchor">#</a></h1><h2><span id="k8s-jie-dian-tian-jia-pod-tian-jia-deng-zeng-shan-cha-gai-wu-dan-dian-gu-zhang">k8s 节点添加、pod添加等增删查改无单点故障</span><a href="#k8s-jie-dian-tian-jia-pod-tian-jia-deng-zeng-shan-cha-gai-wu-dan-dian-gu-zhang" class="header-anchor">#</a></h2><p>需要元数据的存储和处理能力高可用</p>
-<h2><span id="k8s-dui-wai-de-apiserver-ru-worker-wu-dan-dian-gu-zhang">k8s对外的apiServer（如worker）无单点故障</span><a href="#k8s-dui-wai-de-apiserver-ru-worker-wu-dan-dian-gu-zhang" class="header-anchor">#</a></h2><p>worker node和其他组件访问<code>apiServer</code>路径高可用</p>
-<h1><span id="k8s-wu-dan-dian-gu-zhang-ji-zhu-guan-jian-dian">k8s无单点故障技术关键点</span><a href="#k8s-wu-dan-dian-gu-zhang-ji-zhu-guan-jian-dian" class="header-anchor">#</a></h1><h2><span id="yuan-shu-ju-cun-chu">元数据存储</span><a href="#yuan-shu-ju-cun-chu" class="header-anchor">#</a></h2><p>通过etcd存储元数据，etcd三节点集群保证高可用</p>
-<h2><span id="yuan-shu-ju-chu-li">元数据处理</span><a href="#yuan-shu-ju-chu-li" class="header-anchor">#</a></h2><p>通过多个<code>kube-controller</code>和<code>kube-scheduler</code>节点来保证高可用</p>
-<h2><span id="worker-jie-dian-qing-qiu-shu-ju-tong-guo-duo-ip-huo-fu-zai-jun-heng-lai-bao-zheng">worker节点请求数据通过多ip或负载均衡来保证</span><a href="#worker-jie-dian-qing-qiu-shu-ju-tong-guo-duo-ip-huo-fu-zai-jun-heng-lai-bao-zheng" class="header-anchor">#</a></h2><p>节点请求通信通过多Ip或负载均衡来保证高可用，这里也有几种方式</p>
-<h3><span id="iaas-han-shang-ke-ti-gong-fu-zai-jun-heng-de-chang-jing-xia">IaaS厂商可提供负载均衡的场景下</span><a href="#iaas-han-shang-ke-ti-gong-fu-zai-jun-heng-de-chang-jing-xia" class="header-anchor">#</a></h3><p>如下图所示，可将worker node的访问地址指向负载均衡的地址</p>
-<p><img src="/kubernetes/kubernetes-ha/kubernetes-ha-iaas-lb.png" alt="kubernetes-ha-iaas-lb"></p>
-<h3><span id="si-you-hua-bu-shu-keepalived">私有化部署KeepAlived</span><a href="#si-you-hua-bu-shu-keepalived" class="header-anchor">#</a></h3><p>私有化部署场景常用keepAlived提供浮动IP来给<code>worker node</code>或其他组件访问，如下图所示</p>
-<p><img src="/kubernetes/kubernetes-ha/kubernetes-ha-keepalived.png" alt="kubernetes-ha-keepalived"></p>
-<h3><span id="si-you-hua-bu-shu-jia-shang-fu-zai-jun-heng-zu-jian">私有化部署加上负载均衡组件</span><a href="#si-you-hua-bu-shu-jia-shang-fu-zai-jun-heng-zu-jian" class="header-anchor">#</a></h3><p>如果你觉得同一时刻只有单个apiServer工作会成瓶颈，也可以使用<code>KeepAlived</code>加<code>Nginx</code>或<code>HaProxy</code>来对<code>ApiServer</code>做负载均衡</p>
-<p><img src="/kubernetes/kubernetes-ha/kubernetes-ha-keepalived-nginx.png" alt="kubernetes-ha-keepalived-nginx"></p>
-<p>为了简化图像，只画出了master1上的Nginx向后转发的场景。</p>
-<p>至于Nginx和KeepAlived如何部署，推荐采用容器化的部署模式，方便进行监控和运维；但是镜像不从镜像仓库拉取，而是保存在<code>master</code>节点上，这样虽然升级复杂一点，但是这样子<code>kubernetes</code>的高可用就不依赖镜像仓库了，不会和镜像仓库形成循环依赖，更不会影响镜像仓库的高可用方案，大大简化了后续的技术方案。（因为镜像仓库可能会占据较大的存储空间，可能会和<code>master</code>节点分离部署，这时会作为<code>worker</code>节点连接<code>master</code>节点）。</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
-    <a class="extend prev" rel="prev" title="上一页" aria-label="上一页" href="/page/4/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><span class="page-number current">5</span><a class="page-number" href="/page/6/">6</a><a class="page-number" href="/page/7/">7</a><a class="extend next" rel="next" title="下一页" aria-label="下一页" href="/page/6/"><i class="fa fa-angle-right"></i></a>
+    <a class="extend prev" rel="prev" title="上一页" aria-label="上一页" href="/page/4/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><span class="page-number current">5</span><a class="page-number" href="/page/6/">6</a><span class="space">&hellip;</span><a class="page-number" href="/page/8/">8</a><a class="extend next" rel="next" title="下一页" aria-label="下一页" href="/page/6/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 </div>

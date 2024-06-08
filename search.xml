@@ -1467,6 +1467,36 @@
       </tags>
   </entry>
   <entry>
+    <title>高可用无单点架构之镜像仓库</title>
+    <url>/kubernetes/kubernetes-registry-ha/</url>
+    <content><![CDATA[<p>本篇文章探讨镜像仓库<code>registry</code>的高可用</p>
+<h1><span id="jing-xiang-cang-ku-gao-ke-yong-wu-dan-dian-gu-zhang-she-ji-na-xie-chang-jing">镜像仓库高可用无单点故障涉及那些场景</span><a href="#jing-xiang-cang-ku-gao-ke-yong-wu-dan-dian-gu-zhang-she-ji-na-xie-chang-jing" class="header-anchor">#</a></h1><h2><span id="jing-xiang-cang-ku-dui-wai-ti-gong-fang-wen-wu-dan-dian-gu-zhang">镜像仓库对外提供访问无单点故障</span><a href="#jing-xiang-cang-ku-dui-wai-ti-gong-fang-wen-wu-dan-dian-gu-zhang" class="header-anchor">#</a></h2><p>镜像仓库对外提供的访问点保持高可用</p>
+<h2><span id="jing-xiang-cang-ku-de-shu-ju-cun-chu-gao-ke-yong">镜像仓库的数据存储高可用</span><a href="#jing-xiang-cang-ku-de-shu-ju-cun-chu-gao-ke-yong" class="header-anchor">#</a></h2><p>存储在镜像仓库中的数据都得是高可用的</p>
+<h1><span id="jing-xiang-cang-ku-wu-dan-dian-gu-zhang-ji-zhu-guan-jian-dian">镜像仓库无单点故障技术关键点</span><a href="#jing-xiang-cang-ku-wu-dan-dian-gu-zhang-ji-zhu-guan-jian-dian" class="header-anchor">#</a></h1><h2><span id="jing-xiang-cang-ku-dui-wai-ti-gong-fang-wen-wu-dan-dian-gu-zhang">镜像仓库对外提供访问无单点故障</span><a href="#jing-xiang-cang-ku-dui-wai-ti-gong-fang-wen-wu-dan-dian-gu-zhang" class="header-anchor">#</a></h2><p>和上一篇文章一样，如果<code>IaaS</code>能提供<code>ELB</code>，我们最好是使用<code>ELB</code>，或者使用浮动IP的方式替换</p>
+<h2><span id="jing-xiang-cang-ku-de-shu-ju-cun-chu-gao-ke-yong">镜像仓库的数据存储高可用</span><a href="#jing-xiang-cang-ku-de-shu-ju-cun-chu-gao-ke-yong" class="header-anchor">#</a></h2><ul>
+<li>配置镜像仓库使用<code>IaaS</code>的S3存储</li>
+<li>配置镜像仓库使用本地存储，通过共享文件路径存储来实现高可用，如<code>Glusterfs</code>等</li>
+<li>配置镜像仓库使用S3存储，自建兼容S3 API的存储<code>Server</code></li>
+</ul>
+<p>通常会使用共享存储来做到镜像仓库存储的高可用</p>
+<h1><span id="fang-an-gai-shu">方案概述</span><a href="#fang-an-gai-shu" class="header-anchor">#</a></h1><p>那么其实镜像仓库的高可用方案就是对上面方案的组合，下面我们举几个例子</p>
+<h2><span id="jing-xiang-cang-ku-yi-lai-zu-jian-bu-shu-fang-shi">镜像仓库依赖组件部署方式</span><a href="#jing-xiang-cang-ku-yi-lai-zu-jian-bu-shu-fang-shi" class="header-anchor">#</a></h2><p><code>MinIo</code>、<code>KeepAlived</code>、<code>registry</code>都推荐使用容器部署，方便运维管理，但是镜像推荐内置到虚拟机中，不依赖镜像仓库或其他组件，避免循环依赖</p>
+<h2><span id="shi-yong-iaas-de-s3-cun-chu-fu-zai-jun-heng-zu-jian">使用IaaS的S3存储 + 负载均衡组件</span><a href="#shi-yong-iaas-de-s3-cun-chu-fu-zai-jun-heng-zu-jian" class="header-anchor">#</a></h2><p>这是最简单的方案，得益于云厂商提供的S3存储和负载均衡组件，我们可以进行很简单的配置，并部署一台以上的<code>registry</code>,如下图所示</p>
+<p><img src="/kubernetes/kubernetes-registry-ha/kubernetes-registry-ha-s3.png" alt="kubernetes-registry-ha-s3"></p>
+<h2><span id="zi-jian-jian-rong-s3-cun-chu-keepalived-fu-dong-ip">自建兼容S3存储 + KeepAlived浮动Ip</span><a href="#zi-jian-jian-rong-s3-cun-chu-keepalived-fu-dong-ip" class="header-anchor">#</a></h2><p>我们可以自己搭建<code>MinIo</code>集群来作为兼容S3存储，由于MINIO最低部署4个节点，我们需要根据故障域机器来选择部署MINIO的数目，比如，故障域是三台物理机，我们部署4节点就不妥。原因是，4节点，总会有一台物理机上会部署2个minio节点，如果这台物理机挂掉，就会导致单点故障。所以，如果故障域为三台物理机，我们最好部署6节点，可容忍一台物理机宕机。其他的节点，读者也可以自行测算。</p>
+<p>下图是假设三台物理机，<code>minio</code>6副本场景下的部署示意图</p>
+<p><img src="/kubernetes/kubernetes-registry-ha/kubernetes-registry-ha-minio.png" alt="kubernetes-registry-ha-minio"></p>
+<p>注，为了图的美观，并未画出所有的连线</p>
+<h3><span id="minio-guan-jian-pei-zhi">MINIO关键配置</span><a href="#minio-guan-jian-pei-zhi" class="header-anchor">#</a></h3><ul>
+<li>节点数目6个</li>
+<li>EC2</li>
+</ul>
+]]></content>
+      <tags>
+        <tag>Kubernetes</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>一步一步教你写kubernetes sidecar</title>
     <url>/kubernetes/kubernetes-sidecar/</url>
     <content><![CDATA[<h1><span id="shi-me-shi-sidecar">什么是sidecar？</span><a href="#shi-me-shi-sidecar" class="header-anchor">#</a></h1><p><img src="/kubernetes/kubernetes-sidecar/kubernetes-sidecar-what-is.png" alt="kubernetes-sidecar-what-is"></p>
@@ -1505,36 +1535,6 @@
 
 <p>通过查看<strong>kubectl logs output output-workload</strong>可以看到output-sidecar收到了请求</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">HttpResponse(200 OK,List(Server: akka-http/10.2.9, Date: Tue, 29 Mar 2022 00:15:47 GMT),HttpEntity.Strict(text/html; charset=UTF-8,31 bytes total),HttpProtocol(HTTP/1.1))</span><br><span class="line">HttpResponse(200 OK,List(Server: akka-http/10.2.9, Date: Tue, 29 Mar 2022 00:16:02 GMT),HttpEntity.Strict(text/html; charset=UTF-8,31 bytes total),HttpProtocol(HTTP/1.1))</span><br><span class="line">HttpResponse(200 OK,List(Server: akka-http/10.2.9, Date: Tue, 29 Mar 2022 00:16:17 GMT),HttpEntity.Strict(text/html; charset=UTF-8,31 bytes total),HttpProtocol(HTTP/1.1))</span><br><span class="line">HttpResponse(200 OK,List(Server: akka-http/10.2.9, Date: Tue, 29 Mar 2022 00:16:32 GMT),HttpEntity.Strict(text/html; charset=UTF-8,31 bytes total),HttpProtocol(HTTP/1.1))</span><br><span class="line">HttpResponse(200 OK,List(Server: akka-http/10.2.9, Date: Tue, 29 Mar 2022 00:16:47 GMT),HttpEntity.Strict(text/html; charset=UTF-8,31 bytes total),HttpProtocol(HTTP/1.1))</span><br><span class="line">HttpResponse(200 OK,List(Server: akka-http/10.2.9, Date: Tue, 29 Mar 2022 00:17:02 GMT),HttpEntity.Strict(text/html; charset=UTF-8,31 bytes total),HttpProtocol(HTTP/1.1))</span><br><span class="line">HttpResponse(200 OK,List(Server: akka-http/10.2.9, Date: Tue, 29 Mar 2022 00:17:17 GMT),HttpEntity.Strict(text/html; charset=UTF-8,31 bytes total),HttpProtocol(HTTP/1.1))</span><br><span class="line">HttpResponse(200 OK,List(Server: akka-http/10.2.9, Date: Tue, 29 Mar 2022 00:17:32 GMT),HttpEntity.Strict(text/html; charset=UTF-8,31 bytes total),HttpProtocol(HTTP/1.1))</span><br></pre></td></tr></table></figure>
-]]></content>
-      <tags>
-        <tag>Kubernetes</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>高可用无单点架构之镜像仓库</title>
-    <url>/kubernetes/kubernetes-registry-ha/</url>
-    <content><![CDATA[<p>本篇文章探讨镜像仓库<code>registry</code>的高可用</p>
-<h1><span id="jing-xiang-cang-ku-gao-ke-yong-wu-dan-dian-gu-zhang-she-ji-na-xie-chang-jing">镜像仓库高可用无单点故障涉及那些场景</span><a href="#jing-xiang-cang-ku-gao-ke-yong-wu-dan-dian-gu-zhang-she-ji-na-xie-chang-jing" class="header-anchor">#</a></h1><h2><span id="jing-xiang-cang-ku-dui-wai-ti-gong-fang-wen-wu-dan-dian-gu-zhang">镜像仓库对外提供访问无单点故障</span><a href="#jing-xiang-cang-ku-dui-wai-ti-gong-fang-wen-wu-dan-dian-gu-zhang" class="header-anchor">#</a></h2><p>镜像仓库对外提供的访问点保持高可用</p>
-<h2><span id="jing-xiang-cang-ku-de-shu-ju-cun-chu-gao-ke-yong">镜像仓库的数据存储高可用</span><a href="#jing-xiang-cang-ku-de-shu-ju-cun-chu-gao-ke-yong" class="header-anchor">#</a></h2><p>存储在镜像仓库中的数据都得是高可用的</p>
-<h1><span id="jing-xiang-cang-ku-wu-dan-dian-gu-zhang-ji-zhu-guan-jian-dian">镜像仓库无单点故障技术关键点</span><a href="#jing-xiang-cang-ku-wu-dan-dian-gu-zhang-ji-zhu-guan-jian-dian" class="header-anchor">#</a></h1><h2><span id="jing-xiang-cang-ku-dui-wai-ti-gong-fang-wen-wu-dan-dian-gu-zhang">镜像仓库对外提供访问无单点故障</span><a href="#jing-xiang-cang-ku-dui-wai-ti-gong-fang-wen-wu-dan-dian-gu-zhang" class="header-anchor">#</a></h2><p>和上一篇文章一样，如果<code>IaaS</code>能提供<code>ELB</code>，我们最好是使用<code>ELB</code>，或者使用浮动IP的方式替换</p>
-<h2><span id="jing-xiang-cang-ku-de-shu-ju-cun-chu-gao-ke-yong">镜像仓库的数据存储高可用</span><a href="#jing-xiang-cang-ku-de-shu-ju-cun-chu-gao-ke-yong" class="header-anchor">#</a></h2><ul>
-<li>配置镜像仓库使用<code>IaaS</code>的S3存储</li>
-<li>配置镜像仓库使用本地存储，通过共享文件路径存储来实现高可用，如<code>Glusterfs</code>等</li>
-<li>配置镜像仓库使用S3存储，自建兼容S3 API的存储<code>Server</code></li>
-</ul>
-<p>通常会使用共享存储来做到镜像仓库存储的高可用</p>
-<h1><span id="fang-an-gai-shu">方案概述</span><a href="#fang-an-gai-shu" class="header-anchor">#</a></h1><p>那么其实镜像仓库的高可用方案就是对上面方案的组合，下面我们举几个例子</p>
-<h2><span id="jing-xiang-cang-ku-yi-lai-zu-jian-bu-shu-fang-shi">镜像仓库依赖组件部署方式</span><a href="#jing-xiang-cang-ku-yi-lai-zu-jian-bu-shu-fang-shi" class="header-anchor">#</a></h2><p><code>MinIo</code>、<code>KeepAlived</code>、<code>registry</code>都推荐使用容器部署，方便运维管理，但是镜像推荐内置到虚拟机中，不依赖镜像仓库或其他组件，避免循环依赖</p>
-<h2><span id="shi-yong-iaas-de-s3-cun-chu-fu-zai-jun-heng-zu-jian">使用IaaS的S3存储 + 负载均衡组件</span><a href="#shi-yong-iaas-de-s3-cun-chu-fu-zai-jun-heng-zu-jian" class="header-anchor">#</a></h2><p>这是最简单的方案，得益于云厂商提供的S3存储和负载均衡组件，我们可以进行很简单的配置，并部署一台以上的<code>registry</code>,如下图所示</p>
-<p><img src="/kubernetes/kubernetes-registry-ha/kubernetes-registry-ha-s3.png" alt="kubernetes-registry-ha-s3"></p>
-<h2><span id="zi-jian-jian-rong-s3-cun-chu-keepalived-fu-dong-ip">自建兼容S3存储 + KeepAlived浮动Ip</span><a href="#zi-jian-jian-rong-s3-cun-chu-keepalived-fu-dong-ip" class="header-anchor">#</a></h2><p>我们可以自己搭建<code>MinIo</code>集群来作为兼容S3存储，由于MINIO最低部署4个节点，我们需要根据故障域机器来选择部署MINIO的数目，比如，故障域是三台物理机，我们部署4节点就不妥。原因是，4节点，总会有一台物理机上会部署2个minio节点，如果这台物理机挂掉，就会导致单点故障。所以，如果故障域为三台物理机，我们最好部署6节点，可容忍一台物理机宕机。其他的节点，读者也可以自行测算。</p>
-<p>下图是假设三台物理机，<code>minio</code>6副本场景下的部署示意图</p>
-<p><img src="/kubernetes/kubernetes-registry-ha/kubernetes-registry-ha-minio.png" alt="kubernetes-registry-ha-minio"></p>
-<p>注，为了图的美观，并未画出所有的连线</p>
-<h3><span id="minio-guan-jian-pei-zhi">MINIO关键配置</span><a href="#minio-guan-jian-pei-zhi" class="header-anchor">#</a></h3><ul>
-<li>节点数目6个</li>
-<li>EC2</li>
-</ul>
 ]]></content>
       <tags>
         <tag>Kubernetes</tag>
@@ -1902,6 +1902,50 @@
       </tags>
   </entry>
   <entry>
+    <title>Pulsar消息积压topic级别策略老化的两种方案</title>
+    <url>/pulsar/pulsar-msg-topic-level-policy-aging/</url>
+    <content><![CDATA[<p><code>Pulsar</code>像大多数消息中间件一样,支持按时间和大小对消息积压进行老化。但是默认的策略只能在namespace级别配置。本文将介绍如何在topic级别实现老化策略的两种方案。</p>
+<h2><span id="fang-an-yi-kai-qi-topiclevelpolicy-lai-shi-xian">方案一：开启 TopicLevelPolicy 来实现</span><a href="#fang-an-yi-kai-qi-topiclevelpolicy-lai-shi-xian" class="header-anchor">#</a></h2><p>默认的策略配置通过在<code>Zookeeper</code>上配置对应的策略，可以通过<code>./pulsar zookeeper-shell</code>命令来登录zookeeper集群查询。但是如果将这一实现方式扩展到topic级别，将会产生大量的（百万、千万级别）的ZooKeeper节点，这对于<code>ZooKeeper</code>集群来说几乎是不可接受的。因此，Pulsar提供了一种新的实现方式，即通过<code>Topic</code>来存储策略配置，而不是通过<code>ZooKeeper</code>来存储。</p>
+<p><code>Pulsar</code>，从2.7.0版本开始，引入了<code>SystemTopic</code>，用于存储<code>Topic</code>的元数据信息，包括<code>Topic</code>的策略配置。主题级策略使用户可以更灵活地管理主题,并不会给 ZooKeeper 带来额外负担。</p>
+<p>您可以通过如下配置来开启<code>TopicLevelPolicy</code>：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">systemTopicEnabled=true</span><br><span class="line">topicLevelPoliciesEnabled=true</span><br></pre></td></tr></table></figure>
+
+<p>然后通过<code>set-backlog-quota</code>命令来设置您想要的老化时间和老化大小</p>
+<p>PS: 完整的一些功能，如命令行<code>set-backlog-quota</code>，在3.0.0版本中支持</p>
+<h2><span id="fang-an-er-tong-guo-zi-ding-yi-dai-ma-lai-shi-xian">方案二：通过自定义代码来实现</span><a href="#fang-an-er-tong-guo-zi-ding-yi-dai-ma-lai-shi-xian" class="header-anchor">#</a></h2><p><code>Pulsar</code>的<code>TopicLevelPolicy</code>实现需要通过topic存储策略配置，而不是通过<code>ZooKeeper</code>来存储。在实际的极端场景下，<code>Topic</code>中存储的内容可能会丢失（因为未开启<code>Bookkeeper</code>立即落盘或磁盘文件损坏等原因），这将导致策略配置丢失，从而导致策略失效。因此，我们可以通过自定义代码来实现topic级别的策略配置，这样可以避免策略配置丢失的问题。</p>
+<p>举个例子，业务可以将策略存放在<code>Mysql</code>中，然后通过<code>Pulsar</code>的<code>Admin API</code>来让策略生效</p>
+<h3><span id="zi-ding-yi-dai-ma-shi-xian-backlog-shi-jian-ce-lue">自定义代码实现Backlog时间策略</span><a href="#zi-ding-yi-dai-ma-shi-xian-backlog-shi-jian-ce-lue" class="header-anchor">#</a></h3><pre class="mermaid">sequenceDiagram
+    participant C as Client
+    participant B as Broker
+    loop
+        C ->> B: expire-messages-all-subscriptions Request
+        B -->> C: expire-messages-all-subscriptions Response
+    end</pre>
+
+<h3><span id="zi-ding-yi-dai-ma-shi-xian-backlog-da-xiao-ce-lue">自定义代码实现Backlog大小策略</span><a href="#zi-ding-yi-dai-ma-shi-xian-backlog-da-xiao-ce-lue" class="header-anchor">#</a></h3><pre class="mermaid">sequenceDiagram
+    participant C as Client
+    participant B as Broker
+    loop
+        C ->> B: stats-internal Request
+        B -->> C: stats-internal Response
+        alt messageBacklogSize < maxMessageBacklogSize
+        else messageBacklogSize >= maxMessageBacklogSize
+            Note over B,C: estimate the backlog position
+            C ->> B: get-message-by-id Request
+            B -->> C: get-message-by-id
+            Note over B,C: get the timestamp of the message
+            C ->> B: expire-messages-all-subscriptions Request
+            B -->> C: expire-messages-all-subscriptions Response
+        end
+    end</pre>
+
+
+<script type="module"> import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.esm.min.mjs';	mermaid.initialize({startOnLoad: true, flowchart: {curve: 'linear'}}); </script>]]></content>
+      <tags>
+        <tag>Pulsar</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>prometheus tsdb索引布局及查询流程</title>
     <url>/prometheus/prometheus-tsdb-index/</url>
     <content><![CDATA[<h1><span id="prometheus-ci-pan-bu-ju">prometheus 磁盘布局</span><a href="#prometheus-ci-pan-bu-ju" class="header-anchor">#</a></h1><p>采集到的数据每两个小时形成一个block。每个block由一个目录组成，并存放在data路径下。该目录包含一个包含该时间窗口的所有时间序列样本的块子目录、一个元数据文件和一个索引文件（将metric_name和label索引到目录下的时间序列）。 chunks 目录中的样本默认组合成一个或多个段文件，每个段文件最大为 512MB。 当通过 API 删除系列时，删除记录存储在单独的 tombstone 文件中（而不是立即从块段中删除数据）。</p>
@@ -1986,50 +2030,6 @@
 ]]></content>
       <tags>
         <tag>pulsar</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Pulsar消息积压topic级别策略老化的两种方案</title>
-    <url>/pulsar/pulsar-msg-topic-level-policy-aging/</url>
-    <content><![CDATA[<p><code>Pulsar</code>像大多数消息中间件一样,支持按时间和大小对消息积压进行老化。但是默认的策略只能在namespace级别配置。本文将介绍如何在topic级别实现老化策略的两种方案。</p>
-<h2><span id="fang-an-yi-kai-qi-topiclevelpolicy-lai-shi-xian">方案一：开启 TopicLevelPolicy 来实现</span><a href="#fang-an-yi-kai-qi-topiclevelpolicy-lai-shi-xian" class="header-anchor">#</a></h2><p>默认的策略配置通过在<code>Zookeeper</code>上配置对应的策略，可以通过<code>./pulsar zookeeper-shell</code>命令来登录zookeeper集群查询。但是如果将这一实现方式扩展到topic级别，将会产生大量的（百万、千万级别）的ZooKeeper节点，这对于<code>ZooKeeper</code>集群来说几乎是不可接受的。因此，Pulsar提供了一种新的实现方式，即通过<code>Topic</code>来存储策略配置，而不是通过<code>ZooKeeper</code>来存储。</p>
-<p><code>Pulsar</code>，从2.7.0版本开始，引入了<code>SystemTopic</code>，用于存储<code>Topic</code>的元数据信息，包括<code>Topic</code>的策略配置。主题级策略使用户可以更灵活地管理主题,并不会给 ZooKeeper 带来额外负担。</p>
-<p>您可以通过如下配置来开启<code>TopicLevelPolicy</code>：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">systemTopicEnabled=true</span><br><span class="line">topicLevelPoliciesEnabled=true</span><br></pre></td></tr></table></figure>
-
-<p>然后通过<code>set-backlog-quota</code>命令来设置您想要的老化时间和老化大小</p>
-<p>PS: 完整的一些功能，如命令行<code>set-backlog-quota</code>，在3.0.0版本中支持</p>
-<h2><span id="fang-an-er-tong-guo-zi-ding-yi-dai-ma-lai-shi-xian">方案二：通过自定义代码来实现</span><a href="#fang-an-er-tong-guo-zi-ding-yi-dai-ma-lai-shi-xian" class="header-anchor">#</a></h2><p><code>Pulsar</code>的<code>TopicLevelPolicy</code>实现需要通过topic存储策略配置，而不是通过<code>ZooKeeper</code>来存储。在实际的极端场景下，<code>Topic</code>中存储的内容可能会丢失（因为未开启<code>Bookkeeper</code>立即落盘或磁盘文件损坏等原因），这将导致策略配置丢失，从而导致策略失效。因此，我们可以通过自定义代码来实现topic级别的策略配置，这样可以避免策略配置丢失的问题。</p>
-<p>举个例子，业务可以将策略存放在<code>Mysql</code>中，然后通过<code>Pulsar</code>的<code>Admin API</code>来让策略生效</p>
-<h3><span id="zi-ding-yi-dai-ma-shi-xian-backlog-shi-jian-ce-lue">自定义代码实现Backlog时间策略</span><a href="#zi-ding-yi-dai-ma-shi-xian-backlog-shi-jian-ce-lue" class="header-anchor">#</a></h3><pre class="mermaid">sequenceDiagram
-    participant C as Client
-    participant B as Broker
-    loop
-        C ->> B: expire-messages-all-subscriptions Request
-        B -->> C: expire-messages-all-subscriptions Response
-    end</pre>
-
-<h3><span id="zi-ding-yi-dai-ma-shi-xian-backlog-da-xiao-ce-lue">自定义代码实现Backlog大小策略</span><a href="#zi-ding-yi-dai-ma-shi-xian-backlog-da-xiao-ce-lue" class="header-anchor">#</a></h3><pre class="mermaid">sequenceDiagram
-    participant C as Client
-    participant B as Broker
-    loop
-        C ->> B: stats-internal Request
-        B -->> C: stats-internal Response
-        alt messageBacklogSize < maxMessageBacklogSize
-        else messageBacklogSize >= maxMessageBacklogSize
-            Note over B,C: estimate the backlog position
-            C ->> B: get-message-by-id Request
-            B -->> C: get-message-by-id
-            Note over B,C: get the timestamp of the message
-            C ->> B: expire-messages-all-subscriptions Request
-            B -->> C: expire-messages-all-subscriptions Response
-        end
-    end</pre>
-
-
-<script type="module"> import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.esm.min.mjs';	mermaid.initialize({startOnLoad: true, flowchart: {curve: 'linear'}}); </script>]]></content>
-      <tags>
-        <tag>Pulsar</tag>
       </tags>
   </entry>
   <entry>
@@ -2705,6 +2705,22 @@ springIgnite --> util</pre>
 ]]></content>
   </entry>
   <entry>
+    <title>WebFlux最佳实践</title>
+    <url>/code/java/java-webflux-best-practice/</url>
+    <content><![CDATA[<p>WebFlux是Spring 5引入的新的响应式编程框架，它提供了一种基于反应式流的编程模型，可以用于构建高性能、高吞吐量的Web应用程序。</p>
+<h1><span id="fang-zhi-da-liang-qing-qiu-dui-ji">防止大量请求堆积</span><a href="#fang-zhi-da-liang-qing-qiu-dui-ji" class="header-anchor">#</a></h1><h2><span id="xian-zhi-tong-yi-shi-jian-de-bing-fa-chu-li-ge-shu">限制同一时间的并发处理个数</span><a href="#xian-zhi-tong-yi-shi-jian-de-bing-fa-chu-li-ge-shu" class="header-anchor">#</a></h2><p>由于WebFlux可以处理大量的请求，如果后端处理较慢（如写db较慢等），可能会导致大量的请求堆积，可以通过限制同一时间的并发处理个数来防止请求堆积。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> org.springframework.http.HttpStatus;</span><br><span class="line"><span class="keyword">import</span> org.springframework.stereotype.Component;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.server.ServerWebExchange;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.server.WebFilter;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.server.WebFilterChain;</span><br><span class="line"><span class="keyword">import</span> reactor.core.publisher.Mono;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.Semaphore;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ConcurrencyLimitingFilter</span> <span class="keyword">implements</span> <span class="title class_">WebFilter</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Semaphore semaphore;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">ConcurrencyLimitingFilter</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.semaphore = <span class="keyword">new</span> <span class="title class_">Semaphore</span>(<span class="number">10</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> Mono&lt;Void&gt; <span class="title function_">filter</span><span class="params">(ServerWebExchange exchange, WebFilterChain chain)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (semaphore.tryAcquire()) &#123;</span><br><span class="line">            <span class="keyword">return</span> chain.filter(exchange)</span><br><span class="line">                    .doFinally(sig -&gt; semaphore.release());</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            exchange.getResponse().setStatusCode(HttpStatus.TOO_MANY_REQUESTS);</span><br><span class="line">            <span class="keyword">return</span> exchange.getResponse().setComplete();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2><span id="pei-zhi-chao-shi-shi-jian">配置超时时间</span><a href="#pei-zhi-chao-shi-shi-jian" class="header-anchor">#</a></h2><p>网络编程中，任何操作都应该有超时时间。WebFlux允许大量的请求进入，如果不设置超时时间，可能会导致大量的请求排队处理（可能客户端早已放弃），可以通过统一Filter来设置最大超时时间。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> lombok.extern.slf4j.Slf4j;</span><br><span class="line"><span class="keyword">import</span> org.springframework.http.HttpStatus;</span><br><span class="line"><span class="keyword">import</span> org.springframework.stereotype.Component;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.server.ResponseStatusException;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.server.ServerWebExchange;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.server.WebFilter;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.server.WebFilterChain;</span><br><span class="line"><span class="keyword">import</span> reactor.core.publisher.Mono;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.time.Duration;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.TimeoutException;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">WebRequestTimeoutFilter</span> <span class="keyword">implements</span> <span class="title class_">WebFilter</span> &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> Mono&lt;Void&gt; <span class="title function_">filter</span><span class="params">(ServerWebExchange exchange, WebFilterChain chain)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> chain.filter(exchange)</span><br><span class="line">                .timeout(Duration.ofSeconds(<span class="number">10</span>))</span><br><span class="line">                .onErrorResume(TimeoutException.class, e -&gt; &#123;</span><br><span class="line">                    log.error(<span class="string">&quot;Request timeout&quot;</span>, e);</span><br><span class="line">                    <span class="keyword">return</span> Mono.error(<span class="keyword">new</span> <span class="title class_">ResponseStatusException</span>(HttpStatus.GATEWAY_TIMEOUT, <span class="string">&quot;Request timeout&quot;</span>));</span><br><span class="line">                &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+]]></content>
+      <tags>
+        <tag>Java</tag>
+        <tag>Spring</tag>
+        <tag>WebFlux</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>记一次诡异的Java时间戳变化问题</title>
     <url>/code/java/java-weird-timestamp-change/</url>
     <content><![CDATA[<h1><span id="wen-ti-xian-xiang">问题现象</span><a href="#wen-ti-xian-xiang" class="header-anchor">#</a></h1><p>在一个使用Spring R2dbc与Mysql8.x的项目中，当创建 一个REST资源，进行创建，返回的毫秒精度时间戳，和下一瞬间查询的时间戳不一致。sql及代码大概如下</p>
@@ -2871,8 +2887,8 @@ springIgnite --> util</pre>
 ]]></content>
       <tags>
         <tag>Java</tag>
-        <tag>Lombok</tag>
         <tag>Spring</tag>
+        <tag>Lombok</tag>
       </tags>
   </entry>
 </search>

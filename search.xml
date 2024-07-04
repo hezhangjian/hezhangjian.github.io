@@ -692,6 +692,25 @@
       </tags>
   </entry>
   <entry>
+    <title>错误码国际化总结</title>
+    <url>/code/error-msg-i18n/</url>
+    <content><![CDATA[<h1><span id="cuo-wu-xin-xi-wu-mo-ban-bian-liang">错误信息无模板变量</span><a href="#cuo-wu-xin-xi-wu-mo-ban-bian-liang" class="header-anchor">#</a></h1><p>假设我们的错误信息返回如下</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">HTTP/1.1 200 OK</span><br><span class="line">&#123;&quot;error_code&quot;: &quot;IEEE.754&quot;, &quot;error_msg&quot;: &quot;IEE 754 error&quot;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>无模板变量的错误信息国际化，可以直接在前端对整体字符串根据错误码进行静态国际化。</p>
+<figure class="highlight typescript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// catch the error code first</span></span><br><span class="line"><span class="keyword">const</span> error_code = body.<span class="property">error_code</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> error_msg_map = &#123;</span><br><span class="line">    <span class="string">&quot;IEEE.754&quot;</span>: &#123;</span><br><span class="line">        <span class="string">&quot;en&quot;</span>: <span class="string">&quot;IEE 754 error&quot;</span>,</span><br><span class="line">        <span class="string">&quot;zh&quot;</span>: <span class="string">&quot;IEE 754 错误&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> error_msg = error_msg_map[error_code][lang]</span><br></pre></td></tr></table></figure>
+
+<h1><span id="cuo-wu-xin-xi-bao-han-mo-ban-bian-liang">错误信息包含模板变量</span><a href="#cuo-wu-xin-xi-bao-han-mo-ban-bian-liang" class="header-anchor">#</a></h1><p>假设我们的错误信息返回如下</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">HTTP/1.1 200 OK</span><br><span class="line">&#123;&quot;error_code&quot;: &quot;IEEE.754&quot;, &quot;error_msg&quot;: &quot;IEE 754 NbN error, do you mean Nan?&quot;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>包含模板变量的错误信息国际化，可以在前端通过正则表达式提取，并代入到中文字符串模板中实现。如示例代码</p>
+<figure class="highlight typescript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// catch the error code first</span></span><br><span class="line"><span class="keyword">const</span> error_code = body.<span class="property">code</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> error_msg_capture_map = &#123;</span><br><span class="line">    <span class="string">&quot;IEEE.754&quot;</span>: <span class="string">&quot;/IEE 754 (\w+) error, do you mean (\w+)?/&quot;</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> error_msg_template_map = &#123;</span><br><span class="line">    <span class="string">&quot;IEEE.754&quot;</span>: &#123;</span><br><span class="line">        <span class="string">&quot;en&quot;</span>: <span class="string">&quot;IEE 754 &#123;&#123;var1&#125;&#125; error, do you mean &#123;&#123;var2&#125;&#125;?&quot;</span>,</span><br><span class="line">        <span class="string">&quot;zh&quot;</span>: <span class="string">&quot;IEE 754 &#123;&#123;var1&#125;&#125; 错误，你是指 &#123;&#123;var2&#125;&#125; 吗？&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> matches = error_msg_capture_map[error_code].<span class="title function_">exec</span>(body.<span class="property">error_msg</span>);</span><br><span class="line"><span class="keyword">const</span> variables = matches.<span class="title function_">slice</span>(<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> error_msg = error_msg_template_map[error_code][lang];</span><br><span class="line">variables.<span class="title function_">forEach</span>(<span class="function">(<span class="params">value, index</span>) =&gt;</span> &#123;</span><br><span class="line">    error_msg = error_msg.<span class="title function_">replace</span>(<span class="string">`&#123;&#123;var<span class="subst">$&#123;index + <span class="number">1</span>&#125;</span>&#125;&#125;`</span>, value);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+]]></content>
+      <tags>
+        <tag>Code</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>文件编解码代码设计</title>
     <url>/code/file-codec-design/</url>
     <content><![CDATA[<div class="toc">
@@ -752,25 +771,6 @@
 <script type="module"> import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.esm.min.mjs';	mermaid.initialize({startOnLoad: true, flowchart: {curve: 'linear'}}); </script>]]></content>
       <tags>
         <tag>Codec</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>错误码国际化总结</title>
-    <url>/code/error-msg-i18n/</url>
-    <content><![CDATA[<h1><span id="cuo-wu-xin-xi-wu-mo-ban-bian-liang">错误信息无模板变量</span><a href="#cuo-wu-xin-xi-wu-mo-ban-bian-liang" class="header-anchor">#</a></h1><p>假设我们的错误信息返回如下</p>
-<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">HTTP/1.1 200 OK</span><br><span class="line">&#123;&quot;error_code&quot;: &quot;IEEE.754&quot;, &quot;error_msg&quot;: &quot;IEE 754 error&quot;&#125;</span><br></pre></td></tr></table></figure>
-
-<p>无模板变量的错误信息国际化，可以直接在前端对整体字符串根据错误码进行静态国际化。</p>
-<figure class="highlight typescript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// catch the error code first</span></span><br><span class="line"><span class="keyword">const</span> error_code = body.<span class="property">error_code</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> error_msg_map = &#123;</span><br><span class="line">    <span class="string">&quot;IEEE.754&quot;</span>: &#123;</span><br><span class="line">        <span class="string">&quot;en&quot;</span>: <span class="string">&quot;IEE 754 error&quot;</span>,</span><br><span class="line">        <span class="string">&quot;zh&quot;</span>: <span class="string">&quot;IEE 754 错误&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> error_msg = error_msg_map[error_code][lang]</span><br></pre></td></tr></table></figure>
-
-<h1><span id="cuo-wu-xin-xi-bao-han-mo-ban-bian-liang">错误信息包含模板变量</span><a href="#cuo-wu-xin-xi-bao-han-mo-ban-bian-liang" class="header-anchor">#</a></h1><p>假设我们的错误信息返回如下</p>
-<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">HTTP/1.1 200 OK</span><br><span class="line">&#123;&quot;error_code&quot;: &quot;IEEE.754&quot;, &quot;error_msg&quot;: &quot;IEE 754 NbN error, do you mean Nan?&quot;&#125;</span><br></pre></td></tr></table></figure>
-
-<p>包含模板变量的错误信息国际化，可以在前端通过正则表达式提取，并代入到中文字符串模板中实现。如示例代码</p>
-<figure class="highlight typescript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// catch the error code first</span></span><br><span class="line"><span class="keyword">const</span> error_code = body.<span class="property">code</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> error_msg_capture_map = &#123;</span><br><span class="line">    <span class="string">&quot;IEEE.754&quot;</span>: <span class="string">&quot;/IEE 754 (\w+) error, do you mean (\w+)?/&quot;</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> error_msg_template_map = &#123;</span><br><span class="line">    <span class="string">&quot;IEEE.754&quot;</span>: &#123;</span><br><span class="line">        <span class="string">&quot;en&quot;</span>: <span class="string">&quot;IEE 754 &#123;&#123;var1&#125;&#125; error, do you mean &#123;&#123;var2&#125;&#125;?&quot;</span>,</span><br><span class="line">        <span class="string">&quot;zh&quot;</span>: <span class="string">&quot;IEE 754 &#123;&#123;var1&#125;&#125; 错误，你是指 &#123;&#123;var2&#125;&#125; 吗？&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> matches = error_msg_capture_map[error_code].<span class="title function_">exec</span>(body.<span class="property">error_msg</span>);</span><br><span class="line"><span class="keyword">const</span> variables = matches.<span class="title function_">slice</span>(<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> error_msg = error_msg_template_map[error_code][lang];</span><br><span class="line">variables.<span class="title function_">forEach</span>(<span class="function">(<span class="params">value, index</span>) =&gt;</span> &#123;</span><br><span class="line">    error_msg = error_msg.<span class="title function_">replace</span>(<span class="string">`&#123;&#123;var<span class="subst">$&#123;index + <span class="number">1</span>&#125;</span>&#125;&#125;`</span>, value);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
-]]></content>
-      <tags>
-        <tag>Code</tag>
       </tags>
   </entry>
   <entry>
@@ -1674,6 +1674,94 @@
       </tags>
   </entry>
   <entry>
+    <title>揭秘MySQL TLS：通过抓包了解真实的加密通信</title>
+    <url>/mysql/mysql-default-tls/</url>
+    <content><![CDATA[<p>你的mysql客户端和服务端之间开启tls了吗？你的回答可能是No，我没有申请证书，也没有开启mysql客户端，服务端的tls配置。</p>
+<p>可是当你抓取了3306 mysql的端口之后，你会发现，抓出来的包里居然有Client Hello、Server Hello这样的典型TLS报文。</p>
+<p><img src="/mysql/mysql-default-tls/mysql-tls-pcap.png" alt="mysql-tls-pcap"></p>
+<p>其实，Mysql的通信是否加密，是由客户端和服务端共同协商是否开启的，客户端与服务端都处于默认配置下的话，有些类似于StartTls。</p>
+<h2><span id="fu-wu-duan-ce">服务端侧</span><a href="#fu-wu-duan-ce" class="header-anchor">#</a></h2><p>在连接建立时，Mysql服务端会返回一个<strong>Server Greeting</strong>，其中包含了一些关于服务端的信息，比如协议版本、Mysql版本等等。在其中有一个flag的集合字段，名为<br><strong>Capabilities Flag</strong>，顾名思义，这就是用来做兼容性，或者说特性开关的flag，大小为2个字节，其中的第12位，代表着<strong>CLIENT_SSL</strong><br>，如果设置为1，那代表着如果客户端具备能力，服务端可以在后面的会话中切换到TLS。可以看到里面还有一些其他的flag，事务、长密码等等相关的兼容性开关。</p>
+<p><img src="/mysql/mysql-default-tls/mysql-pcap-capabilities-flag.png" alt="mysql-pcap-capabilities-flag"></p>
+<p>我们可以测试一下设置为0的行为，只需要在my.cnf中添加</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">&quot;ssl=0&quot;</span> &gt;&gt; /etc/my.cnf</span><br></pre></td></tr></table></figure>
+
+<p>重启mysql。再度进行抓包，就发现没有tls的报文了，都是在使用明文进行通信了。</p>
+<p><img src="/mysql/mysql-default-tls/mysql-plain-pcap.png" alt="mysql-plain-pcap"></p>
+<h2><span id="ke-hu-duan-ce">客户端侧</span><a href="#ke-hu-duan-ce" class="header-anchor">#</a></h2><p>这个协商过程也可以在客户端进行控制，客户端对应的参数是sslMode，可以设置为DISABLED、PREFERRED、REQUIRED、VERIFY_CA、VERIFY_IDENTITY，分别代表不使用ssl、优先使用ssl、必须使用ssl、验证CA、验证身份。默认的行为是PREFERRED，example:</p>
+<p>比如配置sslMode为DISABLED，那么客户端就不会使用ssl进行通信，而是使用明文。</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">r2dbc:mysql://localhost:3306/test?sslMode=DISABLED</span><br></pre></td></tr></table></figure>
+
+<p><img src="/mysql-client-disable-tls.png" alt="mysql-client-disable-tls"></p>
+<h2><span id="zong-jie">总结</span><a href="#zong-jie" class="header-anchor">#</a></h2><table>
+<thead>
+<tr>
+<th>客户端</th>
+<th>服务端</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>DISABLED</td>
+<td>ssl&#x3D;0</td>
+<td>PLAIN</td>
+</tr>
+<tr>
+<td>DISABLED</td>
+<td>ssl&#x3D;1</td>
+<td>PLAIN</td>
+</tr>
+<tr>
+<td>PREFERRED</td>
+<td>ssl&#x3D;0</td>
+<td>PLAIN</td>
+</tr>
+<tr>
+<td>PREFERRED</td>
+<td>ssl&#x3D;1</td>
+<td>TLS</td>
+</tr>
+<tr>
+<td>REQUIRED</td>
+<td>ssl&#x3D;0</td>
+<td>Fail</td>
+</tr>
+<tr>
+<td>REQUIRED</td>
+<td>ssl&#x3D;1</td>
+<td>TLS</td>
+</tr>
+<tr>
+<td>VERIFY_CA</td>
+<td>ssl&#x3D;0</td>
+<td>Fail</td>
+</tr>
+<tr>
+<td>VERIFY_CA</td>
+<td>ssl&#x3D;1 + CA配置</td>
+<td>TLS，客户端验证证书</td>
+</tr>
+<tr>
+<td>VERIFY_IDENTITY</td>
+<td>ssl&#x3D;0</td>
+<td>Fail</td>
+</tr>
+<tr>
+<td>VERIFY_IDENTITY</td>
+<td>ssl&#x3D;1 + CA配置</td>
+<td>TLS，客户端验证证书和域名</td>
+</tr>
+</tbody></table>
+<p>注：</p>
+<ul>
+<li>VERIFY_CA：确保服务器证书由受信任的CA签发，但不验证证书的主机名或IP地址。</li>
+<li>VERIFY_IDENTITY：不仅验证证书的CA签发，还额外验证证书的主机名或IP地址与服务器的实际地址是否一致。</li>
+</ul>
+]]></content>
+      <tags>
+        <tag>mysql</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Mysql是如何隐藏ps命令行中的密码的</title>
     <url>/mysql/mysql-ps-password/</url>
     <content><![CDATA[<h2><span id="can-kao">参考</span><a href="#can-kao" class="header-anchor">#</a></h2><ul>
@@ -1699,73 +1787,6 @@
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">if (argument) &#123;</span><br><span class="line">  char *start = argument;</span><br><span class="line">  my_free(opt_password);</span><br><span class="line">  opt_password = my_strdup(PSI_NOT_INSTRUMENTED, argument, MYF(MY_FAE));</span><br><span class="line">  while (*argument) *argument++ = &#x27;x&#x27;;  // Destroy argument</span><br><span class="line">  if (*start) start[1] = 0;</span><br><span class="line">  tty_password = false;</span><br><span class="line">&#125; else</span><br><span class="line">  tty_password = true;</span><br></pre></td></tr></table></figure>
 
 <p>PS: 后面，我还在OSX上用go程序尝试修改参数，估摸go程序的args传入是值拷贝，修改完成之后args没有生效，看来这个黑科技只有c程序能使用呀。</p>
-]]></content>
-      <tags>
-        <tag>mysql</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>揭秘MySQL TLS：通过抓包了解真实的加密通信</title>
-    <url>/mysql/mysql-default-tls/</url>
-    <content><![CDATA[<p>你的mysql客户端和服务端之间开启tls了吗？你的回答可能是No，我没有申请证书，也没有开启mysql客户端，服务端的tls配置。</p>
-<p>可是当你抓取了3306 mysql的端口之后，你会发现，抓出来的包里居然有Client Hello、Server Hello这样的典型TLS报文。</p>
-<p><img src="/mysql/mysql-default-tls/mysql-tls-pcap.png" alt="mysql-tls-pcap"></p>
-<p>其实，Mysql的通信是否加密，是由客户端和服务端共同协商是否开启的，客户端与服务端都处于默认配置下的话，有些类似于StartTls。</p>
-<h2><span id="fu-wu-duan-ce">服务端侧</span><a href="#fu-wu-duan-ce" class="header-anchor">#</a></h2><p>在连接建立时，Mysql服务端会返回一个<strong>Server Greeting</strong>，其中包含了一些关于服务端的信息，比如协议版本、Mysql版本等等。在其中有一个flag的集合字段，名为<br><strong>Capabilities Flag</strong>，顾名思义，这就是用来做兼容性，或者说特性开关的flag，大小为2个字节，其中的第12位，代表着<strong>CLIENT_SSL</strong><br>，如果设置为1，那代表着如果客户端具备能力，服务端可以在后面的会话中切换到TLS。可以看到里面还有一些其他的flag，事务、长密码等等相关的兼容性开关。</p>
-<p><img src="/mysql/mysql-default-tls/mysql-pcap-capabilities-flag.png" alt="mysql-pcap-capabilities-flag"></p>
-<p>我们可以测试一下设置为0的行为，只需要在my.cnf中添加</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">&quot;ssl=0&quot;</span> &gt;&gt; /etc/my.cnf</span><br></pre></td></tr></table></figure>
-
-<p>重启mysql。再度进行抓包，就发现没有tls的报文了，都是在使用明文进行通信了。</p>
-<p><img src="/mysql/mysql-default-tls/mysql-plain-pcap.png" alt="mysql-plain-pcap"></p>
-<h2><span id="ke-hu-duan-ce">客户端侧</span><a href="#ke-hu-duan-ce" class="header-anchor">#</a></h2><p>这个协商过程也可以在客户端进行控制，客户端对应的参数是sslMode，可以设置为DISABLED、PREFERRED、REQUIRED、VERIFY_CA、VERIFY_IDENTITY，分别代表不使用ssl、优先使用ssl、必须使用ssl、验证CA、验证身份。example:</p>
-<p>比如配置sslMode为DISABLED，那么客户端就不会使用ssl进行通信，而是使用明文。</p>
-<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">r2dbc:mysql://localhost:3306/test?sslMode=DISABLED</span><br></pre></td></tr></table></figure>
-
-<h2><span id="zong-jie">总结</span><a href="#zong-jie" class="header-anchor">#</a></h2><table>
-<thead>
-<tr>
-<th>客户端</th>
-<th>服务端</th>
-<th>结果</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>DISABLED</td>
-<td>ssl&#x3D;1</td>
-<td>PLAIN</td>
-</tr>
-<tr>
-<td>PREFERRED</td>
-<td>ssl&#x3D;1</td>
-<td>TLS</td>
-</tr>
-<tr>
-<td>REQUIRED</td>
-<td>ssl&#x3D;1</td>
-<td>TLS</td>
-</tr>
-<tr>
-<td>VERIFY_CA</td>
-<td>ssl&#x3D;1 + CA配置</td>
-<td>TLS，客户端验证服务端证书的CA</td>
-</tr>
-<tr>
-<td>VERIFY_IDENTITY</td>
-<td>ssl&#x3D;1 + CA配置</td>
-<td>TLS，客户端验证服务端证书和身份</td>
-</tr>
-<tr>
-<td>ANY</td>
-<td>ssl&#x3D;0</td>
-<td>PLAIN</td>
-</tr>
-</tbody></table>
-<p>注：</p>
-<ul>
-<li>VERIFY_CA：确保服务器证书由受信任的CA签发，但不验证证书的主机名或IP地址。</li>
-<li>VERIFY_IDENTITY：不仅验证证书的CA签发，还额外验证证书的主机名或IP地址与服务器的实际地址是否一致。</li>
-</ul>
 ]]></content>
       <tags>
         <tag>mysql</tag>
@@ -1951,6 +1972,67 @@
       </tags>
   </entry>
   <entry>
+    <title>prometheus tsdb索引布局及查询流程</title>
+    <url>/prometheus/prometheus-tsdb-index/</url>
+    <content><![CDATA[<h1><span id="prometheus-ci-pan-bu-ju">prometheus 磁盘布局</span><a href="#prometheus-ci-pan-bu-ju" class="header-anchor">#</a></h1><p>采集到的数据每两个小时形成一个block。每个block由一个目录组成，并存放在data路径下。该目录包含一个包含该时间窗口的所有时间序列样本的块子目录、一个元数据文件和一个索引文件（将metric_name和label索引到目录下的时间序列）。 chunks 目录中的样本默认组合成一个或多个段文件，每个段文件最大为 512MB。 当通过 API 删除系列时，删除记录存储在单独的 tombstone 文件中（而不是立即从块段中删除数据）。</p>
+<p>当前正在写入的块保存在内存中，没有完全持久化。通过WAL日志来防止崩溃丢失数据。预写日志分为数节(segments)保存在wal文件夹中。这些文件包含尚未压缩的原始数据； 因此它们比常规块文件大得多。 Prometheus 将至少保留三个预写日志文件。在高流量下，会保留三个以上的 WAL 文件，以便保留至少两个小时的原始数据。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./data</span><br><span class="line">├── 01BKGV7JBM69T2G1BGBGM6KB12</span><br><span class="line">│   └── meta.json</span><br><span class="line">├── 01BKGTZQ1SYQJTR4PB43C8PD98</span><br><span class="line">│   ├── chunks</span><br><span class="line">│   │   └── 000001</span><br><span class="line">│   ├── tombstones</span><br><span class="line">│   ├── index</span><br><span class="line">│   └── meta.json</span><br><span class="line">├── 01BKGTZQ1HHWHV8FBJXW1Y3W0K</span><br><span class="line">│   └── meta.json</span><br><span class="line">├── 01BKGV7JC0RY8A6MACW02A2PJD</span><br><span class="line">│   ├── chunks</span><br><span class="line">│   │   └── 000001</span><br><span class="line">│   ├── tombstones</span><br><span class="line">│   ├── index</span><br><span class="line">│   └── meta.json</span><br><span class="line">├── chunks_head</span><br><span class="line">│   └── 000001</span><br><span class="line">└── wal</span><br><span class="line">    ├── 000000002</span><br><span class="line">    └── checkpoint.00000001</span><br><span class="line">        └── 00000000</span><br></pre></td></tr></table></figure>
+
+<h2><span id="prometheus-gai-nian">prometheus概念</span><a href="#prometheus-gai-nian" class="header-anchor">#</a></h2><ul>
+<li>Label: 标签，string格式的kv组合</li>
+<li>series: 时间序列，label的组合</li>
+<li>chunk: 时间，value的数据</li>
+</ul>
+<h2><span id="prometheus-suo-yin-ge-shi">prometheus索引格式</span><a href="#prometheus-suo-yin-ge-shi" class="header-anchor">#</a></h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">┌────────────────────────────┬─────────────────────┐</span><br><span class="line">│ magic(0xBAAAD700) &lt;4b&gt;     │ version(1) &lt;1 byte&gt; │</span><br><span class="line">├────────────────────────────┴─────────────────────┤</span><br><span class="line">│ ┌──────────────────────────────────────────────┐ │</span><br><span class="line">│ │                 Symbol Table                 │ │</span><br><span class="line">│ ├──────────────────────────────────────────────┤ │</span><br><span class="line">│ │                    Series                    │ │</span><br><span class="line">│ ├──────────────────────────────────────────────┤ │</span><br><span class="line">│ │                   Postings 1                 │ │</span><br><span class="line">│ ├──────────────────────────────────────────────┤ │</span><br><span class="line">│ │                      ...                     │ │</span><br><span class="line">│ ├──────────────────────────────────────────────┤ │</span><br><span class="line">│ │                   Postings N                 │ │</span><br><span class="line">│ ├──────────────────────────────────────────────┤ │</span><br><span class="line">│ │             Postings Offset Table            │ │</span><br><span class="line">│ ├──────────────────────────────────────────────┤ │</span><br><span class="line">│ │                      TOC                     │ │</span><br><span class="line">│ └──────────────────────────────────────────────┘ │</span><br><span class="line">└──────────────────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
+
+<p>写入索引时，可以在上面列出的主要部分之间添加任意数量的0字节作为填充。顺序扫描文件时，必须跳过部分间的任意0字节。</p>
+<p>下面描述的大部分部分都以 len 字段开头。 它总是指定就在尾随 CRC32 校验和之前的字节数。 校验和就计算这些字节的校验和（不包含len字段）</p>
+<h3><span id="fu-hao-biao">符号表</span><a href="#fu-hao-biao" class="header-anchor">#</a></h3><p>符号表包含已存储序列的标签对中出现的重复数据删除字符串的排序列表。 它们可以从后续部分中引用，并显着减少总索引大小。</p>
+<p>该部分包含一系列字符串entry，每个entry都以字符串的原始字节长度为前缀。 所有字符串均采用 utf-8 编码。 字符串由顺序索引引用。 字符串按字典顺序升序排序。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">┌────────────────────┬─────────────────────┐</span><br><span class="line">│ len &lt;4b&gt;           │ #symbols &lt;4b&gt;       │</span><br><span class="line">├────────────────────┴─────────────────────┤</span><br><span class="line">│ ┌──────────────────────┬───────────────┐ │</span><br><span class="line">│ │ len(str_1) &lt;uvarint&gt; │ str_1 &lt;bytes&gt; │ │</span><br><span class="line">│ ├──────────────────────┴───────────────┤ │</span><br><span class="line">│ │                . . .                 │ │</span><br><span class="line">│ ├──────────────────────┬───────────────┤ │</span><br><span class="line">│ │ len(str_n) &lt;uvarint&gt; │ str_n &lt;bytes&gt; │ │</span><br><span class="line">│ └──────────────────────┴───────────────┘ │</span><br><span class="line">├──────────────────────────────────────────┤</span><br><span class="line">│ CRC32 &lt;4b&gt;                               │</span><br><span class="line">└──────────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
+<h3><span id="xu-lie-series">序列 series</span><a href="#xu-lie-series" class="header-anchor">#</a></h3><p>保存一个具体的时间序列，其中包含系列的label集合和block中的chunks。</p>
+<p>每个series都是16字节对齐。series的id为偏移量除以16。series ID 的排序列表也就是series label的字典排序列表。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">┌───────────────────────────────────────┐</span><br><span class="line">│ ┌───────────────────────────────────┐ │</span><br><span class="line">│ │   series_1                        │ │</span><br><span class="line">│ ├───────────────────────────────────┤ │</span><br><span class="line">│ │                 . . .             │ │</span><br><span class="line">│ ├───────────────────────────────────┤ │</span><br><span class="line">│ │   series_n                        │ │</span><br><span class="line">│ └───────────────────────────────────┘ │</span><br><span class="line">└───────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
+
+<p>每一个series先保存label的数量，然后是包含label键值对的引用。 标签对按字典顺序排序。然后是series涉及的索引块的个数，然后是一系列元数据条目，其中包含块的最小 (mint) 和最大 (maxt) 时间戳以及对其在块文件中位置的引用。<code>mint</code> 是第一个样本的时间，<code>maxt</code> 是块中最后一个样本的时间。 在索引中保存时间范围数据, 允许按照时间范围删除数据时，如果时间范围匹配，不需要直接访问时间数据。</p>
+<p>空间大小优化: 第一个块的 <code>mint</code> 被存储，它的 <code>maxt</code> 被存储为一个增量，并且 <code>mint</code> 和 <code>maxt</code> 被编码为后续块的前一个时间的增量。 类似的，第一个chunk的引用被存储，下一个引用被存储为前一个chunk的增量。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">┌──────────────────────────────────────────────────────────────────────────┐</span><br><span class="line">│ len &lt;uvarint&gt;                                                            │</span><br><span class="line">├──────────────────────────────────────────────────────────────────────────┤</span><br><span class="line">│ ┌──────────────────────────────────────────────────────────────────────┐ │</span><br><span class="line">│ │                     labels count &lt;uvarint64&gt;                         │ │</span><br><span class="line">│ ├──────────────────────────────────────────────────────────────────────┤ │</span><br><span class="line">│ │              ┌────────────────────────────────────────────┐          │ │</span><br><span class="line">│ │              │ ref(l_i.name) &lt;uvarint32&gt;                  │          │ │</span><br><span class="line">│ │              ├────────────────────────────────────────────┤          │ │</span><br><span class="line">│ │              │ ref(l_i.value) &lt;uvarint32&gt;                 │          │ │</span><br><span class="line">│ │              └────────────────────────────────────────────┘          │ │</span><br><span class="line">│ │                             ...                                      │ │</span><br><span class="line">│ ├──────────────────────────────────────────────────────────────────────┤ │</span><br><span class="line">│ │                     chunks count &lt;uvarint64&gt;                         │ │</span><br><span class="line">│ ├──────────────────────────────────────────────────────────────────────┤ │</span><br><span class="line">│ │              ┌────────────────────────────────────────────┐          │ │</span><br><span class="line">│ │              │ c_0.mint &lt;varint64&gt;                        │          │ │</span><br><span class="line">│ │              ├────────────────────────────────────────────┤          │ │</span><br><span class="line">│ │              │ c_0.maxt - c_0.mint &lt;uvarint64&gt;            │          │ │</span><br><span class="line">│ │              ├────────────────────────────────────────────┤          │ │</span><br><span class="line">│ │              │ ref(c_0.data) &lt;uvarint64&gt;                  │          │ │</span><br><span class="line">│ │              └────────────────────────────────────────────┘          │ │</span><br><span class="line">│ │              ┌────────────────────────────────────────────┐          │ │</span><br><span class="line">│ │              │ c_i.mint - c_i-1.maxt &lt;uvarint64&gt;          │          │ │</span><br><span class="line">│ │              ├────────────────────────────────────────────┤          │ │</span><br><span class="line">│ │              │ c_i.maxt - c_i.mint &lt;uvarint64&gt;            │          │ │</span><br><span class="line">│ │              ├────────────────────────────────────────────┤          │ │</span><br><span class="line">│ │              │ ref(c_i.data) - ref(c_i-1.data) &lt;varint64&gt; │          │ │</span><br><span class="line">│ │              └────────────────────────────────────────────┘          │ │</span><br><span class="line">│ │                             ...                                      │ │</span><br><span class="line">│ └──────────────────────────────────────────────────────────────────────┘ │</span><br><span class="line">├──────────────────────────────────────────────────────────────────────────┤</span><br><span class="line">│ CRC32 &lt;4b&gt;                                                               │</span><br><span class="line">└──────────────────────────────────────────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
+
+<h3><span id="posting">Posting</span><a href="#posting" class="header-anchor">#</a></h3><p>Posting这一节存放着关于series引用的单调递增列表，简单来说就是存放id和时间序列的对应关系</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">┌────────────────────┬────────────────────┐</span><br><span class="line">│ len &lt;4b&gt;           │ #entries &lt;4b&gt;      │</span><br><span class="line">├────────────────────┴────────────────────┤</span><br><span class="line">│ ┌─────────────────────────────────────┐ │</span><br><span class="line">│ │ ref(series_1) &lt;4b&gt;                  │ │</span><br><span class="line">│ ├─────────────────────────────────────┤ │</span><br><span class="line">│ │ ...                                 │ │</span><br><span class="line">│ ├─────────────────────────────────────┤ │</span><br><span class="line">│ │ ref(series_n) &lt;4b&gt;                  │ │</span><br><span class="line">│ └─────────────────────────────────────┘ │</span><br><span class="line">├─────────────────────────────────────────┤</span><br><span class="line">│ CRC32 &lt;4b&gt;                              │</span><br><span class="line">└─────────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
+
+<p>Posting sections的顺序由<code>postings offset table</code>决定。</p>
+<h3><span id="posting-offset-table">Posting Offset Table</span><a href="#posting-offset-table" class="header-anchor">#</a></h3><p><code>postings offset table</code>包含着一系列<code>posting offset entry</code>，根据label的名称和值排序。每一个<code>posting offset entry</code>存放着label的键值对以及在<code>posting sections</code>中其series列表的偏移量。用来跟踪<code>posting sections</code>。当index文件加载时，它们将部分加载到内存中。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">┌─────────────────────┬──────────────────────┐</span><br><span class="line">│ len &lt;4b&gt;            │ #entries &lt;4b&gt;        │</span><br><span class="line">├─────────────────────┴──────────────────────┤</span><br><span class="line">│ ┌────────────────────────────────────────┐ │</span><br><span class="line">│ │  n = 2 &lt;1b&gt;                            │ │</span><br><span class="line">│ ├──────────────────────┬─────────────────┤ │</span><br><span class="line">│ │ len(name) &lt;uvarint&gt;  │ name &lt;bytes&gt;    │ │</span><br><span class="line">│ ├──────────────────────┼─────────────────┤ │</span><br><span class="line">│ │ len(value) &lt;uvarint&gt; │ value &lt;bytes&gt;   │ │</span><br><span class="line">│ ├──────────────────────┴─────────────────┤ │</span><br><span class="line">│ │  offset &lt;uvarint64&gt;                    │ │</span><br><span class="line">│ └────────────────────────────────────────┘ │</span><br><span class="line">│                    . . .                   │</span><br><span class="line">├────────────────────────────────────────────┤</span><br><span class="line">│  CRC32 &lt;4b&gt;                                │</span><br><span class="line">└────────────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
+
+<h3><span id="toc">TOC</span><a href="#toc" class="header-anchor">#</a></h3><p><code>table of contents</code>是整个索引的入口点，并指向文件中的各个部分。 如果引用为零，则表示相应的部分不存在，查找时应返回空结果。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">┌─────────────────────────────────────────┐</span><br><span class="line">│ ref(symbols) &lt;8b&gt;                       │</span><br><span class="line">├─────────────────────────────────────────┤</span><br><span class="line">│ ref(series) &lt;8b&gt;                        │</span><br><span class="line">├─────────────────────────────────────────┤</span><br><span class="line">│ ref(label indices start) &lt;8b&gt;           │</span><br><span class="line">├─────────────────────────────────────────┤</span><br><span class="line">│ ref(label offset table) &lt;8b&gt;            │</span><br><span class="line">├─────────────────────────────────────────┤</span><br><span class="line">│ ref(postings start) &lt;8b&gt;                │</span><br><span class="line">├─────────────────────────────────────────┤</span><br><span class="line">│ ref(postings offset table) &lt;8b&gt;         │</span><br><span class="line">├─────────────────────────────────────────┤</span><br><span class="line">│ CRC32 &lt;4b&gt;                              │</span><br><span class="line">└─────────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
+
+<h2><span id="chunks-ci-pan-ge-shi">chunks 磁盘格式</span><a href="#chunks-ci-pan-ge-shi" class="header-anchor">#</a></h2><p>chunks文件创建在<strong>block</strong>中的<code>chunks/</code>目录中。 每个段文件的最大大小为 512MB。<br>文件中的chunk由uint64的索引组织，索引低四位为文件内偏移，高四位为段序列号。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">┌──────────────────────────────┐</span><br><span class="line">│  magic(0x85BD40DD) &lt;4 byte&gt;  │</span><br><span class="line">├──────────────────────────────┤</span><br><span class="line">│    version(1) &lt;1 byte&gt;       │</span><br><span class="line">├──────────────────────────────┤</span><br><span class="line">│    padding(0) &lt;3 byte&gt;       │</span><br><span class="line">├──────────────────────────────┤</span><br><span class="line">│ ┌──────────────────────────┐ │</span><br><span class="line">│ │         Chunk 1          │ │</span><br><span class="line">│ ├──────────────────────────┤ │</span><br><span class="line">│ │          ...             │ │</span><br><span class="line">│ ├──────────────────────────┤ │</span><br><span class="line">│ │         Chunk N          │ │</span><br><span class="line">│ └──────────────────────────┘ │</span><br><span class="line">└──────────────────────────────┘</span><br></pre></td></tr></table></figure>
+
+<h2><span id="chunks-zhong-de-chunk-ge-shi">chunks中的Chunk格式</span><a href="#chunks-zhong-de-chunk-ge-shi" class="header-anchor">#</a></h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">┌───────────────┬───────────────────┬──────────────┬────────────────┐</span><br><span class="line">│ len &lt;uvarint&gt; │ encoding &lt;1 byte&gt; │ data &lt;bytes&gt; │ CRC32 &lt;4 byte&gt; │</span><br><span class="line">└───────────────┴───────────────────┴──────────────┴────────────────┘</span><br></pre></td></tr></table></figure>
+
+<h1><span id="cha-xun-shu-ju">查询数据</span><a href="#cha-xun-shu-ju" class="header-anchor">#</a></h1><h2><span id="code">code</span><a href="#code" class="header-anchor">#</a></h2><p>查询的prometheus方法签名</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line">Select(sortSeries <span class="type">bool</span>, hints *SelectHints, matchers ...*labels.Matcher) SeriesSet</span><br></pre></td></tr></table></figure>
+
+<p>支持从block中，remote等各种地方查询获取数据</p>
+<p>prometheus会在内存中维护一个数据结构</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// Map of LabelName to a list of some LabelValues&#x27;s position in the offset table.</span></span><br><span class="line"><span class="comment">// The first and last values for each name are always present.</span></span><br><span class="line">postings <span class="keyword">map</span>[<span class="type">string</span>][]postingOffset</span><br></pre></td></tr></table></figure>
+
+<p>在内存中，保留每个label name，并且每n个保存label值，降低内存的占用。但是第一个和最后一个值总是保存在内存中。</p>
+<h2><span id="cha-xun-shu-ju-liu-cheng">查询数据流程</span><a href="#cha-xun-shu-ju-liu-cheng" class="header-anchor">#</a></h2><p><img src="/prometheus/prometheus-tsdb-index/prometheus-tsdb-index.png" alt="prometheus-tsdb-index"></p>
+<h1><span id="can-kao-zi-liao">参考资料</span><a href="#can-kao-zi-liao" class="header-anchor">#</a></h1><ul>
+<li><a href="https://prometheus.io/docs/prometheus/latest/storage/">https://prometheus.io/docs/prometheus/latest/storage/</a></li>
+<li><a href="https://github.com/prometheus/prometheus/blob/release-2.37/tsdb/docs/format/README.md">https://github.com/prometheus/prometheus/blob/release-2.37/tsdb/docs/format/README.md</a></li>
+<li><a href="https://github.com/prometheus/prometheus/blob/release-2.37/tsdb/docs/format/index.md">https://github.com/prometheus/prometheus/blob/release-2.37/tsdb/docs/format/index.md</a></li>
+</ul>
+]]></content>
+      <tags>
+        <tag>prometheus</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Pulsar消息积压topic级别策略老化的两种方案</title>
     <url>/pulsar/pulsar-msg-topic-level-policy-aging/</url>
     <content><![CDATA[<p><code>Pulsar</code>像大多数消息中间件一样,支持按时间和大小对消息积压进行老化。但是默认的策略只能在namespace级别配置。本文将介绍如何在topic级别实现老化策略的两种方案。</p>
@@ -2018,67 +2100,6 @@
 ]]></content>
       <tags>
         <tag>pulsar</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>prometheus tsdb索引布局及查询流程</title>
-    <url>/prometheus/prometheus-tsdb-index/</url>
-    <content><![CDATA[<h1><span id="prometheus-ci-pan-bu-ju">prometheus 磁盘布局</span><a href="#prometheus-ci-pan-bu-ju" class="header-anchor">#</a></h1><p>采集到的数据每两个小时形成一个block。每个block由一个目录组成，并存放在data路径下。该目录包含一个包含该时间窗口的所有时间序列样本的块子目录、一个元数据文件和一个索引文件（将metric_name和label索引到目录下的时间序列）。 chunks 目录中的样本默认组合成一个或多个段文件，每个段文件最大为 512MB。 当通过 API 删除系列时，删除记录存储在单独的 tombstone 文件中（而不是立即从块段中删除数据）。</p>
-<p>当前正在写入的块保存在内存中，没有完全持久化。通过WAL日志来防止崩溃丢失数据。预写日志分为数节(segments)保存在wal文件夹中。这些文件包含尚未压缩的原始数据； 因此它们比常规块文件大得多。 Prometheus 将至少保留三个预写日志文件。在高流量下，会保留三个以上的 WAL 文件，以便保留至少两个小时的原始数据。</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./data</span><br><span class="line">├── 01BKGV7JBM69T2G1BGBGM6KB12</span><br><span class="line">│   └── meta.json</span><br><span class="line">├── 01BKGTZQ1SYQJTR4PB43C8PD98</span><br><span class="line">│   ├── chunks</span><br><span class="line">│   │   └── 000001</span><br><span class="line">│   ├── tombstones</span><br><span class="line">│   ├── index</span><br><span class="line">│   └── meta.json</span><br><span class="line">├── 01BKGTZQ1HHWHV8FBJXW1Y3W0K</span><br><span class="line">│   └── meta.json</span><br><span class="line">├── 01BKGV7JC0RY8A6MACW02A2PJD</span><br><span class="line">│   ├── chunks</span><br><span class="line">│   │   └── 000001</span><br><span class="line">│   ├── tombstones</span><br><span class="line">│   ├── index</span><br><span class="line">│   └── meta.json</span><br><span class="line">├── chunks_head</span><br><span class="line">│   └── 000001</span><br><span class="line">└── wal</span><br><span class="line">    ├── 000000002</span><br><span class="line">    └── checkpoint.00000001</span><br><span class="line">        └── 00000000</span><br></pre></td></tr></table></figure>
-
-<h2><span id="prometheus-gai-nian">prometheus概念</span><a href="#prometheus-gai-nian" class="header-anchor">#</a></h2><ul>
-<li>Label: 标签，string格式的kv组合</li>
-<li>series: 时间序列，label的组合</li>
-<li>chunk: 时间，value的数据</li>
-</ul>
-<h2><span id="prometheus-suo-yin-ge-shi">prometheus索引格式</span><a href="#prometheus-suo-yin-ge-shi" class="header-anchor">#</a></h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">┌────────────────────────────┬─────────────────────┐</span><br><span class="line">│ magic(0xBAAAD700) &lt;4b&gt;     │ version(1) &lt;1 byte&gt; │</span><br><span class="line">├────────────────────────────┴─────────────────────┤</span><br><span class="line">│ ┌──────────────────────────────────────────────┐ │</span><br><span class="line">│ │                 Symbol Table                 │ │</span><br><span class="line">│ ├──────────────────────────────────────────────┤ │</span><br><span class="line">│ │                    Series                    │ │</span><br><span class="line">│ ├──────────────────────────────────────────────┤ │</span><br><span class="line">│ │                   Postings 1                 │ │</span><br><span class="line">│ ├──────────────────────────────────────────────┤ │</span><br><span class="line">│ │                      ...                     │ │</span><br><span class="line">│ ├──────────────────────────────────────────────┤ │</span><br><span class="line">│ │                   Postings N                 │ │</span><br><span class="line">│ ├──────────────────────────────────────────────┤ │</span><br><span class="line">│ │             Postings Offset Table            │ │</span><br><span class="line">│ ├──────────────────────────────────────────────┤ │</span><br><span class="line">│ │                      TOC                     │ │</span><br><span class="line">│ └──────────────────────────────────────────────┘ │</span><br><span class="line">└──────────────────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
-
-<p>写入索引时，可以在上面列出的主要部分之间添加任意数量的0字节作为填充。顺序扫描文件时，必须跳过部分间的任意0字节。</p>
-<p>下面描述的大部分部分都以 len 字段开头。 它总是指定就在尾随 CRC32 校验和之前的字节数。 校验和就计算这些字节的校验和（不包含len字段）</p>
-<h3><span id="fu-hao-biao">符号表</span><a href="#fu-hao-biao" class="header-anchor">#</a></h3><p>符号表包含已存储序列的标签对中出现的重复数据删除字符串的排序列表。 它们可以从后续部分中引用，并显着减少总索引大小。</p>
-<p>该部分包含一系列字符串entry，每个entry都以字符串的原始字节长度为前缀。 所有字符串均采用 utf-8 编码。 字符串由顺序索引引用。 字符串按字典顺序升序排序。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">┌────────────────────┬─────────────────────┐</span><br><span class="line">│ len &lt;4b&gt;           │ #symbols &lt;4b&gt;       │</span><br><span class="line">├────────────────────┴─────────────────────┤</span><br><span class="line">│ ┌──────────────────────┬───────────────┐ │</span><br><span class="line">│ │ len(str_1) &lt;uvarint&gt; │ str_1 &lt;bytes&gt; │ │</span><br><span class="line">│ ├──────────────────────┴───────────────┤ │</span><br><span class="line">│ │                . . .                 │ │</span><br><span class="line">│ ├──────────────────────┬───────────────┤ │</span><br><span class="line">│ │ len(str_n) &lt;uvarint&gt; │ str_n &lt;bytes&gt; │ │</span><br><span class="line">│ └──────────────────────┴───────────────┘ │</span><br><span class="line">├──────────────────────────────────────────┤</span><br><span class="line">│ CRC32 &lt;4b&gt;                               │</span><br><span class="line">└──────────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
-<h3><span id="xu-lie-series">序列 series</span><a href="#xu-lie-series" class="header-anchor">#</a></h3><p>保存一个具体的时间序列，其中包含系列的label集合和block中的chunks。</p>
-<p>每个series都是16字节对齐。series的id为偏移量除以16。series ID 的排序列表也就是series label的字典排序列表。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">┌───────────────────────────────────────┐</span><br><span class="line">│ ┌───────────────────────────────────┐ │</span><br><span class="line">│ │   series_1                        │ │</span><br><span class="line">│ ├───────────────────────────────────┤ │</span><br><span class="line">│ │                 . . .             │ │</span><br><span class="line">│ ├───────────────────────────────────┤ │</span><br><span class="line">│ │   series_n                        │ │</span><br><span class="line">│ └───────────────────────────────────┘ │</span><br><span class="line">└───────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
-
-<p>每一个series先保存label的数量，然后是包含label键值对的引用。 标签对按字典顺序排序。然后是series涉及的索引块的个数，然后是一系列元数据条目，其中包含块的最小 (mint) 和最大 (maxt) 时间戳以及对其在块文件中位置的引用。<code>mint</code> 是第一个样本的时间，<code>maxt</code> 是块中最后一个样本的时间。 在索引中保存时间范围数据, 允许按照时间范围删除数据时，如果时间范围匹配，不需要直接访问时间数据。</p>
-<p>空间大小优化: 第一个块的 <code>mint</code> 被存储，它的 <code>maxt</code> 被存储为一个增量，并且 <code>mint</code> 和 <code>maxt</code> 被编码为后续块的前一个时间的增量。 类似的，第一个chunk的引用被存储，下一个引用被存储为前一个chunk的增量。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">┌──────────────────────────────────────────────────────────────────────────┐</span><br><span class="line">│ len &lt;uvarint&gt;                                                            │</span><br><span class="line">├──────────────────────────────────────────────────────────────────────────┤</span><br><span class="line">│ ┌──────────────────────────────────────────────────────────────────────┐ │</span><br><span class="line">│ │                     labels count &lt;uvarint64&gt;                         │ │</span><br><span class="line">│ ├──────────────────────────────────────────────────────────────────────┤ │</span><br><span class="line">│ │              ┌────────────────────────────────────────────┐          │ │</span><br><span class="line">│ │              │ ref(l_i.name) &lt;uvarint32&gt;                  │          │ │</span><br><span class="line">│ │              ├────────────────────────────────────────────┤          │ │</span><br><span class="line">│ │              │ ref(l_i.value) &lt;uvarint32&gt;                 │          │ │</span><br><span class="line">│ │              └────────────────────────────────────────────┘          │ │</span><br><span class="line">│ │                             ...                                      │ │</span><br><span class="line">│ ├──────────────────────────────────────────────────────────────────────┤ │</span><br><span class="line">│ │                     chunks count &lt;uvarint64&gt;                         │ │</span><br><span class="line">│ ├──────────────────────────────────────────────────────────────────────┤ │</span><br><span class="line">│ │              ┌────────────────────────────────────────────┐          │ │</span><br><span class="line">│ │              │ c_0.mint &lt;varint64&gt;                        │          │ │</span><br><span class="line">│ │              ├────────────────────────────────────────────┤          │ │</span><br><span class="line">│ │              │ c_0.maxt - c_0.mint &lt;uvarint64&gt;            │          │ │</span><br><span class="line">│ │              ├────────────────────────────────────────────┤          │ │</span><br><span class="line">│ │              │ ref(c_0.data) &lt;uvarint64&gt;                  │          │ │</span><br><span class="line">│ │              └────────────────────────────────────────────┘          │ │</span><br><span class="line">│ │              ┌────────────────────────────────────────────┐          │ │</span><br><span class="line">│ │              │ c_i.mint - c_i-1.maxt &lt;uvarint64&gt;          │          │ │</span><br><span class="line">│ │              ├────────────────────────────────────────────┤          │ │</span><br><span class="line">│ │              │ c_i.maxt - c_i.mint &lt;uvarint64&gt;            │          │ │</span><br><span class="line">│ │              ├────────────────────────────────────────────┤          │ │</span><br><span class="line">│ │              │ ref(c_i.data) - ref(c_i-1.data) &lt;varint64&gt; │          │ │</span><br><span class="line">│ │              └────────────────────────────────────────────┘          │ │</span><br><span class="line">│ │                             ...                                      │ │</span><br><span class="line">│ └──────────────────────────────────────────────────────────────────────┘ │</span><br><span class="line">├──────────────────────────────────────────────────────────────────────────┤</span><br><span class="line">│ CRC32 &lt;4b&gt;                                                               │</span><br><span class="line">└──────────────────────────────────────────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
-
-<h3><span id="posting">Posting</span><a href="#posting" class="header-anchor">#</a></h3><p>Posting这一节存放着关于series引用的单调递增列表，简单来说就是存放id和时间序列的对应关系</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">┌────────────────────┬────────────────────┐</span><br><span class="line">│ len &lt;4b&gt;           │ #entries &lt;4b&gt;      │</span><br><span class="line">├────────────────────┴────────────────────┤</span><br><span class="line">│ ┌─────────────────────────────────────┐ │</span><br><span class="line">│ │ ref(series_1) &lt;4b&gt;                  │ │</span><br><span class="line">│ ├─────────────────────────────────────┤ │</span><br><span class="line">│ │ ...                                 │ │</span><br><span class="line">│ ├─────────────────────────────────────┤ │</span><br><span class="line">│ │ ref(series_n) &lt;4b&gt;                  │ │</span><br><span class="line">│ └─────────────────────────────────────┘ │</span><br><span class="line">├─────────────────────────────────────────┤</span><br><span class="line">│ CRC32 &lt;4b&gt;                              │</span><br><span class="line">└─────────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
-
-<p>Posting sections的顺序由<code>postings offset table</code>决定。</p>
-<h3><span id="posting-offset-table">Posting Offset Table</span><a href="#posting-offset-table" class="header-anchor">#</a></h3><p><code>postings offset table</code>包含着一系列<code>posting offset entry</code>，根据label的名称和值排序。每一个<code>posting offset entry</code>存放着label的键值对以及在<code>posting sections</code>中其series列表的偏移量。用来跟踪<code>posting sections</code>。当index文件加载时，它们将部分加载到内存中。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">┌─────────────────────┬──────────────────────┐</span><br><span class="line">│ len &lt;4b&gt;            │ #entries &lt;4b&gt;        │</span><br><span class="line">├─────────────────────┴──────────────────────┤</span><br><span class="line">│ ┌────────────────────────────────────────┐ │</span><br><span class="line">│ │  n = 2 &lt;1b&gt;                            │ │</span><br><span class="line">│ ├──────────────────────┬─────────────────┤ │</span><br><span class="line">│ │ len(name) &lt;uvarint&gt;  │ name &lt;bytes&gt;    │ │</span><br><span class="line">│ ├──────────────────────┼─────────────────┤ │</span><br><span class="line">│ │ len(value) &lt;uvarint&gt; │ value &lt;bytes&gt;   │ │</span><br><span class="line">│ ├──────────────────────┴─────────────────┤ │</span><br><span class="line">│ │  offset &lt;uvarint64&gt;                    │ │</span><br><span class="line">│ └────────────────────────────────────────┘ │</span><br><span class="line">│                    . . .                   │</span><br><span class="line">├────────────────────────────────────────────┤</span><br><span class="line">│  CRC32 &lt;4b&gt;                                │</span><br><span class="line">└────────────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
-
-<h3><span id="toc">TOC</span><a href="#toc" class="header-anchor">#</a></h3><p><code>table of contents</code>是整个索引的入口点，并指向文件中的各个部分。 如果引用为零，则表示相应的部分不存在，查找时应返回空结果。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">┌─────────────────────────────────────────┐</span><br><span class="line">│ ref(symbols) &lt;8b&gt;                       │</span><br><span class="line">├─────────────────────────────────────────┤</span><br><span class="line">│ ref(series) &lt;8b&gt;                        │</span><br><span class="line">├─────────────────────────────────────────┤</span><br><span class="line">│ ref(label indices start) &lt;8b&gt;           │</span><br><span class="line">├─────────────────────────────────────────┤</span><br><span class="line">│ ref(label offset table) &lt;8b&gt;            │</span><br><span class="line">├─────────────────────────────────────────┤</span><br><span class="line">│ ref(postings start) &lt;8b&gt;                │</span><br><span class="line">├─────────────────────────────────────────┤</span><br><span class="line">│ ref(postings offset table) &lt;8b&gt;         │</span><br><span class="line">├─────────────────────────────────────────┤</span><br><span class="line">│ CRC32 &lt;4b&gt;                              │</span><br><span class="line">└─────────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
-
-<h2><span id="chunks-ci-pan-ge-shi">chunks 磁盘格式</span><a href="#chunks-ci-pan-ge-shi" class="header-anchor">#</a></h2><p>chunks文件创建在<strong>block</strong>中的<code>chunks/</code>目录中。 每个段文件的最大大小为 512MB。<br>文件中的chunk由uint64的索引组织，索引低四位为文件内偏移，高四位为段序列号。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">┌──────────────────────────────┐</span><br><span class="line">│  magic(0x85BD40DD) &lt;4 byte&gt;  │</span><br><span class="line">├──────────────────────────────┤</span><br><span class="line">│    version(1) &lt;1 byte&gt;       │</span><br><span class="line">├──────────────────────────────┤</span><br><span class="line">│    padding(0) &lt;3 byte&gt;       │</span><br><span class="line">├──────────────────────────────┤</span><br><span class="line">│ ┌──────────────────────────┐ │</span><br><span class="line">│ │         Chunk 1          │ │</span><br><span class="line">│ ├──────────────────────────┤ │</span><br><span class="line">│ │          ...             │ │</span><br><span class="line">│ ├──────────────────────────┤ │</span><br><span class="line">│ │         Chunk N          │ │</span><br><span class="line">│ └──────────────────────────┘ │</span><br><span class="line">└──────────────────────────────┘</span><br></pre></td></tr></table></figure>
-
-<h2><span id="chunks-zhong-de-chunk-ge-shi">chunks中的Chunk格式</span><a href="#chunks-zhong-de-chunk-ge-shi" class="header-anchor">#</a></h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">┌───────────────┬───────────────────┬──────────────┬────────────────┐</span><br><span class="line">│ len &lt;uvarint&gt; │ encoding &lt;1 byte&gt; │ data &lt;bytes&gt; │ CRC32 &lt;4 byte&gt; │</span><br><span class="line">└───────────────┴───────────────────┴──────────────┴────────────────┘</span><br></pre></td></tr></table></figure>
-
-<h1><span id="cha-xun-shu-ju">查询数据</span><a href="#cha-xun-shu-ju" class="header-anchor">#</a></h1><h2><span id="code">code</span><a href="#code" class="header-anchor">#</a></h2><p>查询的prometheus方法签名</p>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line">Select(sortSeries <span class="type">bool</span>, hints *SelectHints, matchers ...*labels.Matcher) SeriesSet</span><br></pre></td></tr></table></figure>
-
-<p>支持从block中，remote等各种地方查询获取数据</p>
-<p>prometheus会在内存中维护一个数据结构</p>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// Map of LabelName to a list of some LabelValues&#x27;s position in the offset table.</span></span><br><span class="line"><span class="comment">// The first and last values for each name are always present.</span></span><br><span class="line">postings <span class="keyword">map</span>[<span class="type">string</span>][]postingOffset</span><br></pre></td></tr></table></figure>
-
-<p>在内存中，保留每个label name，并且每n个保存label值，降低内存的占用。但是第一个和最后一个值总是保存在内存中。</p>
-<h2><span id="cha-xun-shu-ju-liu-cheng">查询数据流程</span><a href="#cha-xun-shu-ju-liu-cheng" class="header-anchor">#</a></h2><p><img src="/prometheus/prometheus-tsdb-index/prometheus-tsdb-index.png" alt="prometheus-tsdb-index"></p>
-<h1><span id="can-kao-zi-liao">参考资料</span><a href="#can-kao-zi-liao" class="header-anchor">#</a></h1><ul>
-<li><a href="https://prometheus.io/docs/prometheus/latest/storage/">https://prometheus.io/docs/prometheus/latest/storage/</a></li>
-<li><a href="https://github.com/prometheus/prometheus/blob/release-2.37/tsdb/docs/format/README.md">https://github.com/prometheus/prometheus/blob/release-2.37/tsdb/docs/format/README.md</a></li>
-<li><a href="https://github.com/prometheus/prometheus/blob/release-2.37/tsdb/docs/format/index.md">https://github.com/prometheus/prometheus/blob/release-2.37/tsdb/docs/format/index.md</a></li>
-</ul>
-]]></content>
-      <tags>
-        <tag>prometheus</tag>
       </tags>
   </entry>
   <entry>
@@ -2409,6 +2430,38 @@
       </tags>
   </entry>
   <entry>
+    <title>java进行数据库操作的并发控制</title>
+    <url>/code/java/find-save-concurrent/</url>
+    <content><![CDATA[<p>在现代应用编码中，从数据库里面find出来，进行一些业务逻辑操作，最后再save回去。即：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="type">Person</span> <span class="variable">person</span> <span class="operator">=</span> personRepo.findById(id);</span><br><span class="line">person.setAge(<span class="number">18</span>);</span><br><span class="line">personRepo.save(person);</span><br></pre></td></tr></table></figure>
+
+<p>但是这样的业务操作，如果一个线程修改年龄，另一个线程修改昵称，最后save回去，可能会导致年龄&#x2F;昵称某一个的修改被覆盖。</p>
+<pre class="mermaid">sequenceDiagram
+    participant A as Thread A
+    participant B as Thread B
+    participant DB as Database
+
+    A->>DB: find person by id
+    Note over A: person.setAge(18)
+    B->>DB: find person by id
+    Note over B: person.setNickname("NewName")
+
+    A->>DB: save person
+    B->>DB: save person
+
+    Note over DB: Potential Overwrite Issue</pre>
+
+<p>常见的解决方案有两种</p>
+<h1><span id="zhi-xing-qian-tian-jia-bei-guan-suo">执行前添加悲观锁</span><a href="#zhi-xing-qian-tian-jia-bei-guan-suo" class="header-anchor">#</a></h1><p>通过分布式锁等方式，保证同一时间只有一个线程能够对数据进行修改。</p>
+<h1><span id="le-guan-suo-si-lu-shi-xian">乐观锁思路实现</span><a href="#le-guan-suo-si-lu-shi-xian" class="header-anchor">#</a></h1><p>版本控制是另一种流行的处理并发问题的方法。它通过在每次更新记录时递增版本号来确保数据的一致性。</p>
+<p>这在JPA中，可以通过在field上添加<code>@Version</code>注解来实现，但这也就要求①数据库中必须有version字段，②对于查找后更新类操作，必须使用JPA的save方法来进行更新。</p>
+<p>当然也可以通过<code>update_time</code>来模拟乐观锁实现，这可能需要你在更新的时候添加<code>update_time</code>的条件，并且，<code>update_time</code>在极端场景下，理论正确性没那么严谨。</p>
+<script type="module"> import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.esm.min.mjs';	mermaid.initialize({startOnLoad: true, flowchart: {curve: 'linear'}}); </script>]]></content>
+      <tags>
+        <tag>database</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Java Http SDK设计</title>
     <url>/code/java/java-http-sdk-design/</url>
     <content><![CDATA[<div class="toc">
@@ -2454,38 +2507,6 @@ reactor --> common</pre>
       <tags>
         <tag>Java</tag>
         <tag>SDK</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>java进行数据库操作的并发控制</title>
-    <url>/code/java/find-save-concurrent/</url>
-    <content><![CDATA[<p>在现代应用编码中，从数据库里面find出来，进行一些业务逻辑操作，最后再save回去。即：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="type">Person</span> <span class="variable">person</span> <span class="operator">=</span> personRepo.findById(id);</span><br><span class="line">person.setAge(<span class="number">18</span>);</span><br><span class="line">personRepo.save(person);</span><br></pre></td></tr></table></figure>
-
-<p>但是这样的业务操作，如果一个线程修改年龄，另一个线程修改昵称，最后save回去，可能会导致年龄&#x2F;昵称某一个的修改被覆盖。</p>
-<pre class="mermaid">sequenceDiagram
-    participant A as Thread A
-    participant B as Thread B
-    participant DB as Database
-
-    A->>DB: find person by id
-    Note over A: person.setAge(18)
-    B->>DB: find person by id
-    Note over B: person.setNickname("NewName")
-
-    A->>DB: save person
-    B->>DB: save person
-
-    Note over DB: Potential Overwrite Issue</pre>
-
-<p>常见的解决方案有两种</p>
-<h1><span id="zhi-xing-qian-tian-jia-bei-guan-suo">执行前添加悲观锁</span><a href="#zhi-xing-qian-tian-jia-bei-guan-suo" class="header-anchor">#</a></h1><p>通过分布式锁等方式，保证同一时间只有一个线程能够对数据进行修改。</p>
-<h1><span id="le-guan-suo-si-lu-shi-xian">乐观锁思路实现</span><a href="#le-guan-suo-si-lu-shi-xian" class="header-anchor">#</a></h1><p>版本控制是另一种流行的处理并发问题的方法。它通过在每次更新记录时递增版本号来确保数据的一致性。</p>
-<p>这在JPA中，可以通过在field上添加<code>@Version</code>注解来实现，但这也就要求①数据库中必须有version字段，②对于查找后更新类操作，必须使用JPA的save方法来进行更新。</p>
-<p>当然也可以通过<code>update_time</code>来模拟乐观锁实现，这可能需要你在更新的时候添加<code>update_time</code>的条件，并且，<code>update_time</code>在极端场景下，理论正确性没那么严谨。</p>
-<script type="module"> import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.esm.min.mjs';	mermaid.initialize({startOnLoad: true, flowchart: {curve: 'linear'}}); </script>]]></content>
-      <tags>
-        <tag>database</tag>
       </tags>
   </entry>
   <entry>
@@ -2549,31 +2570,6 @@ reactor --> common</pre>
       </tags>
   </entry>
   <entry>
-    <title>JAVA Ping命令心跳探测 InetAddress isReachable分析</title>
-    <url>/code/java/java-ping/</url>
-    <content><![CDATA[<h1><span id="ye-wu-xu-qiu-fen-xi-yu-jie-jue-fang-an">业务需求分析与解决方案</span><a href="#ye-wu-xu-qiu-fen-xi-yu-jie-jue-fang-an" class="header-anchor">#</a></h1><p>在业务场景中，当需要利用ping命令对主机进行心跳探测时，直接在代码中fork进程执行ping命令虽然可行，但这种方法开销较大，并且处理流程易出错，与使用标准库相比缺乏优雅性。因此，本文探讨了使用Java的InetAddress类的isReachable方法作为替代方案。</p>
-<p>根据资料指出，Java的InetAddress类在root用户权限下通过执行ping命令进行探测，在非root用户权限下则通过访问TCP端口7进行探测。为验证这一点，本文撰写了相应的demo代码并进行了测试（详见：<a href="https://github.com/shoothzj/heart-beat">GitHub - heart-beat</a>）。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">import lombok.extern.slf4j.Slf4j;</span><br><span class="line"></span><br><span class="line">import java.net.InetAddress;</span><br><span class="line"></span><br><span class="line">@Slf4j</span><br><span class="line">public class PingTestMain &#123;</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) throws Exception &#123;</span><br><span class="line">        String testIp = System.getProperty(&quot;TestIp&quot;);</span><br><span class="line">        InetAddress inetAddress = InetAddress.getByName(testIp);</span><br><span class="line">        boolean addressReachable = inetAddress.isReachable(500);</span><br><span class="line">        log.info(&quot;address is reachable is &#123;&#125;&quot;, addressReachable);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h1><span id="ce-shi-shi-yan">测试实验</span><a href="#ce-shi-shi-yan" class="header-anchor">#</a></h1><h2><span id="root-yong-hu-xia-zhi-xing-cheng-xu">root用户下执行程序</span><a href="#root-yong-hu-xia-zhi-xing-cheng-xu" class="header-anchor">#</a></h2><p><img src="/code/java/java-ping/java-ping-root-success.png" alt="java-ping-root-success.png"></p>
-<p>java程序打印结果也是true</p>
-<h2><span id="zai-pu-tong-yong-hu-quan-xian-xia-de-ce-shi">在普通用户权限下的测试</span><a href="#zai-pu-tong-yong-hu-quan-xian-xia-de-ce-shi" class="header-anchor">#</a></h2><p><img src="/code/java/java-ping/java-ping-user-fail.png" alt="java-ping-user-fail.png"></p>
-<p>此时可以看到,我们的客户端程序向目标tcp7端口发送了一个报文,虽然java程序打印结果为true,但是因为收到了RST包导致的.在当今的网络安全要求下,7端口往往不会开放</p>
-<h2><span id="zai-mu-biao-wang-luo-ping-bi-tcp-duan-kou-7-de-qing-kuang-xia-zhi-xing-cheng-xu">在目标网络屏蔽TCP端口7的情况下执行程序</span><a href="#zai-mu-biao-wang-luo-ping-bi-tcp-duan-kou-7-de-qing-kuang-xia-zhi-xing-cheng-xu" class="header-anchor">#</a></h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">iptables -A INPUT -p tcp --dport 7 -j DROP</span><br></pre></td></tr></table></figure>
-
-<p>发送的报文没有收到RST包,此时java程序返回false.不是我们预期的结果</p>
-<h2><span id="pu-tong-yong-hu-quan-xian-xia-xi-dai-te-quan-de-ce-shi">普通用户权限下携带特权的测试</span><a href="#pu-tong-yong-hu-quan-xian-xia-xi-dai-te-quan-de-ce-shi" class="header-anchor">#</a></h2><p>进一步的研究发现，Java程序发送ping命令需要创建raw socket，这要求程序具有root权限或cap_net_raw权限。赋予Java程序创建raw socket的权限后重新测试，发现程序能够正确发送ping命令，达到预期效果。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">setcap cap_net_raw+ep /usr/java/jdk-13.0.1/bin/java</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>发现如下报错</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">java: error while loading shared libraries: libjli.so: cannot open shared object file: No such file or directory</span><br></pre></td></tr></table></figure>
-<p>使用<a href="https://askubuntu.com/questions/334365/how-to-add-a-directory-to-linker-command-line-in-linux%E8%A7%84%E9%81%BF%E6%B7%BB%E5%8A%A0so%E6%96%87%E4%BB%B6%E6%9D%83%E9%99%90">https://askubuntu.com/questions/334365/how-to-add-a-directory-to-linker-command-line-in-linux规避添加so文件权限</a></p>
-<p>随后抓包,发现还是发送了ping命令,达到了我们预期的效果</p>
-<h1><span id="zong-jie">总结</span><a href="#zong-jie" class="header-anchor">#</a></h1><p>本文通过一系列测试得出结论，root用户权限下的Java程序会使用ping命令进行探测。若普通用户不具备相应权限，则会尝试探测TCP端口7，但在安全组未开启该端口的情况下会导致预期结果不一致。推荐赋予java程序特权,使得InetAddress类能够使用ping命令进行探测</p>
-]]></content>
-      <tags>
-        <tag>Java</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>java指标统计方案及代码</title>
     <url>/code/java/java-metrics-statistic/</url>
     <content><![CDATA[<h1><span id="java-gen-ju-xian-cheng-tong-ji-cpu">java 根据线程统计CPU</span><a href="#java-gen-ju-xian-cheng-tong-ji-cpu" class="header-anchor">#</a></h1><h2><span id="she-ji-si-lu">设计思路</span><a href="#she-ji-si-lu" class="header-anchor">#</a></h2><p>java的ThreadMXBean可以获取每个线程CPU执行的nanoTime，那么可以以这个为基础，除以中间系统经过的纳秒数，就获得了该线程的<code>CPU</code>占比</p>
@@ -2617,6 +2613,31 @@ reactor --> common</pre>
 ]]></content>
       <tags>
         <tag>java</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>JAVA Ping命令心跳探测 InetAddress isReachable分析</title>
+    <url>/code/java/java-ping/</url>
+    <content><![CDATA[<h1><span id="ye-wu-xu-qiu-fen-xi-yu-jie-jue-fang-an">业务需求分析与解决方案</span><a href="#ye-wu-xu-qiu-fen-xi-yu-jie-jue-fang-an" class="header-anchor">#</a></h1><p>在业务场景中，当需要利用ping命令对主机进行心跳探测时，直接在代码中fork进程执行ping命令虽然可行，但这种方法开销较大，并且处理流程易出错，与使用标准库相比缺乏优雅性。因此，本文探讨了使用Java的InetAddress类的isReachable方法作为替代方案。</p>
+<p>根据资料指出，Java的InetAddress类在root用户权限下通过执行ping命令进行探测，在非root用户权限下则通过访问TCP端口7进行探测。为验证这一点，本文撰写了相应的demo代码并进行了测试（详见：<a href="https://github.com/shoothzj/heart-beat">GitHub - heart-beat</a>）。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">import lombok.extern.slf4j.Slf4j;</span><br><span class="line"></span><br><span class="line">import java.net.InetAddress;</span><br><span class="line"></span><br><span class="line">@Slf4j</span><br><span class="line">public class PingTestMain &#123;</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) throws Exception &#123;</span><br><span class="line">        String testIp = System.getProperty(&quot;TestIp&quot;);</span><br><span class="line">        InetAddress inetAddress = InetAddress.getByName(testIp);</span><br><span class="line">        boolean addressReachable = inetAddress.isReachable(500);</span><br><span class="line">        log.info(&quot;address is reachable is &#123;&#125;&quot;, addressReachable);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1><span id="ce-shi-shi-yan">测试实验</span><a href="#ce-shi-shi-yan" class="header-anchor">#</a></h1><h2><span id="root-yong-hu-xia-zhi-xing-cheng-xu">root用户下执行程序</span><a href="#root-yong-hu-xia-zhi-xing-cheng-xu" class="header-anchor">#</a></h2><p><img src="/code/java/java-ping/java-ping-root-success.png" alt="java-ping-root-success.png"></p>
+<p>java程序打印结果也是true</p>
+<h2><span id="zai-pu-tong-yong-hu-quan-xian-xia-de-ce-shi">在普通用户权限下的测试</span><a href="#zai-pu-tong-yong-hu-quan-xian-xia-de-ce-shi" class="header-anchor">#</a></h2><p><img src="/code/java/java-ping/java-ping-user-fail.png" alt="java-ping-user-fail.png"></p>
+<p>此时可以看到,我们的客户端程序向目标tcp7端口发送了一个报文,虽然java程序打印结果为true,但是因为收到了RST包导致的.在当今的网络安全要求下,7端口往往不会开放</p>
+<h2><span id="zai-mu-biao-wang-luo-ping-bi-tcp-duan-kou-7-de-qing-kuang-xia-zhi-xing-cheng-xu">在目标网络屏蔽TCP端口7的情况下执行程序</span><a href="#zai-mu-biao-wang-luo-ping-bi-tcp-duan-kou-7-de-qing-kuang-xia-zhi-xing-cheng-xu" class="header-anchor">#</a></h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">iptables -A INPUT -p tcp --dport 7 -j DROP</span><br></pre></td></tr></table></figure>
+
+<p>发送的报文没有收到RST包,此时java程序返回false.不是我们预期的结果</p>
+<h2><span id="pu-tong-yong-hu-quan-xian-xia-xi-dai-te-quan-de-ce-shi">普通用户权限下携带特权的测试</span><a href="#pu-tong-yong-hu-quan-xian-xia-xi-dai-te-quan-de-ce-shi" class="header-anchor">#</a></h2><p>进一步的研究发现，Java程序发送ping命令需要创建raw socket，这要求程序具有root权限或cap_net_raw权限。赋予Java程序创建raw socket的权限后重新测试，发现程序能够正确发送ping命令，达到预期效果。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">setcap cap_net_raw+ep /usr/java/jdk-13.0.1/bin/java</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>发现如下报错</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">java: error while loading shared libraries: libjli.so: cannot open shared object file: No such file or directory</span><br></pre></td></tr></table></figure>
+<p>使用<a href="https://askubuntu.com/questions/334365/how-to-add-a-directory-to-linker-command-line-in-linux%E8%A7%84%E9%81%BF%E6%B7%BB%E5%8A%A0so%E6%96%87%E4%BB%B6%E6%9D%83%E9%99%90">https://askubuntu.com/questions/334365/how-to-add-a-directory-to-linker-command-line-in-linux规避添加so文件权限</a></p>
+<p>随后抓包,发现还是发送了ping命令,达到了我们预期的效果</p>
+<h1><span id="zong-jie">总结</span><a href="#zong-jie" class="header-anchor">#</a></h1><p>本文通过一系列测试得出结论，root用户权限下的Java程序会使用ping命令进行探测。若普通用户不具备相应权限，则会尝试探测TCP端口7，但在安全组未开启该端口的情况下会导致预期结果不一致。推荐赋予java程序特权,使得InetAddress类能够使用ping命令进行探测</p>
+]]></content>
+      <tags>
+        <tag>Java</tag>
       </tags>
   </entry>
   <entry>

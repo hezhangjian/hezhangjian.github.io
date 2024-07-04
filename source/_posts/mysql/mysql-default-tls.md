@@ -33,7 +33,7 @@ echo "ssl=0" >> /etc/my.cnf
 
 ## 客户端侧
 
-这个协商过程也可以在客户端进行控制，客户端对应的参数是sslMode，可以设置为DISABLED、PREFERRED、REQUIRED、VERIFY_CA、VERIFY_IDENTITY，分别代表不使用ssl、优先使用ssl、必须使用ssl、验证CA、验证身份。example:
+这个协商过程也可以在客户端进行控制，客户端对应的参数是sslMode，可以设置为DISABLED、PREFERRED、REQUIRED、VERIFY_CA、VERIFY_IDENTITY，分别代表不使用ssl、优先使用ssl、必须使用ssl、验证CA、验证身份。默认的行为是PREFERRED，example:
 
 比如配置sslMode为DISABLED，那么客户端就不会使用ssl进行通信，而是使用明文。
 
@@ -41,17 +41,24 @@ echo "ssl=0" >> /etc/my.cnf
 r2dbc:mysql://localhost:3306/test?sslMode=DISABLED
 ```
 
+![mysql-client-disable-tls](mysql-client-disable-tls.png)
+
 ## 总结
 
-| 客户端             | 服务端          | 结果                |
-|-----------------|--------------|-------------------|
-| DISABLED        | ssl=1        | PLAIN             |
-| PREFERRED       | ssl=1        | TLS               |
-| REQUIRED        | ssl=1        | TLS               |
-| VERIFY_CA       | ssl=1 + CA配置 | TLS，客户端验证服务端证书的CA |
-| VERIFY_IDENTITY | ssl=1 + CA配置 | TLS，客户端验证服务端证书和身份 |
-| ANY             | ssl=0        | PLAIN             |
+| 客户端             | 服务端          | 结果             |
+|-----------------|--------------|----------------|
+| DISABLED        | ssl=0        | PLAIN          |
+| DISABLED        | ssl=1        | PLAIN          |
+| PREFERRED       | ssl=0        | PLAIN          |
+| PREFERRED       | ssl=1        | TLS            |
+| REQUIRED        | ssl=0        | Fail           |
+| REQUIRED        | ssl=1        | TLS            |
+| VERIFY_CA       | ssl=0        | Fail           |
+| VERIFY_CA       | ssl=1 + CA配置 | TLS，客户端验证证书    |
+| VERIFY_IDENTITY | ssl=0        | Fail           |
+| VERIFY_IDENTITY | ssl=1 + CA配置 | TLS，客户端验证证书和域名 |
 
 注：
+
 - VERIFY_CA：确保服务器证书由受信任的CA签发，但不验证证书的主机名或IP地址。
 - VERIFY_IDENTITY：不仅验证证书的CA签发，还额外验证证书的主机名或IP地址与服务器的实际地址是否一致。

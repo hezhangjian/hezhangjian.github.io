@@ -1674,6 +1674,46 @@
       </tags>
   </entry>
   <entry>
+    <title>MySQL异步复制中的数据不一致问题</title>
+    <url>/mysql/mysql-async-replica-inconsistency/</url>
+    <content><![CDATA[<h2><span id="qian-ti">前提</span><a href="#qian-ti" class="header-anchor">#</a></h2><p>Mysql8.0.X版本，且核心配置如下</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">gtid_mode=ON</span><br><span class="line">binlog_format=row</span><br><span class="line">slave_skip_errors=all</span><br></pre></td></tr></table></figure>
+
+<p>数据不一致的根本原因在于MySQL在设计上不具备分布式系统的完整语义，这导致主从复制在面对网络分区和延迟时无法保持数据一致性。（又不可能采取全同步的模式，那就变成一个CP系统了）。根据数据冲突的内容，如果是<strong>”不同主键，不触发唯一键约束的数据冲突”</strong>，那么后续很容易可以同步到一致。如果触发了主键或者唯一键的冲突，无法互相同步，场景会变得复杂一些，简而言之，只有当后续的操作可以同时在主&#x2F;备两个数据库中抹平这个差距，数据才能恢复，并且约束越多，抹平也就变得愈困难。举例</p>
+<ul>
+<li>仅存在主键约束，数据内容不同，通过下次操作主键(update&#x2F;delete)，则可以恢复</li>
+<li>数据库自增主键（两条数据主键不同），触发了唯一字段约束，后续的操作要同时抹平主键、唯一字段、其他内容才能恢复一致（比如根据相同的条件删除掉这条数据等）</li>
+</ul>
+<p>下文将分别以插入为例讨论这几个场景，用红色叉号代表同步延迟或者断开。</p>
+<p>注：由于Mysql主备同步时会将upsert类的sql转换为实际执行的insert、update语句，也就是说upsert的语义在主备同步不稳定&#x2F;切换时，容易丢失。</p>
+<h2><span id="bu-tong-zhu-jian-bu-hong-fa-wei-yi-jian-yue-shu-de-shu-ju-chong-tu"><strong>不同主键，不触发唯一键约束的数据冲突</strong></span><a href="#bu-tong-zhu-jian-bu-hong-fa-wei-yi-jian-yue-shu-de-shu-ju-chong-tu" class="header-anchor">#</a></h2><p>设想表结构，仅有一个name字段，且name为主键。比如我们先在MysqlA中插入了数据name&#x3D;tt，假设发生了切换，又向MysqlB插入了数据name&#x3D;wtt。</p>
+<p><img src="/mysql/mysql-async-replica-inconsistency/mysql-case1-insert-data.png" alt="mysql-case1-insert-data"></p>
+<p>这就导致MysqlA与MysqlB里面的数据存在着不一致，但是一旦同步恢复，数据就会一致。</p>
+<p><img src="/mysql/mysql-async-replica-inconsistency/mysql-case1-sync-success.png" alt="mysql-case1-sync-success"></p>
+<h2><span id="jin-zhu-jian-yue-shu-nei-rong-bu-yi-zhi-chong-tu">仅主键约束，内容不一致冲突</span><a href="#jin-zhu-jian-yue-shu-nei-rong-bu-yi-zhi-chong-tu" class="header-anchor">#</a></h2><p>表结构，拥有两个字段，name为主键，age为字段。</p>
+<p>同样，插入了两条数据，导致冲突。</p>
+<p><img src="/mysql/mysql-async-replica-inconsistency/mysql-case2-insert-data.png" alt="mysql-case2-insert-data"></p>
+<p>即使MysqlA和MysqlB之间同步恢复，后续insert语句也会由于主键冲突同步失败。</p>
+<p><img src="/mysql/mysql-async-replica-inconsistency/mysql-case2-sync-fail.png" alt="mysql-case2-sync-fail"></p>
+<p>这种不一致要等到后续对主键进行update操作后，才能恢复一致</p>
+<p><img src="/mysql/mysql-async-replica-inconsistency/mysql-case2-recovery.png" alt="mysql-case2-recovery"></p>
+<h2><span id="bao-han-zhu-jian-wei-yi-yue-shu-zai-nei-de-chong-tu-chang-jing">包含主键、唯一约束在内的冲突场景</span><a href="#bao-han-zhu-jian-wei-yi-yue-shu-zai-nei-de-chong-tu-chang-jing" class="header-anchor">#</a></h2><p>主键为数据库自增主键，其中一个库为奇数，另一个库为偶数。同时还有唯一约束name</p>
+<p><img src="/mysql/mysql-async-replica-inconsistency/mysql-case3-insert-data.png" alt="mysql-case3-insert-data"></p>
+<p>这时候插入数据，就会导致不一致，并且主键也不相同，由于业务不感知主键，使用不存在则更新的语法也会导致主键不一致。</p>
+<p><img src="/mysql/mysql-async-replica-inconsistency/mysql-case3-upsert-data.png" alt="mysql-case3-upsert-data"></p>
+<p>可以预想到即使恢复同步，MysqlA和MysqlB数据也无法一致。</p>
+<p><img src="/mysql/mysql-async-replica-inconsistency/mysql-case3-sync-fail.png" alt="mysql-case3-sync-fail"></p>
+<p>在这种场景下，任何针对id的SQL操作都无法在双方数据库中成功同步。例如，MysqlB数据库中不存在id为0的记录，而MysqlA中不存在id为1的记录，导致同步操作失败。</p>
+<p>想要恢复一致，可以通过业务唯一约束来删除记录或者是根据业务约束把Mysql主键id也一并更新（不过这很困难，一般这种业务是不会直接操作id的）</p>
+<p>那么可能会有人有疑问，为什么不像之前那样，用name作为唯一主键呢？</p>
+<p>答：业务的需求多种多样，而且如果唯一约束由多个字段组成，使用Mysql自增主键是唯一的选择。</p>
+<h2><span id="zong-jie">总结</span><a href="#zong-jie" class="header-anchor">#</a></h2><p>本文探讨了Mysql异步复制模式下的数据不一致问题，容易在什么时候产生，什么时候恢复。总的来说，业务如果只有一个唯一主键，出现不一致的概率更小。如果业务用数据库自增作为主键，同时伴有唯一约束的插入操作（如upsert等），更容易出现长期的不一致。</p>
+]]></content>
+      <tags>
+        <tag>mysql</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>揭秘MySQL TLS：通过抓包了解真实的加密通信</title>
     <url>/mysql/mysql-default-tls/</url>
     <content><![CDATA[<p>你的mysql客户端和服务端之间开启tls了吗？你的回答可能是No，我没有申请证书，也没有开启mysql客户端，服务端的tls配置。</p>
@@ -1691,7 +1731,7 @@
 <p>比如配置sslMode为DISABLED，那么客户端就不会使用ssl进行通信，而是使用明文。</p>
 <figure class="highlight text"><table><tr><td class="code"><pre><span class="line">r2dbc:mysql://localhost:3306/test?sslMode=DISABLED</span><br></pre></td></tr></table></figure>
 
-<p><img src="/mysql-client-disable-tls.png" alt="mysql-client-disable-tls"></p>
+<p><img src="/mysql/mysql-default-tls/mysql-client-disable-tls.png" alt="mysql-client-disable-tls"></p>
 <h2><span id="zong-jie">总结</span><a href="#zong-jie" class="header-anchor">#</a></h2><table>
 <thead>
 <tr>

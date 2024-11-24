@@ -146,13 +146,13 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">72</span>
+          <span class="site-state-item-count">75</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">41</span>
+        <span class="site-state-item-count">43</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -177,6 +177,352 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/config/business-config-center-impl/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="shoothzj">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/config/business-config-center-impl/" class="post-title-link" itemprop="url">业务配置中心的实现</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-05-13 15:44:23" itemprop="dateCreated datePublished" datetime="2021-05-13T15:44:23+00:00">2021-05-13</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2024-11-24 11:33:05" itemprop="dateModified" datetime="2024-11-24T11:33:05+00:00">2024-11-24</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1><span id="qian-yan">前言</span><a href="#qian-yan" class="header-anchor">#</a></h1><p>之前在InfoQ的《华为云物联网四年配置中心实践》文章中分享了业务配置中心。</p>
+<p>本文讲述业务配置中心（下文简述为配置中心）的关键技术和实现方式。华为云物联网平台按照本文的实现方式实现了一个业务配置中心，该配置中心2020年1月上线，平稳运行至今。</p>
+<h1><span id="gai-nian">概念</span><a href="#gai-nian" class="header-anchor">#</a></h1><h2><span id="yun-wei-pei-zhi">运维配置</span><a href="#yun-wei-pei-zhi" class="header-anchor">#</a></h2><p>和用户无关，通常为集群界级别的配置，程序只会进行读取，如数据库配置、邮箱服务器配置、网卡配置、子网地址配置等。</p>
+<h2><span id="ye-wu-pei-zhi">业务配置</span><a href="#ye-wu-pei-zhi" class="header-anchor">#</a></h2><p>作为SaaS 服务，每个用户在上面都有一些业务配置。如用户的证书配置、用户服务器的流控配置等，这些业务配置相对<strong>运维配置</strong>来说更加复杂，且可能会有唯一性限制，如按用户 id 唯一。这部分配置数据一般由用户操作触发，代码动态写入，并且通知到各个微服务实例。通常，我们希望这些配置能在界面展示，且支持人为修改。上述逻辑如果由各微服务自己实现，会存在大量重复代码，并且质量无法保证。我们希望由一个公共组件来统一实现这个能力。开源或体量较小的项目就不会选择依赖一个配置中心，而是直接通过连接数据库或etcd来解决问题</p>
+<h2><span id="env">env</span><a href="#env" class="header-anchor">#</a></h2><p>代表一个部署环境。</p>
+<h2><span id="cluster">cluster</span><a href="#cluster" class="header-anchor">#</a></h2><p>代表环境下的集群。常见于单环境下蓝绿发布，蓝集群、绿集群、金丝雀集群等。</p>
+<h2><span id="pei-zhi">配置</span><a href="#pei-zhi" class="header-anchor">#</a></h2><p>配置名称，如用户证书配置、用户流控配置等。</p>
+<h2><span id="key">Key</span><a href="#key" class="header-anchor">#</a></h2><p>配置的唯一键，如用户id。</p>
+<h2><span id="value">Value</span><a href="#value" class="header-anchor">#</a></h2><p>配置唯一键对应的值。</p>
+<h1><span id="pei-zhi-zhong-xin-she-ji-geng-gai">配置中心设计梗概</span><a href="#pei-zhi-zhong-xin-she-ji-geng-gai" class="header-anchor">#</a></h1><h2><span id="ye-wu-pei-zhi-te-dian">业务配置特点</span><a href="#ye-wu-pei-zhi-te-dian" class="header-anchor">#</a></h2><ul>
+<li>虽然业务配置写入可能存在并发，但并发量不大，频率较低。</li>
+<li>业务配置常常以用户为id，单集群用户量有限，一般不超过5万。</li>
+</ul>
+<h2><span id="pei-zhi-zhong-xin-yao-jie-jue-de-wen-ti">配置中心要解决的问题</span><a href="#pei-zhi-zhong-xin-yao-jie-jue-de-wen-ti" class="header-anchor">#</a></h2><p><img src="/config/business-config-center-impl/business-config-center-impl1.png" alt="business-config-center-impl1"></p>
+<h2><span id="she-ji-yao-dian">设计要点</span><a href="#she-ji-yao-dian" class="header-anchor">#</a></h2><ul>
+<li>单配置要求有配置id，每个id上通过version的乐观并发控制来解决多版本冲突问题</li>
+<li>通知不追求可靠，应用程序和配置中心断链无法接收通知的场景下，通过定期同步数据来保证数据的可靠</li>
+<li>支持Schema的变更，因Schema变更不频繁，也采用version的乐观并发控制来解决多版本冲突问题</li>
+</ul>
+<h2><span id="tong-zhi-shi-fou-bao-han-xiao-xi-nei-rong">通知是否包含消息内容</span><a href="#tong-zhi-shi-fou-bao-han-xiao-xi-nei-rong" class="header-anchor">#</a></h2><p>我认为应该只通知Key，具体的数值让应用程序再去配置中心查询。仅通知Key实现简洁易懂。同时通知Key&amp;Value需要多考虑定期同步和通知两条通道并发，可能引起的竞态冲突。</p>
+<h1><span id="pei-zhi-zhong-xin-ye-wu-liu-cheng">配置中心业务流程</span><a href="#pei-zhi-zhong-xin-ye-wu-liu-cheng" class="header-anchor">#</a></h1><p>本小节描述业务配置中心的所有业务流程，并试图从交互中抽象出与具体实现无关的接口</p>
+<h2><span id="pei-zhi-de-zeng-shan-gai-cha">配置的增删改查</span><a href="#pei-zhi-de-zeng-shan-gai-cha" class="header-anchor">#</a></h2><p><img src="/config/business-config-center-impl/business-config-center-impl2.png" alt="business-config-center-impl2"></p>
+<h2><span id="pei-zhi-zhi-de-zeng-shan-gai-cha">配置值的增删改查</span><a href="#pei-zhi-zhi-de-zeng-shan-gai-cha" class="header-anchor">#</a></h2><p><img src="/config/business-config-center-impl/business-config-center-impl3.png" alt="business-config-center-impl3"></p>
+<h2><span id="ding-qi-tong-bu">定期同步</span><a href="#ding-qi-tong-bu" class="header-anchor">#</a></h2><p>分布式场景下，通知有可能无法送达，如程序陷入网络中断（或长gc），通知消息送达超时，待程序恢复后，数据不再准确。因此需要对数据做定期同步，提高可靠性。</p>
+<p><img src="/config/business-config-center-impl/business-config-center-impl4.png" alt="business-config-center-impl4"></p>
+<p>同步过程中，仅仅请求交互id和version，避免传输大量数据。应用程序接收到需要同步的数据后：</p>
+<ul>
+<li>删除操作，触发删除通知，从本地缓存中移除数据。</li>
+<li>添加、修改操作，向配置中心查询最新数据，触发通知并写入本地缓存。</li>
+</ul>
+<h2><span id="fu-wu-qi-dong">服务启动</span><a href="#fu-wu-qi-dong" class="header-anchor">#</a></h2><p>服务启动也可看做是一个同步的流程，只是需要同步大量的数据添加。为了避免向配置中心频繁大量的请求，引入批量操作来减轻压力</p>
+<p><img src="/config/business-config-center-impl/business-config-center-impl5.png" alt="business-config-center-impl5"></p>
+<h2><span id="xian-zhi">限制</span><a href="#xian-zhi" class="header-anchor">#</a></h2><p>该配置中心设计思路依赖客户端可把数据全量放入到内存中，如用户量太大，则不适合采用这种模式。</p>
+<p>注：一个节省内存的思路是，内存中只放置全量的id和version，数据只有当用到的时候再去查询。这个思路要求配置中心持久化一些老旧数据以供以下场景的查询使用</p>
+<ul>
+<li><p>业务流程中，需要使用该配置值的。</p>
+</li>
+<li><p>回调业务程序修改的时候，需要提供旧值的。</p>
+</li>
+</ul>
+<p>除此之外没有任何区别。</p>
+<h1><span id="ye-wu-pei-zhi-chou-xiang-shi-xian">业务配置抽象实现</span><a href="#ye-wu-pei-zhi-chou-xiang-shi-xian" class="header-anchor">#</a></h1><p>从上述描述的业务场景，我们抽象出业务配置中心的交互接口和抽象实现。接口的Swagger Yaml已上传到Github：<a target="_blank" rel="noopener" href="https://gist.github.com/Shoothzj/68c9c2ecae72cc2a125184e95b0a741e">https://gist.github.com/Shoothzj/68c9c2ecae72cc2a125184e95b0a741e</a></p>
+<h2><span id="pei-zhi-xiang-guan-jie-kou">配置相关接口</span><a href="#pei-zhi-xiang-guan-jie-kou" class="header-anchor">#</a></h2><ul>
+<li>提供env、cluster、配置名称、配置Schema、配置版本号添加配置</li>
+<li>提供env、cluster、配置名称删除配置</li>
+<li>提供env、cluster、配置名称、新Schema、新Version来修改配置</li>
+<li>提供env、cluster、配置名称来查询配置</li>
+</ul>
+<h2><span id="pei-zhi-zhi-xiang-guan-jie-kou">配置值相关接口</span><a href="#pei-zhi-zhi-xiang-guan-jie-kou" class="header-anchor">#</a></h2><ul>
+<li>提供env、cluster、配置名称、Key、Value来添加配置值</li>
+<li>提供env、cluster、Key、ValueVersion（可选）来删除配置值</li>
+<li>提供env、cluster、Key、Value、ValueVersion（可选）修改配置值</li>
+<li>提供env、cluster、Key查询配置值</li>
+<li>根据env、cluster、应用程序当前的配置数据来做定期同步</li>
+<li>根据Key列表批量查询配置值</li>
+</ul>
+<h2><span id="tong-zhi-xiang-guan-jie-kou">通知相关接口</span><a href="#tong-zhi-xiang-guan-jie-kou" class="header-anchor">#</a></h2><ul>
+<li>通知某env某cluster下，配置项中的一个Key发生变化，新增、修改或是删除。可选方式有HTTP长链接（Inspired by Apollo）、Mqtt、WebSocket等。</li>
+</ul>
+<h2><span id="pei-zhi-zhong-xin-cun-chu-ceng-chou-xiang-shi-xian">配置中心存储层抽象实现</span><a href="#pei-zhi-zhong-xin-cun-chu-ceng-chou-xiang-shi-xian" class="header-anchor">#</a></h2><p>配置中心存储层需要存储<strong>配置</strong>和<strong>配置值</strong>数据，支持UpdateByVersion，且需要捕捉数据的变化，用来通知到应用程序</p>
+<h2><span id="fu-wu-fa-xian-chou-xiang-shi-xian">服务发现抽象实现</span><a href="#fu-wu-fa-xian-chou-xiang-shi-xian" class="header-anchor">#</a></h2><p>为了使应用程序连接到配置中心，需要一个发现机制可以让应用程序感知到配置中心的地址。高可用的方式很多，如K8s发现、ZooKeeper、Etcd、ServiceComb、业务环境变量注入ELB地址（ELB后端挂载配置中心的地址）等。</p>
+<h2><span id="chou-xiang-zong-jie">抽象总结</span><a href="#chou-xiang-zong-jie" class="header-anchor">#</a></h2><p><img src="/config/business-config-center-impl/business-config-center-impl6.png" alt="business-config-center-impl6"></p>
+<p>根据这个抽象，我们可以进行关键技术点选型，来实现业务配置中心。</p>
+<h1><span id="pei-zhi-zhong-xin-shi-xian">配置中心实现</span><a href="#pei-zhi-zhong-xin-shi-xian" class="header-anchor">#</a></h1><h2><span id="hua-wei-yun-wu-lian-wang-pei-zhi-zhong-xin-shi-xian">华为云物联网配置中心实现</span><a href="#hua-wei-yun-wu-lian-wang-pei-zhi-zhong-xin-shi-xian" class="header-anchor">#</a></h2><p><img src="/config/business-config-center-impl/business-config-center-impl7.png" alt="business-config-center-impl7"></p>
+<ul>
+<li>env+cluster+config组成数据表的名称</li>
+<li>一个key、value对应一行数据</li>
+</ul>
+<h2><span id="ling-yi-chong-shi-xian-fang-shi">另一种实现方式</span><a href="#ling-yi-chong-shi-xian-fang-shi" class="header-anchor">#</a></h2><p>只要实现上述接口和抽象能力，都可以实现业务配置中心，也可以这么实现</p>
+<p><img src="/config/business-config-center-impl/business-config-center-impl8.png" alt="business-config-center-impl8"></p>
+<ul>
+<li>env+cluster+config+key 组合成etcd的key</li>
+<li>一个key、value对应一个键值对</li>
+</ul>
+<h2><span id="you-yi-chong-shi-xian-fang-shi">又一种实现方式</span><a href="#you-yi-chong-shi-xian-fang-shi" class="header-anchor">#</a></h2><p>当然也可以</p>
+<p><img src="/config/business-config-center-impl/business-config-center-impl9.png" alt="business-config-center-impl9"></p>
+<ul>
+<li>env+cluster+config+key 组合成RocksDB的key</li>
+<li>一个key、value对应一个键值对</li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/mysql/mysql-ps-password/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="shoothzj">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/mysql/mysql-ps-password/" class="post-title-link" itemprop="url">Mysql是如何隐藏ps命令行中的密码的</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-04-26 19:35:38" itemprop="dateCreated datePublished" datetime="2021-04-26T19:35:38+00:00">2021-04-26</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2024-11-24 11:33:05" itemprop="dateModified" datetime="2024-11-24T11:33:05+00:00">2024-11-24</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2><span id="can-kao">参考</span><a href="#can-kao" class="header-anchor">#</a></h2><ul>
+<li><a target="_blank" rel="noopener" href="http://northernmost.org/blog/how-does-mysql-hide-the-command-line-password-in-ps/index.html">http://northernmost.org/blog/how-does-mysql-hide-the-command-line-password-in-ps/index.html</a></li>
+</ul>
+<p>之前就在环境上<code>ps -ef</code>看到过<code>xxxxxx</code>的密码，一直没搞明白怎么回事，今天整理了一下，核心内容均来自于上述连接，作了一些额外的测试和查阅资料。</p>
+<h2><span id="ce-shi">测试</span><a href="#ce-shi" class="header-anchor">#</a></h2><h3><span id="yun-xing-mysql-shi-li">运行Mysql实例</span><a href="#yun-xing-mysql-shi-li" class="header-anchor">#</a></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 自己做的Mysql8的镜像</span></span><br><span class="line">docker run ttbb/mysql:stand-alone</span><br></pre></td></tr></table></figure>
+
+<h3><span id="shi-yong-mi-ma-lian-jie-mysql-fu-wu-qi">使用密码连接Mysql服务器</span><a href="#shi-yong-mi-ma-lian-jie-mysql-fu-wu-qi" class="header-anchor">#</a></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql -u hzj -p Mysql@123 -e <span class="string">&quot;select 1&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h3><span id="ps-ef-cha-kan">ps -ef查看</span><a href="#ps-ef-cha-kan" class="header-anchor">#</a></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@91bcbd15a82e mysql]# ps -ef</span><br><span class="line">UID        PID  PPID  C STIME TTY          TIME CMD</span><br><span class="line">root         1     0  0 07:34 ?        00:00:00 /usr/local/bin/dumb-init bash -vx /opt/sh/mysql/hzj/scripts/start.sh</span><br><span class="line">root         8     1  0 07:34 ?        00:00:00 bash -vx /opt/sh/mysql/hzj/scripts/start.sh</span><br><span class="line">root        17     1  0 07:34 ?        00:00:00 mysqld --daemonize --user=root</span><br><span class="line">root        62     8  0 07:34 ?        00:00:00 tail -f /dev/null</span><br><span class="line">root        63     0  0 07:34 pts/0    00:00:00 bash</span><br><span class="line">root        98    63  0 07:37 pts/0    00:00:00 mysql -h 127.0.0.1 -u hzj -px xxxxxxx</span><br><span class="line">root        99     0  1 07:37 pts/1    00:00:00 bash</span><br><span class="line">root       122    99  0 07:37 pts/1    00:00:00 ps -ef</span><br></pre></td></tr></table></figure>
+
+<h2><span id="mysql-yin-cang-mi-ma-yuan-li">Mysql隐藏密码原理</span><a href="#mysql-yin-cang-mi-ma-yuan-li" class="header-anchor">#</a></h2><p>改写了<code>args</code>系统参数，demo如下</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// Created by 张俭 on 2021/4/26.</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> *argv[])</span> &#123;</span><br><span class="line">    <span class="type">int</span> i = <span class="number">0</span>;</span><br><span class="line">    <span class="type">pid_t</span> mypid = getpid();</span><br><span class="line">    <span class="keyword">if</span> (argc == <span class="number">1</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;argc = %d and arguments are:\n&quot;</span>, argc);</span><br><span class="line">    <span class="keyword">for</span> (i; i &lt; argc; i++) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;%d = %s\n&quot;</span>, i, argv[i]);</span><br><span class="line">    &#125;</span><br><span class="line">    fflush(<span class="built_in">stdout</span>);</span><br><span class="line">    sleep(<span class="number">30</span>);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Replacing first argument with x:es... Now open another terminal and run: ps p %d\n&quot;</span>, (<span class="type">int</span>)mypid);</span><br><span class="line">    <span class="built_in">memset</span>(argv[<span class="number">1</span>], <span class="string">&#x27;x&#x27;</span>, <span class="built_in">strlen</span>(argv[<span class="number">1</span>]));</span><br><span class="line">    getc(<span class="built_in">stdin</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>编译并运行</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">gcc password_hide.c</span><br><span class="line">[root@c77dc365cd1a sh]<span class="comment"># ./a.out abcd</span></span><br><span class="line">argc = 2 and arguments are:</span><br><span class="line">0 = ./a.out</span><br><span class="line">1 = abcd</span><br><span class="line">Replacing first argument with x:es... Now open another terminal and run: ps p 55</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>观测结果，开始看的确有明文密码</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@c77dc365cd1a sh]# ps -ef</span><br><span class="line">UID        PID  PPID  C STIME TTY          TIME CMD</span><br><span class="line">root         1     0  0 07:49 pts/0    00:00:00 bash</span><br><span class="line">root        32     0  0 07:51 pts/1    00:00:00 bash</span><br><span class="line">root        64     1  0 07:56 pts/0    00:00:00 ./a.out abcd</span><br><span class="line">root        66    32  0 07:56 pts/1    00:00:00 ps -ef</span><br></pre></td></tr></table></figure>
+<p>经过30秒后，已经被复写</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@c77dc365cd1a sh]# ps p 55</span><br><span class="line">  PID TTY      STAT   TIME COMMAND</span><br><span class="line">   55 pts/0    S+     0:00 ./a.out xxxx</span><br></pre></td></tr></table></figure>
+<h2><span id="mysql-yuan-ma-di-zhi">Mysql源码地址</span><a href="#mysql-yuan-ma-di-zhi" class="header-anchor">#</a></h2><p>mysql-server&#x2F;client&#x2F;mysql.cc line 2054</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">if (argument) &#123;</span><br><span class="line">  char *start = argument;</span><br><span class="line">  my_free(opt_password);</span><br><span class="line">  opt_password = my_strdup(PSI_NOT_INSTRUMENTED, argument, MYF(MY_FAE));</span><br><span class="line">  while (*argument) *argument++ = &#x27;x&#x27;;  // Destroy argument</span><br><span class="line">  if (*start) start[1] = 0;</span><br><span class="line">  tty_password = false;</span><br><span class="line">&#125; else</span><br><span class="line">  tty_password = true;</span><br></pre></td></tr></table></figure>
+
+<p>PS: 后面，我还在OSX上用go程序尝试修改参数，估摸go程序的args传入是值拷贝，修改完成之后args没有生效，看来这个黑科技只有c程序能使用呀。</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/pulsar/pulsar-third-vendor/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="shoothzj">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/pulsar/pulsar-third-vendor/" class="post-title-link" itemprop="url">如果不是公有云的供应商，能提供什么样的Pulsar服务体验</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-04-20 20:45:22" itemprop="dateCreated datePublished" datetime="2021-04-20T20:45:22+00:00">2021-04-20</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2024-11-24 11:33:05" itemprop="dateModified" datetime="2024-11-24T11:33:05+00:00">2024-11-24</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1><span id="xu-yao-liao-jie-de-gai-nian">需要了解的概念</span><a href="#xu-yao-liao-jie-de-gai-nian" class="header-anchor">#</a></h1><ul>
+<li>VPC：用户的私有网段</li>
+<li>peering：多个VPC之间打通的方式，可跨用户</li>
+</ul>
+<h1><span id="qian-yan">前言</span><a href="#qian-yan" class="header-anchor">#</a></h1><p>今天微信推送Pulsar社区有个Hackathon比赛, 开始想的idea就是，实现<code>pulsar</code>在华为云上提供服务。因为是社区的比赛，是以一个三方系统的方式在华为云上提供服务，而非是以华为云的名义提供服务。分析了下可行性和能达到的效果，对比了<code>StreamNative</code>的官网上提供的<code>pulsar</code>服务在阿里云托管的能力，能提供的能力差不多，最多只不过是实现了在华为云托管的能力，没有从0到1的突破。</p>
+<p>现在，在公有云上买<code>redis</code>和<code>kafka</code>这类组件已经变得非常普遍，由公有云供应商提供的中间件往往能给你带来良好的体验，相比三方厂家在云上进行托管，我个人认为云厂商的优势主要在以下三点</p>
+<h2><span id="wang-luo-da-tong-rong-yi">网络打通容易</span><a href="#wang-luo-da-tong-rong-yi" class="header-anchor">#</a></h2><p>下文说一下不是公有云的供应商能以什么样的方式暴露自己的服务。云厂商可以把中间件的ip地址申请在你的vpc内，对任何应用程序来说，连接都是最方便的。无论是容器化部署、虚拟机部署、和其他vpc peering打通的场景，都可以通信。</p>
+<h2><span id="di-lian-de-cheng-ben">低廉的成本</span><a href="#di-lian-de-cheng-ben" class="header-anchor">#</a></h2><p>不考虑人力成本，云厂商自运营的价格要低于三方厂家。</p>
+<h2><span id="jian-kong-xi-tong-dui-jie">监控系统对接</span><a href="#jian-kong-xi-tong-dui-jie" class="header-anchor">#</a></h2><p>方便地和云厂商的告警、统计系统对接，接收告警通知和报表等。</p>
+<p>其中<strong>网络打通</strong>和<strong>成本</strong>尤为重要，三方厂家好好做监控统计系统，也能给用户较为良好的体验。</p>
+<h1><span id="san-fang-han-jia-neng-ti-gong-shi-me-yang-de-pulsar-jie-ru">三方厂家能提供什么样的Pulsar接入</span><a href="#san-fang-han-jia-neng-ti-gong-shi-me-yang-de-pulsar-jie-ru" class="header-anchor">#</a></h1><h2><span id="tong-yi-jie-ru">统一接入</span><a href="#tong-yi-jie-ru" class="header-anchor">#</a></h2><p>三方厂家自己作为公有云上一个用户，无论这个Region上有多少个租户，都用这一个用户提供服务，这也就意味着无法与每个用户进行私网通信。如果在华为云，利用华为云推出的<strong>VPCEP</strong>服务（此处应有链接），倒是可以给每个用户提供私网通信，不过这个是做了DNAT地址转换的，跟做了DNAT转换的中间件连接，是非常麻烦的。（懂的自然懂。如果有人想详细了解，可以留言，我可以写一个文章介绍里面的坑）</p>
+<p>如果使用公网，又想避免扩容的时候动态申请EIP，动态申请EIP并不复杂，问题是EIP是有配额限制的，这才是关键。那么就需要一个统一的接入点，就需要部署pulsar proxy。到这一步，是每个用户申请一个EIP的，如果还想继续节省EIP，那么可以统一域名接入，后端通过SNI的方式转发，个别流量大的客户，单独把域名指向单独的集群。</p>
+<p><img src="/pulsar/pulsar-third-vendor/pulsar-third-vendor1.png" alt="pulsar-third-vendor1"></p>
+<h2><span id="peering-da-tong">Peering打通</span><a href="#peering-da-tong" class="header-anchor">#</a></h2><p>Peering打通可以给用户不错的私网体验，需要用户预留一个网段，网段不需要太大，能容纳pulsar所在的vm就行。采用peering打通一般绝不会选择容器化部署，想要两个容器化的集群互通，对网设的要求很高，暂且忽略Service的存在，这要求用户的vpc网段和pod网段和三方厂商的vpc网段和pod网段都不重叠！而且peering打通，给用户私有，再搭建一个k8s集群，对成本影响比较大。主要有如下两个问题</p>
+<h3><span id="zi-dong-hua">自动化</span><a href="#zi-dong-hua" class="header-anchor">#</a></h3><p>和客户peering打通，需要较大的权限，如何自动化，最大程度的减少需要的权限。</p>
+<h3><span id="ke-hu-wang-duan-he-qi-ta-wang-duan-you-zuo-liao-peering">客户网段和其他网段又做了peering</span><a href="#ke-hu-wang-duan-he-qi-ta-wang-duan-you-zuo-liao-peering" class="header-anchor">#</a></h3><p><img src="/pulsar/pulsar-third-vendor/pulsar-third-vendor2.png" alt="pulsar-third-vendor2"></p>
+<p>这个问题其实还好，就是路由规则配置麻烦</p>
+<h1><span id="zong-jie">总结</span><a href="#zong-jie" class="header-anchor">#</a></h1><p>Peering打通对用户来说已经比较方便了，相信做到自动化也没有太大的技术难度，只是时间和人力投入的问题。统一接入因为网络打通的原因，不好使用<code>kop</code>、<code>mop</code>这些高级特性，此外还有不小的公网带宽成本，羊毛出在羊身上，比较大量的用户也会倾向于Peering打通的模式吧。</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -222,7 +568,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-07-11 00:09:50" itemprop="dateModified" datetime="2024-07-11T00:09:50+00:00">2024-07-11</time>
+      <time title="修改时间：2024-11-24 11:33:05" itemprop="dateModified" datetime="2024-11-24T11:33:05+00:00">2024-11-24</time>
     </span>
 
   
@@ -330,7 +676,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-07-11 00:09:50" itemprop="dateModified" datetime="2024-07-11T00:09:50+00:00">2024-07-11</time>
+      <time title="修改时间：2024-11-24 11:33:05" itemprop="dateModified" datetime="2024-11-24T11:33:05+00:00">2024-11-24</time>
     </span>
 
   
@@ -502,7 +848,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-07-11 00:09:50" itemprop="dateModified" datetime="2024-07-11T00:09:50+00:00">2024-07-11</time>
+      <time title="修改时间：2024-11-24 11:33:05" itemprop="dateModified" datetime="2024-11-24T11:33:05+00:00">2024-11-24</time>
     </span>
 
   
@@ -592,7 +938,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-07-11 00:09:50" itemprop="dateModified" datetime="2024-07-11T00:09:50+00:00">2024-07-11</time>
+      <time title="修改时间：2024-11-24 11:33:05" itemprop="dateModified" datetime="2024-11-24T11:33:05+00:00">2024-11-24</time>
     </span>
 
   
@@ -679,7 +1025,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-07-11 00:09:50" itemprop="dateModified" datetime="2024-07-11T00:09:50+00:00">2024-07-11</time>
+      <time title="修改时间：2024-11-24 11:33:05" itemprop="dateModified" datetime="2024-11-24T11:33:05+00:00">2024-11-24</time>
     </span>
 
   
@@ -781,7 +1127,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-07-11 00:09:50" itemprop="dateModified" datetime="2024-07-11T00:09:50+00:00">2024-07-11</time>
+      <time title="修改时间：2024-11-24 11:33:05" itemprop="dateModified" datetime="2024-11-24T11:33:05+00:00">2024-11-24</time>
     </span>
 
   
@@ -871,7 +1217,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-07-11 00:09:50" itemprop="dateModified" datetime="2024-07-11T00:09:50+00:00">2024-07-11</time>
+      <time title="修改时间：2024-11-24 11:33:05" itemprop="dateModified" datetime="2024-11-24T11:33:05+00:00">2024-11-24</time>
     </span>
 
   
@@ -902,287 +1248,6 @@
 <p>配置ip 隧道倒也不难</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip tunnel add $tun_name mode ipip remote $remote_ip local $local_ip ttl 255</span><br></pre></td></tr></table></figure>
 <h1><span id="zong-jie">总结</span><a href="#zong-jie" class="header-anchor">#</a></h1><p>以上三种方案均没有单点问题，且都兼容tcp，udp协议。GateWay处的单点问题，通过zk选主、etcd选主，keepalive等 + 浮动IP迁移的方式均能解决。大家可以根据自己的网规网设自由选择</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/nginx/nginx-sni/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="shoothzj">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/nginx/nginx-sni/" class="post-title-link" itemprop="url">Nginx支持SNI转发</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-12-05 15:20:31" itemprop="dateCreated datePublished" datetime="2020-12-05T15:20:31+00:00">2020-12-05</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-07-11 00:09:50" itemprop="dateModified" datetime="2024-07-11T00:09:50+00:00">2024-07-11</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>SNI是一个TLS的扩展字段，经常用于访问域名跳转到不同的后端地址。</p>
-<p>配置方式如下：打开nginx.conf文件，以ttbb&#x2F;nginx:nake镜像为例&#x2F;usr&#x2F;local&#x2F;openresty&#x2F;nginx&#x2F;conf&#x2F;nginx.conf</p>
-<p>如下为默认的nginx.conf配置</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">#user  nobody;</span><br><span class="line">worker_processes  1;</span><br><span class="line"></span><br><span class="line">#error_log  logs/error.log;</span><br><span class="line">#error_log  logs/error.log  notice;</span><br><span class="line">#error_log  logs/error.log  info;</span><br><span class="line"></span><br><span class="line">#pid        logs/nginx.pid;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">events &#123;</span><br><span class="line">    worker_connections  1024;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">http &#123;</span><br><span class="line">    include       mime.types;</span><br><span class="line">    default_type  application/octet-stream;</span><br><span class="line"></span><br><span class="line">    #log_format  main  &#x27;$remote_addr - $remote_user [$time_local] &quot;$request&quot; &#x27;</span><br><span class="line">    #                  &#x27;$status $body_bytes_sent &quot;$http_referer&quot; &#x27;</span><br><span class="line">    #                  &#x27;&quot;$http_user_agent&quot; &quot;$http_x_forwarded_for&quot;&#x27;;</span><br><span class="line"></span><br><span class="line">    #access_log  logs/access.log  main;</span><br><span class="line"></span><br><span class="line">    sendfile        on;</span><br><span class="line">    #tcp_nopush     on;</span><br><span class="line"></span><br><span class="line">    #keepalive_timeout  0;</span><br><span class="line">    keepalive_timeout  65;</span><br><span class="line"></span><br><span class="line">    #gzip  on;</span><br><span class="line"></span><br><span class="line">    server &#123;</span><br><span class="line">        listen       80;</span><br><span class="line">        server_name  localhost;</span><br><span class="line"></span><br><span class="line">        #charset koi8-r;</span><br><span class="line"></span><br><span class="line">        #access_log  logs/host.access.log  main;</span><br><span class="line"></span><br><span class="line">        location / &#123;</span><br><span class="line">            root   html;</span><br><span class="line">            index  index.html index.htm;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        #error_page  404              /404.html;</span><br><span class="line"></span><br><span class="line">        # redirect server error pages to the static page /50x.html</span><br><span class="line">        #</span><br><span class="line">        error_page   500 502 503 504  /50x.html;</span><br><span class="line">        location = /50x.html &#123;</span><br><span class="line">            root   html;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        # proxy the PHP scripts to Apache listening on 127.0.0.1:80</span><br><span class="line">        #</span><br><span class="line">        #location ~ \.php$ &#123;</span><br><span class="line">        #    proxy_pass   http://127.0.0.1;</span><br><span class="line">        #&#125;</span><br><span class="line"></span><br><span class="line">        # pass the PHP scripts to FastCGI server listening on 127.0.0.1:9000</span><br><span class="line">        #</span><br><span class="line">        #location ~ \.php$ &#123;</span><br><span class="line">        #    root           html;</span><br><span class="line">        #    fastcgi_pass   127.0.0.1:9000;</span><br><span class="line">        #    fastcgi_index  index.php;</span><br><span class="line">        #    fastcgi_param  SCRIPT_FILENAME  /scripts$fastcgi_script_name;</span><br><span class="line">        #    include        fastcgi_params;</span><br><span class="line">        #&#125;</span><br><span class="line"></span><br><span class="line">        # deny access to .htaccess files, if Apache&#x27;s document root</span><br><span class="line">        # concurs with nginx&#x27;s one</span><br><span class="line">        #</span><br><span class="line">        #location ~ /\.ht &#123;</span><br><span class="line">        #    deny  all;</span><br><span class="line">        #&#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    # another virtual host using mix of IP-, name-, and port-based configuration</span><br><span class="line">    #</span><br><span class="line">    #server &#123;</span><br><span class="line">    #    listen       8000;</span><br><span class="line">    #    listen       somename:8080;</span><br><span class="line">    #    server_name  somename  alias  another.alias;</span><br><span class="line"></span><br><span class="line">    #    location / &#123;</span><br><span class="line">    #        root   html;</span><br><span class="line">    #        index  index.html index.htm;</span><br><span class="line">    #    &#125;</span><br><span class="line">    #&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    # HTTPS server</span><br><span class="line">    #</span><br><span class="line">    #server &#123;</span><br><span class="line">    #    listen       443 ssl;</span><br><span class="line">    #    server_name  localhost;</span><br><span class="line"></span><br><span class="line">    #    ssl_certificate      cert.pem;</span><br><span class="line">    #    ssl_certificate_key  cert.key;</span><br><span class="line"></span><br><span class="line">    #    ssl_session_cache    shared:SSL:1m;</span><br><span class="line">    #    ssl_session_timeout  5m;</span><br><span class="line"></span><br><span class="line">    #    ssl_ciphers  HIGH:!aNULL:!MD5;</span><br><span class="line">    #    ssl_prefer_server_ciphers  on;</span><br><span class="line"></span><br><span class="line">    #    location / &#123;</span><br><span class="line">    #        root   html;</span><br><span class="line">    #        index  index.html index.htm;</span><br><span class="line">    #    &#125;</span><br><span class="line">    #&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>在最后面添加上</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">stream &#123;</span><br><span class="line"></span><br><span class="line">map $ssl_preread_server_name $name &#123;</span><br><span class="line">    backend.example.com      backend;</span><br><span class="line">    default                  backend2;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">upstream backend &#123;</span><br><span class="line">    server 192.168.0.3:12345;</span><br><span class="line">    server 192.168.0.4:12345;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">upstream backend2 &#123;</span><br><span class="line">    server 127.0.0.1:8071;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">server &#123;</span><br><span class="line">    listen      12346;</span><br><span class="line">    proxy_pass  $name;</span><br><span class="line">    ssl_preread on;</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>这个时候，我们已经开启了SNI转发的功能，如果你使用backend.example.com的域名访问服务器，就会转发到backend，如果使用其他域名，就会转发到backend2</p>
-<p>测试的时候，让我们在&#x2F;etc&#x2F;hosts里进行设置，添加</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1 backend.example.com</span><br></pre></td></tr></table></figure>
-
-<p>然后进行请求</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl https://backend.example.com:12346</span><br></pre></td></tr></table></figure>
-
-<p>这里注意请求要使用https，http协议或者是tcp可没有SNI的说法</p>
-<p><img src="/nginx/nginx-sni/nginx-sni-backend.png" alt="nginx-sni-backend"></p>
-<p>发现请求的确实是backend</p>
-<p>然后测试请求127.0.0.1:12346</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl https://127.0.0.1:12346</span><br></pre></td></tr></table></figure>
-
-<p><img src="/nginx/nginx-sni/nginx-sni-127.png" alt="nginx-sni-127"></p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/code/java/java-ping/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="shoothzj">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/code/java/java-ping/" class="post-title-link" itemprop="url">JAVA Ping命令心跳探测 InetAddress isReachable分析</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-01-12 09:35:09" itemprop="dateCreated datePublished" datetime="2020-01-12T09:35:09+00:00">2020-01-12</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-07-11 00:09:50" itemprop="dateModified" datetime="2024-07-11T00:09:50+00:00">2024-07-11</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1><span id="ye-wu-xu-qiu-fen-xi-yu-jie-jue-fang-an">业务需求分析与解决方案</span><a href="#ye-wu-xu-qiu-fen-xi-yu-jie-jue-fang-an" class="header-anchor">#</a></h1><p>在业务场景中，当需要利用ping命令对主机进行心跳探测时，直接在代码中fork进程执行ping命令虽然可行，但这种方法开销较大，并且处理流程易出错，与使用标准库相比缺乏优雅性。因此，本文探讨了使用Java的InetAddress类的isReachable方法作为替代方案。</p>
-<p>根据资料指出，Java的InetAddress类在root用户权限下通过执行ping命令进行探测，在非root用户权限下则通过访问TCP端口7进行探测。为验证这一点，本文撰写了相应的demo代码并进行了测试（详见：<a target="_blank" rel="noopener" href="https://github.com/shoothzj/heart-beat">GitHub - heart-beat</a>）。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">import lombok.extern.slf4j.Slf4j;</span><br><span class="line"></span><br><span class="line">import java.net.InetAddress;</span><br><span class="line"></span><br><span class="line">@Slf4j</span><br><span class="line">public class PingTestMain &#123;</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) throws Exception &#123;</span><br><span class="line">        String testIp = System.getProperty(&quot;TestIp&quot;);</span><br><span class="line">        InetAddress inetAddress = InetAddress.getByName(testIp);</span><br><span class="line">        boolean addressReachable = inetAddress.isReachable(500);</span><br><span class="line">        log.info(&quot;address is reachable is &#123;&#125;&quot;, addressReachable);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h1><span id="ce-shi-shi-yan">测试实验</span><a href="#ce-shi-shi-yan" class="header-anchor">#</a></h1><h2><span id="root-yong-hu-xia-zhi-xing-cheng-xu">root用户下执行程序</span><a href="#root-yong-hu-xia-zhi-xing-cheng-xu" class="header-anchor">#</a></h2><p><img src="/code/java/java-ping/java-ping-root-success.png" alt="java-ping-root-success.png"></p>
-<p>java程序打印结果也是true</p>
-<h2><span id="zai-pu-tong-yong-hu-quan-xian-xia-de-ce-shi">在普通用户权限下的测试</span><a href="#zai-pu-tong-yong-hu-quan-xian-xia-de-ce-shi" class="header-anchor">#</a></h2><p><img src="/code/java/java-ping/java-ping-user-fail.png" alt="java-ping-user-fail.png"></p>
-<p>此时可以看到,我们的客户端程序向目标tcp7端口发送了一个报文,虽然java程序打印结果为true,但是因为收到了RST包导致的.在当今的网络安全要求下,7端口往往不会开放</p>
-<h2><span id="zai-mu-biao-wang-luo-ping-bi-tcp-duan-kou-7-de-qing-kuang-xia-zhi-xing-cheng-xu">在目标网络屏蔽TCP端口7的情况下执行程序</span><a href="#zai-mu-biao-wang-luo-ping-bi-tcp-duan-kou-7-de-qing-kuang-xia-zhi-xing-cheng-xu" class="header-anchor">#</a></h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iptables -A INPUT -p tcp --dport 7 -j DROP</span><br></pre></td></tr></table></figure>
-
-<p>发送的报文没有收到RST包,此时java程序返回false.不是我们预期的结果</p>
-<h2><span id="pu-tong-yong-hu-quan-xian-xia-xi-dai-te-quan-de-ce-shi">普通用户权限下携带特权的测试</span><a href="#pu-tong-yong-hu-quan-xian-xia-xi-dai-te-quan-de-ce-shi" class="header-anchor">#</a></h2><p>进一步的研究发现，Java程序发送ping命令需要创建raw socket，这要求程序具有root权限或cap_net_raw权限。赋予Java程序创建raw socket的权限后重新测试，发现程序能够正确发送ping命令，达到预期效果。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">setcap cap_net_raw+ep /usr/java/jdk-13.0.1/bin/java</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>发现如下报错</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java: error while loading shared libraries: libjli.so: cannot open shared object file: No such file or directory</span><br></pre></td></tr></table></figure>
-<p>使用<a target="_blank" rel="noopener" href="https://askubuntu.com/questions/334365/how-to-add-a-directory-to-linker-command-line-in-linux%E8%A7%84%E9%81%BF%E6%B7%BB%E5%8A%A0so%E6%96%87%E4%BB%B6%E6%9D%83%E9%99%90">https://askubuntu.com/questions/334365/how-to-add-a-directory-to-linker-command-line-in-linux规避添加so文件权限</a></p>
-<p>随后抓包,发现还是发送了ping命令,达到了我们预期的效果</p>
-<h1><span id="zong-jie">总结</span><a href="#zong-jie" class="header-anchor">#</a></h1><p>本文通过一系列测试得出结论，root用户权限下的Java程序会使用ping命令进行探测。若普通用户不具备相应权限，则会尝试探测TCP端口7，但在安全组未开启该端口的情况下会导致预期结果不一致。推荐赋予java程序特权,使得InetAddress类能够使用ping命令进行探测</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/wireshark/wireshark-display-filter/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="shoothzj">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/wireshark/wireshark-display-filter/" class="post-title-link" itemprop="url">WireShark 显示过滤器</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2018-09-09 09:55:09" itemprop="dateCreated datePublished" datetime="2018-09-09T09:55:09+00:00">2018-09-09</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-07-11 00:09:50" itemprop="dateModified" datetime="2024-07-11T00:09:50+00:00">2024-07-11</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1><span id="ru-he-shi-yong-xian-shi-guo-lu-qi">如何使用显示过滤器</span><a href="#ru-he-shi-yong-xian-shi-guo-lu-qi" class="header-anchor">#</a></h1><p><img src="/wireshark/wireshark-display-filter/wireshark-display-filter1.png" alt="wireshark-display-filter1"><br>或者按住 CTRL + F，输入显示过滤器<br><img src="/wireshark/wireshark-display-filter/wireshark-display-filter2.png" alt="wireshark-display-filter2"></p>
-<h2><span id="er-ceng-xian-shi-guo-lu-qi-ju-li">二层显示过滤器举例</span><a href="#er-ceng-xian-shi-guo-lu-qi-ju-li" class="header-anchor">#</a></h2><h3><span id="chang-du-xiao-yu-128-zi-jie-de-shu-ju-bao">长度小于128字节的数据包</span><a href="#chang-du-xiao-yu-128-zi-jie-de-shu-ju-bao" class="header-anchor">#</a></h3><p>frame.len&lt;&#x3D;128</p>
-<h3><span id="pai-chu-arp-liu-liang">排除ARP流量</span><a href="#pai-chu-arp-liu-liang" class="header-anchor">#</a></h3><p>!arp</p>
-<h2><span id="san-ceng-xian-shi-guo-lu-qi-ju-li">三层显示过滤器举例</span><a href="#san-ceng-xian-shi-guo-lu-qi-ju-li" class="header-anchor">#</a></h2><h3><span id="zhi-xian-shi-192-168-0-1-ip-xiang-guan-shu-ju-bao">只显示192.168.0.1 IP相关数据包</span><a href="#zhi-xian-shi-192-168-0-1-ip-xiang-guan-shu-ju-bao" class="header-anchor">#</a></h3><p>ip.addr&#x3D;&#x3D;192.168.0.1</p>
-<h2><span id="si-ceng-xian-shi-guo-lu-qi-ju-li">四层显示过滤器举例</span><a href="#si-ceng-xian-shi-guo-lu-qi-ju-li" class="header-anchor">#</a></h2><h3><span id="pai-chu-rdp-liu-liang">排除RDP流量</span><a href="#pai-chu-rdp-liu-liang" class="header-anchor">#</a></h3><p>!tcp.port&#x3D;&#x3D;3389</p>
-<h3><span id="ju-you-syn-biao-zhi-de-tcp-shu-ju-bao">具有SYN标志的TCP数据包</span><a href="#ju-you-syn-biao-zhi-de-tcp-shu-ju-bao" class="header-anchor">#</a></h3><p>tcp.flags.syn&#x3D;&#x3D;1</p>
-<h3><span id="ju-you-rst-biao-zhi-de-tcp-shu-ju-bao">具有RST标志的TCP数据包</span><a href="#ju-you-rst-biao-zhi-de-tcp-shu-ju-bao" class="header-anchor">#</a></h3><p>tcp.flags.rst&#x3D;&#x3D;1</p>
-<h3><span id="tcp-que-ren-shi-jian-jiao-jiu">TCP确认时间较久</span><a href="#tcp-que-ren-shi-jian-jiao-jiu" class="header-anchor">#</a></h3><p>tcp.analysis.ack_rtt &gt; 0.2 and tcp.len &#x3D;&#x3D; 0<br>###启用TCP Relative Sequence Number的情况<br>如何启用?<br>Edit -&gt; Preferences -&gt; Protocols -&gt; TCP Relative Sequence Numbers</p>
-<h3><span id="wo-shou-bei-dui-fang-ju-jue-de-bao">握手被对方拒绝的包</span><a href="#wo-shou-bei-dui-fang-ju-jue-de-bao" class="header-anchor">#</a></h3><p>tcp.flags.reset &#x3D;&#x3D; 1 &amp;&amp; tcp.seq &#x3D;&#x3D; 1</p>
-<h3><span id="ke-hu-duan-chong-chuan">客户端重传</span><a href="#ke-hu-duan-chong-chuan" class="header-anchor">#</a></h3><p>tcp.flags.syn &#x3D;&#x3D; 1 &amp;&amp; tcp.analysis.retransmission</p>
-<h3><span id="tcp-bao-han">Tcp包含</span><a href="#tcp-bao-han" class="header-anchor">#</a></h3><p>tcp contains {str}</p>
-<h2><span id="ying-yong-ceng-xian-shi-guo-lu-qi-ju-li">应用层显示过滤器举例</span><a href="#ying-yong-ceng-xian-shi-guo-lu-qi-ju-li" class="header-anchor">#</a></h2><h3><span id="suo-you-http-liu-liang">所有http流量</span><a href="#suo-you-http-liu-liang" class="header-anchor">#</a></h3><p>http</p>
-<h3><span id="wen-ben-guan-li-liu-liang">文本管理流量</span><a href="#wen-ben-guan-li-liu-liang" class="header-anchor">#</a></h3><p>tcp.port &#x3D;&#x3D; 23 || tcp.port &#x3D;&#x3D; 21</p>
-<h3><span id="wen-ben-email-liu-liang">文本email流量</span><a href="#wen-ben-email-liu-liang" class="header-anchor">#</a></h3><p>email || pop || imap</p>
-<h3><span id="zhi-xian-shi-fang-wen-mou-zhi-ding-zhu-ji-ming-de-http-xie-yi-shu-ju-bao">只显示访问某指定主机名的HTTP协议数据包</span><a href="#zhi-xian-shi-fang-wen-mou-zhi-ding-zhu-ji-ming-de-http-xie-yi-shu-ju-bao" class="header-anchor">#</a></h3><p>http.host &#x3D;&#x3D; &lt;”hostname”&gt;</p>
-<h3><span id="zhi-xian-shi-bao-han-http-get-fang-fa-de-http-xie-yi-shu-ju-bao">只显示包含HTTP GET方法的HTTP协议数据包</span><a href="#zhi-xian-shi-bao-han-http-get-fang-fa-de-http-xie-yi-shu-ju-bao" class="header-anchor">#</a></h3><p>http.request.method &#x3D;&#x3D; ‘GET’</p>
-<h3><span id="zhi-xian-shi-http-ke-hu-duan-fa-qi-de-bao-han-zhi-ding-uri-qing-qiu-de-http-xie-yi-shu-ju-bao">只显示HTTP 客户端发起的包含指定URI请求的HTTP协议数据包</span><a href="#zhi-xian-shi-http-ke-hu-duan-fa-qi-de-bao-han-zhi-ding-uri-qing-qiu-de-http-xie-yi-shu-ju-bao" class="header-anchor">#</a></h3><p>http.request.uri &#x3D;&#x3D; &lt;”Full request URI”&gt;</p>
-<h3><span id="zhi-xian-shi-bao-han-zip-wen-jian-de-shu-ju-bao">只显示包含ZIP文件的数据包</span><a href="#zhi-xian-shi-bao-han-zip-wen-jian-de-shu-ju-bao" class="header-anchor">#</a></h3><p>http matches “.zip” &amp;&amp; http.request.method &#x3D;&#x3D; ‘GET’</p>
 
       
     </div>

@@ -146,13 +146,13 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">72</span>
+          <span class="site-state-item-count">75</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">41</span>
+        <span class="site-state-item-count">43</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -177,6 +177,442 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/code/backend-dev-entity-naming/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="shoothzj">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/code/backend-dev-entity-naming/" class="post-title-link" itemprop="url">后端开发实体命名</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-12-25 20:05:45" itemprop="dateCreated datePublished" datetime="2023-12-25T20:05:45+00:00">2023-12-25</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2024-11-24 11:33:05" itemprop="dateModified" datetime="2024-11-24T11:33:05+00:00">2024-11-24</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>对于一个资源实体来说，在解决方案里，常见的操作场景有：</p>
+<ul>
+<li>由外部&#x2F;客户发起的增删改查、列表查询，访问协议一般为HTTP协议。</li>
+<li>由系统内部组件发起的增删改查、列表查询，协议可能为HTTP协议，也可能是RPC协议如gRPC等。</li>
+<li>由资源实体的owner服务跟数据库进行实体读写。</li>
+<li>由资源实体的owner服务将变更广播到消息中间件里。</li>
+</ul>
+<p>可以将实体命名如下：<br><img src="/code/backend-dev-entity-naming/naming.png" alt="naming"></p>
+<p>实体类详细说明：</p>
+<ul>
+<li>CreateXxxReq 创建资源请求，包含除资源id之外的所有字段，有些变种里面可能会包含id字段。</li>
+<li>UpdateXxxReq 更新资源请求，包含除资源id之外支持更新的所有字段。</li>
+<li>XxxResp 资源响应，可用于Crate、Update接口的返回，包含所有字段。</li>
+<li>ListXxxsResp 资源列表响应，包含资源列表。</li>
+<li>List<briefxxxresp> 资源列表响应，包含资源列表，每个资源包含部分字段，一般是id、name、createdTime、updatedTime等。</briefxxxresp></li>
+</ul>
+<p>出于复杂性的考虑，可以将XxxNotify类跟InnerXxx进行简化合并，转化为:</p>
+<p><img src="/naming-omit-notify.png" alt="naming-omit-notify"></p>
+<p>swagger&#x2F;openapi里，operationId可使用如下</p>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>operationId</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>创建资源</td>
+<td>CreateXxx</td>
+</tr>
+<tr>
+<td>删除资源</td>
+<td>DeleteXxx</td>
+</tr>
+<tr>
+<td>更新资源</td>
+<td>UpdateXxx</td>
+</tr>
+<tr>
+<td>查询单个资源</td>
+<td>ShowXxx</td>
+</tr>
+<tr>
+<td>查询资源列表</td>
+<td>ListXxx</td>
+</tr>
+<tr>
+<td>内部创建资源</td>
+<td>CreateInnerXxx</td>
+</tr>
+<tr>
+<td>内部删除资源</td>
+<td>DeleteInnerXxx</td>
+</tr>
+<tr>
+<td>内部更新资源</td>
+<td>UpdateInnerXxx</td>
+</tr>
+<tr>
+<td>内部查询单个资源</td>
+<td>ShowInnerXxx</td>
+</tr>
+<tr>
+<td>内部查询资源列表</td>
+<td>ListInnerXxx</td>
+</tr>
+</tbody></table>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/code/java/find-save-concurrent/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="shoothzj">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/code/java/find-save-concurrent/" class="post-title-link" itemprop="url">java进行数据库操作的并发控制</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-12-25 08:44:38" itemprop="dateCreated datePublished" datetime="2023-12-25T08:44:38+00:00">2023-12-25</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2024-11-24 11:33:05" itemprop="dateModified" datetime="2024-11-24T11:33:05+00:00">2024-11-24</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>在现代应用编码中，从数据库里面find出来，进行一些业务逻辑操作，最后再save回去。即：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Person</span> <span class="variable">person</span> <span class="operator">=</span> personRepo.findById(id);</span><br><span class="line">person.setAge(<span class="number">18</span>);</span><br><span class="line">personRepo.save(person);</span><br></pre></td></tr></table></figure>
+
+<p>但是这样的业务操作，如果一个线程修改年龄，另一个线程修改昵称，最后save回去，可能会导致年龄&#x2F;昵称某一个的修改被覆盖。</p>
+<pre class="mermaid">sequenceDiagram
+    participant A as Thread A
+    participant B as Thread B
+    participant DB as Database
+
+    A->>DB: find person by id
+    Note over A: person.setAge(18)
+    B->>DB: find person by id
+    Note over B: person.setNickname("NewName")
+
+    A->>DB: save person
+    B->>DB: save person
+
+    Note over DB: Potential Overwrite Issue</pre>
+
+<p>常见的解决方案有两种</p>
+<h1><span id="zhi-xing-qian-tian-jia-bei-guan-suo">执行前添加悲观锁</span><a href="#zhi-xing-qian-tian-jia-bei-guan-suo" class="header-anchor">#</a></h1><p>通过分布式锁等方式，保证同一时间只有一个线程能够对数据进行修改。</p>
+<h1><span id="le-guan-suo-si-lu-shi-xian">乐观锁思路实现</span><a href="#le-guan-suo-si-lu-shi-xian" class="header-anchor">#</a></h1><p>版本控制是另一种流行的处理并发问题的方法。它通过在每次更新记录时递增版本号来确保数据的一致性。</p>
+<p>这在JPA中，可以通过在field上添加<code>@Version</code>注解来实现，但这也就要求①数据库中必须有version字段，②对于查找后更新类操作，必须使用JPA的save方法来进行更新。</p>
+<p>当然也可以通过<code>update_time</code>来模拟乐观锁实现，这可能需要你在更新的时候添加<code>update_time</code>的条件，并且，<code>update_time</code>在极端场景下，理论正确性没那么严谨。</p>
+<script type="module"> import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.esm.min.mjs';	mermaid.initialize({startOnLoad: true, flowchart: {curve: 'linear'}}); </script>
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/pagination-practice/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="shoothzj">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/pagination-practice/" class="post-title-link" itemprop="url">分页实践：前后端多种分页方式实现对比</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-12-16 12:27:25" itemprop="dateCreated datePublished" datetime="2023-12-16T12:27:25+00:00">2023-12-16</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2024-11-24 11:33:05" itemprop="dateModified" datetime="2024-11-24T11:33:05+00:00">2024-11-24</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>在软件开发中，分页没有统一的规范，实现方式也各不相同，有的会返回总页数，有的会返回总条数，有的可以任意翻页。本文对比一下几种常见的分页方式。</p>
+<p>总体来说，分页的实现方案分为四种：</p>
+<ul>
+<li>后端全部返回，由前端分页</li>
+<li>limit offset方案</li>
+<li>cursor方案</li>
+<li>cursor方案与offset结合</li>
+</ul>
+<h1><span id="hou-duan-quan-bu-fan-hui-you-qian-duan-fen-ye">后端全部返回，由前端分页</span><a href="#hou-duan-quan-bu-fan-hui-you-qian-duan-fen-ye" class="header-anchor">#</a></h1><pre class="mermaid">sequenceDiagram
+    participant 前端
+    participant 后端
+    前端 ->> 后端: 请求资源集数据
+    后端 -->> 前端: 返回全部数据</pre>
+
+<table>
+<thead>
+<tr>
+<th>前端功能</th>
+<th>支持情况</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>显示总页</td>
+<td>🙂</td>
+</tr>
+<tr>
+<td>任意页码跳转</td>
+<td>🙂</td>
+</tr>
+<tr>
+<td>跳转附近数页</td>
+<td>🙂</td>
+</tr>
+<tr>
+<td>大量数据集</td>
+<td>😭完全不可用</td>
+</tr>
+<tr>
+<td>实现难度</td>
+<td>简单</td>
+</tr>
+</tbody></table>
+<h1><span id="limit-offset-fang-an">limit offset方案</span><a href="#limit-offset-fang-an" class="header-anchor">#</a></h1><pre class="mermaid">sequenceDiagram
+    participant 前端
+    participant 后端
+    前端 ->> 后端: 请求满足条件的资源总数
+    后端 -->> 前端: 返回满足条件的资源总数
+    前端 ->> 后端: 请求资源集数据、PageNo
+    后端 -->> 前端: 部分数据</pre>
+
+<table>
+<thead>
+<tr>
+<th>前端功能</th>
+<th>支持情况</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>显示总页</td>
+<td>🙂</td>
+</tr>
+<tr>
+<td>任意页码跳转</td>
+<td>🙂</td>
+</tr>
+<tr>
+<td>跳转附近数页</td>
+<td>🙂</td>
+</tr>
+<tr>
+<td>大量数据集</td>
+<td>😭海量数据集下性能差</td>
+</tr>
+<tr>
+<td>实现难度</td>
+<td>相对简单</td>
+</tr>
+</tbody></table>
+<h1><span id="cursor-fang-an">cursor方案</span><a href="#cursor-fang-an" class="header-anchor">#</a></h1><pre class="mermaid">sequenceDiagram
+    participant 前端
+    participant 后端
+    前端 ->> 后端: 请求满足条件的资源总数
+    后端 -->> 前端: 返回满足条件的资源总数
+    前端 ->> 后端: 请求资源集数据、cursor、limit
+    后端 -->> 前端: 部分数据、prevCursor、nextCursor</pre>
+
+<table>
+<thead>
+<tr>
+<th>前端功能</th>
+<th>支持情况</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>显示总页</td>
+<td>🙂</td>
+</tr>
+<tr>
+<td>任意页码跳转</td>
+<td>😭</td>
+</tr>
+<tr>
+<td>跳转附近数页</td>
+<td>🙂</td>
+</tr>
+<tr>
+<td>大量数据集</td>
+<td>🙂</td>
+</tr>
+<tr>
+<td>实现难度</td>
+<td>相对复杂</td>
+</tr>
+</tbody></table>
+<p>如果每一次翻页都返回总页数的话，对性能来讲也是不小的开销。</p>
+<p>相对动态的数据来说，如果不一直翻到没有数据为止，也不好确定是否到了最后一页。为了解决这个问题，以及跳转附近数页的问题，可以演进为这样的方案。</p>
+<p>假定前端最多显示最近6页，每页50条数据，那么前端可以直接尝试预读300条数据，根据返回的数据来做局部的分页。一言以蔽之：读取更多的数据来进行局部分页。</p>
+<p><img src="/pagination-practice/cursor_preload.png" alt="cursor_preload"></p>
+<p>这里可以再简化一下前端的实现，添加offset参数，这样子前端只需要判断当前页前后数据条数是否足够，附近页的跳转可以通过携带offset字段请求得到。</p>
+<h1><span id="cursor-fang-an-yu-offset-jie-he">cursor方案与offset结合</span><a href="#cursor-fang-an-yu-offset-jie-he" class="header-anchor">#</a></h1><p><img src="/pagination-practice/cursor_offset.png" alt="cursor_offset"></p>
+<script type="module"> import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.esm.min.mjs';	mermaid.initialize({startOnLoad: true, flowchart: {curve: 'linear'}}); </script>
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -222,7 +658,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-07-11 00:09:50" itemprop="dateModified" datetime="2024-07-11T00:09:50+00:00">2024-07-11</time>
+      <time title="修改时间：2024-11-24 11:33:05" itemprop="dateModified" datetime="2024-11-24T11:33:05+00:00">2024-11-24</time>
     </span>
 
   
@@ -308,7 +744,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-07-11 00:09:50" itemprop="dateModified" datetime="2024-07-11T00:09:50+00:00">2024-07-11</time>
+      <time title="修改时间：2024-11-24 11:33:05" itemprop="dateModified" datetime="2024-11-24T11:33:05+00:00">2024-11-24</time>
     </span>
 
   
@@ -404,7 +840,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-07-11 00:09:50" itemprop="dateModified" datetime="2024-07-11T00:09:50+00:00">2024-07-11</time>
+      <time title="修改时间：2024-11-24 11:33:05" itemprop="dateModified" datetime="2024-11-24T11:33:05+00:00">2024-11-24</time>
     </span>
 
   
@@ -495,7 +931,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-07-11 00:09:50" itemprop="dateModified" datetime="2024-07-11T00:09:50+00:00">2024-07-11</time>
+      <time title="修改时间：2024-11-24 11:33:05" itemprop="dateModified" datetime="2024-11-24T11:33:05+00:00">2024-11-24</time>
     </span>
 
   
@@ -621,7 +1057,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-07-11 00:09:50" itemprop="dateModified" datetime="2024-07-11T00:09:50+00:00">2024-07-11</time>
+      <time title="修改时间：2024-11-24 11:33:05" itemprop="dateModified" datetime="2024-11-24T11:33:05+00:00">2024-11-24</time>
     </span>
 
   
@@ -751,7 +1187,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-07-11 00:09:50" itemprop="dateModified" datetime="2024-07-11T00:09:50+00:00">2024-07-11</time>
+      <time title="修改时间：2024-11-24 11:33:05" itemprop="dateModified" datetime="2024-11-24T11:33:05+00:00">2024-11-24</time>
     </span>
 
   
@@ -868,7 +1304,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-07-11 00:09:50" itemprop="dateModified" datetime="2024-07-11T00:09:50+00:00">2024-07-11</time>
+      <time title="修改时间：2024-11-24 11:33:05" itemprop="dateModified" datetime="2024-11-24T11:33:05+00:00">2024-11-24</time>
     </span>
 
   
@@ -899,463 +1335,6 @@
 <h1><span id="duo-yu-yan-sdk-she-ji-de-chang-jian-wen-ti">多语言SDK设计的常见问题</span><a href="#duo-yu-yan-sdk-she-ji-de-chang-jian-wen-ti" class="header-anchor">#</a></h1><h2><span id="ri-zhi-da-yin-de-she-ji-ce-lue">日志打印的设计策略</span><a href="#ri-zhi-da-yin-de-she-ji-ce-lue" class="header-anchor">#</a></h2><p>在SDK的关键节点，比如初始化完成、连接建立或者连接断开，都可以打印日志。如果是PerRequest的日志，一般默认不会打印INFO级别的日志。</p>
 <p>SDK应该避免仅仅打印错误日志然后忽略异常；相反，它应该提供机制让调用者能够捕获并处理异常信息。这种做法有助于保持错误处理的透明性，并允许调用者根据需要采取适当的响应措施。正如<strong>David J. Wheeler</strong>所说”Put the control in the hands of those who know how to handle the information, not those who know how to manage the computers, because encapsulated details will eventually leak out.”把控制权放到那些知道如何处理信息的人手中，而不是放在那些知道如何管理计算机的人手中，因为封装的细节最终都会暴露。</p>
 <h2><span id="shi-fou-xu-yao-shi-yong-xian-shi-de-start-x2f-connect-fang-fa">是否需要使用显式的<code>start</code>&#x2F;<code>connect</code>方法？</span><a href="#shi-fou-xu-yao-shi-yong-xian-shi-de-start-x2f-connect-fang-fa" class="header-anchor">#</a></h2><p>像go这样的语言，一般来说不太在意特定的时间内，某个协程是否处于阻塞等待连接的状态。而在java这样的语言，特别是在采用响应式编程模型的场景下，通常需要通过异步操作来管理连接的建立。这可以通过显式的start&#x2F;connect方法来或者是异步的工厂方法来实现。</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/opengemini/opengemini-sdk-design/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="shoothzj">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/opengemini/opengemini-sdk-design/" class="post-title-link" itemprop="url">opengemini client sdk 设计</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2023-11-12 16:21:53" itemprop="dateCreated datePublished" datetime="2023-11-12T16:21:53+00:00">2023-11-12</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-07-11 00:09:50" itemprop="dateModified" datetime="2024-07-11T00:09:50+00:00">2024-07-11</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1><span id="bei-jing">背景</span><a href="#bei-jing" class="header-anchor">#</a></h1><p>由于Influxdb 1.X的客户端已经基本处于维护状态，同时openGemini仍在不断发展中，为了能够更好地支持openGemini，如支持对接多个服务端地址、支持对接Apache<br>Arrow Flight协议等，社区决定开发属于openGemini自己的客户端SDK。</p>
-<h1><span id="ke-hu-duan-sdk-gui-hua-gong-neng">客户端SDK规划功能</span><a href="#ke-hu-duan-sdk-gui-hua-gong-neng" class="header-anchor">#</a></h1><ul>
-<li>支持对接多个服务端地址</li>
-<li>支持对接Apache Arrow Flight协议</li>
-<li>支持Sql查询、结构化查询、写入、批量写入等，详见下文UML图</li>
-<li>默认超时，连接超时10秒，读写超时30秒</li>
-</ul>
-<p>本文的方法假定编程语言不支持重载，如编程语言支持重载，可以对方法名进行一些优化调整。</p>
-<h1><span id="client-constructor-params-design">Client constructor params design</span><a href="#client-constructor-params-design" class="header-anchor">#</a></h1><p>tls相关配置可以参考<a href="../../code/multi-lang-paradigm-tls-config-design">TLS配置参数设计</a></p>
-<pre class="mermaid">classDiagram
-    class OpenGeminiClient {
-        + List~Address~ addresses
-        + AuthConfig authConfig // nullable, if null, means no auth
-        + BatchConfig batchConfig // nullable, if null, means batch is disabled
-        + timeout
-        + connectTimeout
-        + bool gzipEnabled
-        + bool tlsEnabled
-        + TlsConfig tlsConfig // language specific
-        + void close()
-    }
-
-    class Address {
-        + String host
-        + int Port // in rust, it is u16
-    }
-
-    class AuthConfig {
-        + AuthType authType // enum None, Password, Token
-        + String username
-        + String password
-        + String token
-    }
-
-    class BatchConfig {
-        + Duration batchInterval // must be greater than 0
-        + int batchSize // must be greater than 0
-    }
-
-    OpenGeminiClient "1" *-- "many" Address: contains
-    OpenGeminiClient *-- AuthConfig: contains
-    OpenGeminiClient *-- BatchConfig: contains</pre>
-
-<h1><span id="database-amp-retentionpolicy-management-design">Database &amp; RetentionPolicy management design</span><a href="#database-amp-retentionpolicy-management-design" class="header-anchor">#</a></h1><pre class="mermaid">classDiagram
-    class OpenGeminiClient {
-        + void CreateDatabase(String database)
-        + void CreateDatabaseWithRp(String database, rpConfig RpConfig)
-        + String[] ShowDatabases()
-        + void DropDatabase(String database)
-        + void CreateRetentionPolicy(database string, rpConfig RpConfig, isDefault bool)
-        + RetentionPolicy[] ShowRetentionPolicies(database string)
-        + void DropRetentionPolicy(database, retentionPolicy string)
-    }
-    class RpConfig {
-        + String Name
-        + String Duration
-        + String ShardGroupDuration
-        + String IndexDuration
-    }</pre>
-
-<h1><span id="write-point-design">Write point design</span><a href="#write-point-design" class="header-anchor">#</a></h1><pre class="mermaid">classDiagram
-    class OpenGeminiClient {
-        + WritePoint(String database, Point point)
-        + WriteBatchPoints(String database, BatchPoints batchPoints)
-    }
-    class BatchPoints {
-        + List~Point~ points
-        + AddPoint(Point)
-    }
-
-    class Point {
-        + String measurement
-        + Precision precision // enum, second, millisecond, microsecond, nanosecond, default is nanosecond
-        + Time time // language specific
-        + Map~String, String~ tags
-        + Map~String, Object~ fields
-        + AddTag(string, string) // init container if null
-        + AddField(string, int) // init container if null
-        + AddField(string, string) // init container if null
-        + AddField(string, float) // init container if null
-        + AddField(string, bool) // init container if null
-        + SetTime(timestamp)
-        + SetPrecision(type)
-        + SetMeasurement(name)
-    }
-
-    BatchPoints "1" *-- "many" Point: contains</pre>
-
-<h1><span id="sql-like-query-design">Sql-like query design</span><a href="#sql-like-query-design" class="header-anchor">#</a></h1><pre class="mermaid">classDiagram
-    class Query {
-        + String database
-        + String retentionPolicy
-        + String command
-    }</pre>
-
-<pre class="mermaid">classDiagram
-    class QueryResult {
-        + List~SeriesResult~ results
-        + String error
-    }
-    class SeriesResult {
-        + List~Series~ series // Series is an uncountable noun.
-        + String error
-    }
-    class Series {
-        + String name
-        + Map~String, String~ tags
-        + List~String~ columns
-        + List~List~ values
-    }
-    QueryResult "1" *-- "0..*" SeriesResult: contains
-    SeriesResult "1" *-- "0..*" Series: contains</pre>
-
-<h1><span id="ping-design">Ping design</span><a href="#ping-design" class="header-anchor">#</a></h1><pre class="mermaid">classDiagram
-    class OpenGeminiClient {
-        + void ping(int index) // index selects one from multiple servers
-    }</pre>
-
-<h1><span id="inner-http-client-design">Inner Http client design</span><a href="#inner-http-client-design" class="header-anchor">#</a></h1><p>使用类似InnerHttpClient的设计，将鉴权、负载均衡、重试等逻辑封装在内部，对client提供简单的接口。增强模块化和代码清晰度。</p>
-<pre class="mermaid">classDiagram
-    class InnerHttpClient {
-        + void executeHttpGetByIdx(int idx, ...) // specify server index
-        + void executeHttpRequestByIdx(int idx, String method, ...) // specify server index
-        + void executeHttpGet(String method, ...) // load balance
-        + void executeHttpRequest(String method, ...) // load balance
-        - void executeHttpRequestInner(String url, String method, ...) // inner method
-    }</pre>
-
-<pre class="mermaid">graph TD
-    executeHttpGetByIdx --> executeHttpRequestByIdx
-    executeHttpRequestByIdx --> executeHttpRequestInner
-    executeHttpGet --> executeHttpRequest
-    executeHttpRequest --> executeHttpRequestInner</pre>
-
-<h1><span id="error-handling">Error handling</span><a href="#error-handling" class="header-anchor">#</a></h1><h2><span id="error-message">Error message</span><a href="#error-message" class="header-anchor">#</a></h2><h3><span id="scene1-http-request-failed">Scene1 http request failed</span><a href="#scene1-http-request-failed" class="header-anchor">#</a></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$operation request failed, error: $error_details</span><br></pre></td></tr></table></figure>
-
-<h3><span id="scene2-http-response-code-is-not-200-300">Scene2 http response code is not 200~300</span><a href="#scene2-http-response-code-is-not-200-300" class="header-anchor">#</a></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$operation error resp, code: $code, body: $body</span><br></pre></td></tr></table></figure>
-
-<h3><span id="scene3-other-error">Scene3 other error</span><a href="#scene3-other-error" class="header-anchor">#</a></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$operation failed, error: $error_details</span><br><span class="line"># example:</span><br><span class="line">writePoint failed, unmarshall response body error: json: cannot unmarshal number ...</span><br></pre></td></tr></table></figure>
-
-
-<script type="module"> import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.esm.min.mjs';	mermaid.initialize({startOnLoad: true, flowchart: {curve: 'linear'}}); </script>
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/code/multi-lang-paradigm-tls-config-design/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="shoothzj">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/code/multi-lang-paradigm-tls-config-design/" class="post-title-link" itemprop="url">多语言编程 TLS配置参数设计</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2023-11-06 10:11:35" itemprop="dateCreated datePublished" datetime="2023-11-06T10:11:35+00:00">2023-11-06</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-07-11 00:09:50" itemprop="dateModified" datetime="2024-07-11T00:09:50+00:00">2024-07-11</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <div class="toc">
-
-<!-- toc -->
-
-<ul>
-<li><a href="#bei-jing">背景</a></li>
-<li><a href="#tong-yong-can-shu">通用参数</a></li>
-<li><a href="#go">Go</a></li>
-<li><a href="#java">Java</a></li>
-<li><a href="#javascript">JavaScript</a></li>
-<li><a href="#kotlin">Kotlin</a></li>
-<li><a href="#python">Python</a></li>
-<li><a href="#rust">Rust</a></li>
-</ul>
-<!-- tocstop -->
-
-</div>
-
-<h1><span id="bei-jing">背景</span><a href="#bei-jing" class="header-anchor">#</a></h1><p>TLS(Transport Layer Security)是一种安全协议，用于在两个通信应用程序之间提供保密性和数据完整性。TLS是SSL(Secure Sockets Layer)的继任者。</p>
-<p>不同的编程语言处理TLS配置的方式各有千秋, 本文针对TLS配置参数的设计进行探讨。</p>
-<p>代码配置中，建议使用反映状态的参数名。</p>
-<h1><span id="tong-yong-can-shu">通用参数</span><a href="#tong-yong-can-shu" class="header-anchor">#</a></h1><ul>
-<li>tlsEnable: 是否启用TLS</li>
-</ul>
-<h1><span id="go">Go</span><a href="#go" class="header-anchor">#</a></h1><p>推荐使用方式一</p>
-<p>方式一：</p>
-<ul>
-<li>tlsConfig *tls.Config: Go标准库的内置TLS结构体</li>
-</ul>
-<p>方式二：</p>
-<p>由于Go不支持加密的私钥文件，推荐使用文件内容，而不是文件路径，避免敏感信息泄露。</p>
-<ul>
-<li>tlsCertContent []byte: 证书文件内容</li>
-<li>tlsPrivateKeyContent []byte: 私钥文件内容</li>
-<li>tlsMinVersion uint16: TLS最低版本</li>
-<li>tlsMaxVersion uint16: TLS最高版本</li>
-<li>tlsCipherSuites []uint16: TLS加密套件列表</li>
-</ul>
-<h1><span id="java">Java</span><a href="#java" class="header-anchor">#</a></h1><p>Java的TLS参数基本上都是基于keystore和truststore来配置的。一般常见设计如下参数：</p>
-<ul>
-<li>keyStorePath: keystore文件路径</li>
-<li>keyStorePassword: keystore密码</li>
-<li>trustStorePath: truststore文件路径</li>
-<li>trustStorePassword: truststore密码</li>
-<li>tlsVerificationDisabled: 是否禁用TLS校验</li>
-<li>tlsHostnameVerificationDisabled: 是否禁用TLS主机名校验，仅部分框架支持。</li>
-<li>tlsVersions: TLS版本列表</li>
-<li>tlsCipherSuites: TLS加密套件列表</li>
-</ul>
-<h1><span id="javascript">JavaScript</span><a href="#javascript" class="header-anchor">#</a></h1><p>JavaScript可以使用标准库里的tls.SecureContextOptions</p>
-<h1><span id="kotlin">Kotlin</span><a href="#kotlin" class="header-anchor">#</a></h1><p>kotlin的Tls与Java相同：</p>
-<ul>
-<li>keyStorePath: keystore文件路径</li>
-<li>keyStorePassword: keystore密码</li>
-<li>trustStorePath: truststore文件路径</li>
-<li>trustStorePassword: truststore密码</li>
-<li>tlsVerificationDisabled: 是否禁用TLS校验</li>
-<li>tlsHostnameVerificationDisabled: 是否禁用TLS主机名校验，仅部分框架支持。</li>
-<li>tlsVersions: TLS版本列表</li>
-<li>tlsCipherSuites: TLS加密套件列表</li>
-</ul>
-<h1><span id="python">Python</span><a href="#python" class="header-anchor">#</a></h1><p>推荐使用方式一</p>
-<p>方式一</p>
-<ul>
-<li>ssl.SSLContext: Python标准库的内置TLS结构体</li>
-</ul>
-<p>方式二</p>
-<p>Python可以使用文件路径以及加密的私钥文件。</p>
-<ul>
-<li>tlsCertPath: 证书文件路径</li>
-<li>tlsPrivateKeyPath: 私钥文件路径</li>
-<li>tlsPrivateKeyPassword: 私钥密码</li>
-<li>tlsMinVersion: TLS最低版本</li>
-<li>tlsMaxVersion: TLS最高版本</li>
-<li>tlsCipherSuites: TLS加密套件列表</li>
-</ul>
-<h1><span id="rust">Rust</span><a href="#rust" class="header-anchor">#</a></h1><p>由于常见的Rust TLS实现不支持加密的私钥文件，推荐使用文件内容，而不是文件路径，避免敏感信息泄露。 一般常见如下设计参数:</p>
-<ul>
-<li>tls_cert_content Vec<u8>: 证书内容</u8></li>
-<li>tsl_private_key_content Vec<u8>: 私钥内容</u8></li>
-<li>tls_versions: TLS版本列表</li>
-<li>tls_cipher_suites: TLS加密套件列表</li>
-<li>tls_verification_disabled: 是否禁用TLS校验</li>
-</ul>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/code/python/python-http-sdk-design/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="shoothzj">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/code/python/python-http-sdk-design/" class="post-title-link" itemprop="url">Python Http SDK设计</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2023-10-28 16:52:15" itemprop="dateCreated datePublished" datetime="2023-10-28T16:52:15+00:00">2023-10-28</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-07-11 00:09:50" itemprop="dateModified" datetime="2024-07-11T00:09:50+00:00">2024-07-11</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>根据Python项目的需求和特性，可以为Python的Http SDK项目选择以下命名方式：</p>
-<ul>
-<li><code>xxx-client-python</code>：如果这个项目只有Http SDK，没有其他协议的SDK，推荐使用这个命名方式。</li>
-<li><code>xxx-http-client-python</code>：当存在其他协议的SDK时，可以使用这个命名方式，以区分不同协议的SDK。</li>
-<li><code>xxx-admin-python</code>：当项目使用其他协议作为数据通道，使用HTTP协议作为管理通道时，可以使用这个命名方式。</li>
-</ul>
-<p>由于Python的调用方式通常是<code>模块名.类名.方法名</code>。</p>
 
       
     </div>

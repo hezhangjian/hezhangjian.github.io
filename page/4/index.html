@@ -146,13 +146,13 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">72</span>
+          <span class="site-state-item-count">75</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">41</span>
+        <span class="site-state-item-count">43</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -177,6 +177,421 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/code/java/java-project-structure/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="shoothzj">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/code/java/java-project-structure/" class="post-title-link" itemprop="url">Java 项目结构组织</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-10-08 20:08:02" itemprop="dateCreated datePublished" datetime="2023-10-08T20:08:02+00:00">2023-10-08</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2024-11-24 11:33:05" itemprop="dateModified" datetime="2024-11-24T11:33:05+00:00">2024-11-24</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#jian-dan-de-library">简单的library</a></li>
+<li><a href="#fu-za-de-springboot-xiang-mu-fu-ze-duo-ge-ye-wu-mo-kuai">复杂的SpringBoot项目，负责多个业务模块</a><ul>
+<li><a href="#fang-an-yi-duo-ye-wu-mo-kuai-tong-guo-zi-bao-lai-qu-fen-bu-fen-zi-module">方案一：多业务模块通过子包来区分，不分子module</a></li>
+<li><a href="#fang-an-er-gen-ju-ye-wu-mo-kuai-chai-fen-zi-module">方案二：根据业务模块拆分子module</a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h2><span id="jian-dan-de-library">简单的library</span><a href="#jian-dan-de-library" class="header-anchor">#</a></h2><p>对于简单的library来说，我更推荐将所有的文件都放在同一个package下面，如简单的client封装</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">package:com.xxx.yyy/</span><br><span class="line">|-- XxClient</span><br><span class="line">|-- XxDTO</span><br><span class="line">|-- XxException</span><br><span class="line">|-- XxUtil</span><br></pre></td></tr></table></figure>
+
+<h2><span id="fu-za-de-springboot-xiang-mu-fu-ze-duo-ge-ye-wu-mo-kuai">复杂的SpringBoot项目，负责多个业务模块</span><a href="#fu-za-de-springboot-xiang-mu-fu-ze-duo-ge-ye-wu-mo-kuai" class="header-anchor">#</a></h2><p>备注:</p>
+<ul>
+<li>xxx、yyy代表大块的业务区分：如用户、订单、支付</li>
+<li>aaa、bbb代表小块的业务区分：如(用户的)登录、注册、查询</li>
+</ul>
+<h3><span id="fang-an-yi-duo-ye-wu-mo-kuai-tong-guo-zi-bao-lai-qu-fen-bu-fen-zi-module">方案一：多业务模块通过子包来区分，不分子module</span><a href="#fang-an-yi-duo-ye-wu-mo-kuai-tong-guo-zi-bao-lai-qu-fen-bu-fen-zi-module" class="header-anchor">#</a></h3><p>module视图:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">example(maven artifactId: example-parent)/</span><br><span class="line">|-- example-service(业务逻辑)</span><br><span class="line">|-- example-spring-ignite(依赖spring，常见为中间件client，适配spring模块用于方便单元测试)</span><br><span class="line">|-- example-spring-ignite-test(依赖spring，不依赖test-common，spring模块单元测试用)</span><br><span class="line">|-- example-starter(启动类)</span><br><span class="line">|-- example-test-common(不依赖example-common)</span><br><span class="line">|-- example-util(不依赖Spring框架，可选模块，为service与其他spring集成组件共用)</span><br></pre></td></tr></table></figure>
+
+<p>依赖关系图:</p>
+<pre class="mermaid">graph TD
+service[example-service]
+springIgnite[example-spring-ignite]
+springIgniteTest[example-spring-ignite-test]
+starter[example-starter]
+testCommon[example-test-common]
+util[example-util]
+
+starter --> service
+
+service --> springIgnite
+service --> util
+service -.-> testCommon
+
+testCommon --> springIgniteTest
+
+springIgniteTest --> springIgnite
+
+springIgnite --> util</pre>
+
+<p>service包内视图:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">io.shoothzj.example/</span><br><span class="line">|-- service/</span><br><span class="line">|   |-- common/</span><br><span class="line">|   |-- module/</span><br><span class="line">|   |   |-- aaaModule</span><br><span class="line">|   |   |-- bbbModule</span><br><span class="line">|   |-- mapper/</span><br><span class="line">|   |   |-- aaaMapper</span><br><span class="line">|   |   |-- bbbMapper</span><br><span class="line">|   |-- repo/</span><br><span class="line">|   |   |-- aaaRepo</span><br><span class="line">|   |   |-- bbbRepo</span><br><span class="line">|   |-- service/</span><br><span class="line">|   |   |-- aaaService</span><br><span class="line">|   |   |-- bbbService</span><br></pre></td></tr></table></figure>
+
+<h3><span id="fang-an-er-gen-ju-ye-wu-mo-kuai-chai-fen-zi-module">方案二：根据业务模块拆分子module</span><a href="#fang-an-er-gen-ju-ye-wu-mo-kuai-chai-fen-zi-module" class="header-anchor">#</a></h3><p>适用于大型项目，每个业务模块都比较大。</p>
+<p>module视图：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">example(maven artifactId: example-parent)/</span><br><span class="line">|-- example-common(可依赖spring模块)</span><br><span class="line">|-- example-rest-xxx(xxx功能模块的rest接口)</span><br><span class="line">|-- example-rest-yyy(yyy功能模块的rest接口)</span><br><span class="line">|-- example-service-xxx(xxx功能的业务逻辑)</span><br><span class="line">|-- example-service-yyy(yyy功能的业务逻辑)</span><br><span class="line">|-- example-spring-ignite(依赖spring，常见为中间件client，适配spring模块用于方便单元测试)</span><br><span class="line">|-- example-spring-ignite-test(依赖spring，不依赖test-common，spring模块单元测试用)</span><br><span class="line">|-- example-starter(启动类)</span><br><span class="line">|-- example-test-common(不依赖example-common)</span><br><span class="line">|-- example-util(不依赖example-common，可选模块，为service、common与其他spring集成组件共用)</span><br></pre></td></tr></table></figure>
+
+<p>依赖关系图:</p>
+<pre class="mermaid">graph TD
+common[example-common]
+rest-xxx[example-rest-xxx]
+rest-yyy[example-rest-yyy]
+service-xxx[example-service-xxx]
+service-yyy[example-service-yyy]
+springIgnite[example-spring-ignite]
+springIgniteTest[example-spring-ignite-test]
+starter[example-starter]
+testCommon[example-test-common]
+util[example-util]
+
+starter --> rest-xxx
+starter --> rest-yyy
+
+rest-xxx --> common
+rest-xxx --> service-xxx
+
+rest-yyy --> common
+rest-yyy --> service-yyy
+
+service-xxx --> common
+service-xxx --> springIgnite
+
+service-yyy --> common
+service-yyy --> util
+
+common -.-> testCommon
+
+testCommon --> springIgniteTest
+
+springIgniteTest --> springIgnite
+
+springIgnite --> util</pre>
+
+<p>关于service模块引不引用rest模块的DTO，我的想法：</p>
+<p>如果确实service模块和rest模块DTO差距比较大，可以拆分做转换，如果差距很小&#x2F;没有差距，可以复用同一个DTO，放在service模块或者更底层的依赖。</p>
+<p>service-xxx包内视图:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">io.shoothzj.example.service/</span><br><span class="line">|-- xxx/</span><br><span class="line">|   |-- common/</span><br><span class="line">|   |-- module/</span><br><span class="line">|   |   |-- aaaModule</span><br><span class="line">|   |   |-- bbbModule</span><br><span class="line">|   |-- mapper/</span><br><span class="line">|   |   |-- aaaMapper</span><br><span class="line">|   |   |-- bbbMapper</span><br><span class="line">|   |-- repo/</span><br><span class="line">|   |   |-- aaaRepo</span><br><span class="line">|   |   |-- bbbRepo</span><br><span class="line">|   |-- service/</span><br><span class="line">|   |   |-- aaaService</span><br><span class="line">|   |   |-- bbbService</span><br></pre></td></tr></table></figure>
+
+
+<script type="module"> import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.esm.min.mjs';	mermaid.initialize({startOnLoad: true, flowchart: {curve: 'linear'}}); </script>
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/code/multi-lang-return-obj-example/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="shoothzj">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/code/multi-lang-return-obj-example/" class="post-title-link" itemprop="url">多语言编程 返回多个不同类型的方法样例</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-09-18 21:10:15" itemprop="dateCreated datePublished" datetime="2023-09-18T21:10:15+00:00">2023-09-18</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2024-11-24 11:33:05" itemprop="dateModified" datetime="2024-11-24T11:33:05+00:00">2024-11-24</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#bei-jing">背景</a></li>
+<li><a href="#c">C</a></li>
+<li><a href="#c">C++</a></li>
+<li><a href="#go">Go</a></li>
+<li><a href="#java">Java</a></li>
+<li><a href="#javascript">Javascript</a></li>
+<li><a href="#kotlin">Kotlin</a><ul>
+<li><a href="#shi-yong-any-lei-xing">使用Any类型</a></li>
+<li><a href="#shi-yong-sealedclass">使用SealedClass</a></li>
+</ul>
+</li>
+<li><a href="#python">Python</a></li>
+<li><a href="#ruby">Ruby</a></li>
+<li><a href="#rust">Rust</a></li>
+<li><a href="#scala">Scala</a></li>
+<li><a href="#typescript">TypeScript</a></li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="bei-jing">背景</span><a href="#bei-jing" class="header-anchor">#</a></h1><p>你可能会在一些场景下碰到需要返回多个不同类型的方法。比如协议解析读取报文时，更具体地像kubernetes在开始解析Yaml的时候，怎么知道这个类型是属于Deployment还是Service？</p>
+<h1><span id="c">C</span><a href="#c" class="header-anchor">#</a></h1><p>C语言通常通过使用Struct（结构体）和Union（联合体）的方式来实现这个功能，如下文例子</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">enum</span> &#123;</span></span><br><span class="line">    MONKEY,</span><br><span class="line">    COW,</span><br><span class="line">    UNKNOWN</span><br><span class="line">&#125; AnimalType;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">    <span class="type">char</span>* description;</span><br><span class="line">&#125; Monkey;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">    <span class="type">char</span>* description;</span><br><span class="line">&#125; Cow;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">    AnimalType type;</span><br><span class="line">    <span class="class"><span class="keyword">union</span> &#123;</span></span><br><span class="line">        Monkey monkey;</span><br><span class="line">        Cow cow;</span><br><span class="line">    &#125;;</span><br><span class="line">&#125; Animal;</span><br><span class="line"></span><br><span class="line">Animal <span class="title function_">createAnimal</span><span class="params">(<span class="type">const</span> <span class="type">char</span>* animalType)</span> &#123;</span><br><span class="line">    Animal animal;</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">strcmp</span>(animalType, <span class="string">&quot;Monkey&quot;</span>) == <span class="number">0</span>) &#123;</span><br><span class="line">        animal.type = MONKEY;</span><br><span class="line">        animal.monkey.description = <span class="string">&quot;I am a monkey!&quot;</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="built_in">strcmp</span>(animalType, <span class="string">&quot;Cow&quot;</span>) == <span class="number">0</span>) &#123;</span><br><span class="line">        animal.type = COW;</span><br><span class="line">        animal.cow.description = <span class="string">&quot;I am a cow!&quot;</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        animal.type = UNKNOWN;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> animal;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">    Animal animal1 = createAnimal(<span class="string">&quot;Monkey&quot;</span>);</span><br><span class="line">    <span class="keyword">if</span> (animal1.type == MONKEY) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>, animal1.monkey.description);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    Animal animal2 = createAnimal(<span class="string">&quot;Cow&quot;</span>);</span><br><span class="line">    <span class="keyword">if</span> (animal2.type == COW) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>, animal2.cow.description);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    Animal animal3 = createAnimal(<span class="string">&quot;Dog&quot;</span>);</span><br><span class="line">    <span class="keyword">if</span> (animal3.type == UNKNOWN) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;Unknown animal type\n&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1><span id="c">C++</span><a href="#c" class="header-anchor">#</a></h1><p>在C++中，我们可以使用基类指针来指向派生类的对象。可以使用动态类型识别（RTTI）来在运行时确定对象的类型</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdexcept&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Animal</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> std::string <span class="title">toString</span><span class="params">()</span> <span class="type">const</span> </span>= <span class="number">0</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Monkey</span> : <span class="keyword">public</span> Animal &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function">std::string <span class="title">toString</span><span class="params">()</span> <span class="type">const</span> <span class="keyword">override</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;I am a monkey!&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Cow</span> : <span class="keyword">public</span> Animal &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function">std::string <span class="title">toString</span><span class="params">()</span> <span class="type">const</span> <span class="keyword">override</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;I am a cow!&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function">Animal* <span class="title">createAnimal</span><span class="params">(<span class="type">const</span> std::string&amp; animalType)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (animalType == <span class="string">&quot;Monkey&quot;</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Monkey</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (animalType == <span class="string">&quot;Cow&quot;</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Cow</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">throw</span> std::<span class="built_in">runtime_error</span>(<span class="string">&quot;Unknown animal type: &quot;</span> + animalType);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        Animal* animal1 = <span class="built_in">createAnimal</span>(<span class="string">&quot;Monkey&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (Monkey* monkey = <span class="built_in">dynamic_cast</span>&lt;Monkey*&gt;(animal1)) &#123;</span><br><span class="line">            std::cout &lt;&lt; monkey-&gt;<span class="built_in">toString</span>() &lt;&lt; std::endl;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">delete</span> animal1;</span><br><span class="line"></span><br><span class="line">        Animal* animal2 = <span class="built_in">createAnimal</span>(<span class="string">&quot;Cow&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (Cow* cow = <span class="built_in">dynamic_cast</span>&lt;Cow*&gt;(animal2)) &#123;</span><br><span class="line">            std::cout &lt;&lt; cow-&gt;<span class="built_in">toString</span>() &lt;&lt; std::endl;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">delete</span> animal2;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">catch</span> (<span class="type">const</span> std::runtime_error&amp; e) &#123;</span><br><span class="line">        std::cerr &lt;&lt; e.<span class="built_in">what</span>() &lt;&lt; std::endl;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1><span id="go">Go</span><a href="#go" class="header-anchor">#</a></h1><p>Go的常见处理方式，是返回一个接口或者**interface{}**类型。调用者使用Go语言类型断言来检查具体的类型</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;fmt&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> Animal <span class="keyword">interface</span> &#123;</span><br><span class="line">	String() <span class="type">string</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> Monkey <span class="keyword">struct</span>&#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m Monkey)</span></span> String() <span class="type">string</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="string">&quot;I am a monkey!&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> Cow <span class="keyword">struct</span>&#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c Cow)</span></span> String() <span class="type">string</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="string">&quot;I am a cow!&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">createAnimal</span><span class="params">(typeName <span class="type">string</span>)</span></span> (Animal, <span class="type">error</span>) &#123;</span><br><span class="line">	<span class="keyword">switch</span> typeName &#123;</span><br><span class="line">	<span class="keyword">case</span> <span class="string">&quot;Monkey&quot;</span>:</span><br><span class="line">		<span class="keyword">return</span> Monkey&#123;&#125;, <span class="literal">nil</span></span><br><span class="line">	<span class="keyword">case</span> <span class="string">&quot;Cow&quot;</span>:</span><br><span class="line">		<span class="keyword">return</span> Cow&#123;&#125;, <span class="literal">nil</span></span><br><span class="line">	<span class="keyword">default</span>:</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, fmt.Errorf(<span class="string">&quot;Unknown animal type: %s&quot;</span>, typeName)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	animal1, err := createAnimal(<span class="string">&quot;Monkey&quot;</span>)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		fmt.Println(err)</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> monkey, ok := animal1.(Monkey); ok &#123;</span><br><span class="line">		fmt.Println(monkey)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	animal2, err := createAnimal(<span class="string">&quot;Cow&quot;</span>)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		fmt.Println(err)</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> cow, ok := animal2.(Cow); ok &#123;</span><br><span class="line">		fmt.Println(cow)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1><span id="java">Java</span><a href="#java" class="header-anchor">#</a></h1><p>Java语言的常见处理方式，是返回Object类型或者一个基础类型。然后由调用方在进行instance of判断。或者Java17之后，可以使用模式匹配的方式来简化转型</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MultiTypeReturnExample</span> &#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">Monkey</span> &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> String <span class="title function_">toString</span><span class="params">()</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="string">&quot;I am a monkey!&quot;</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">Cow</span> &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> String <span class="title function_">toString</span><span class="params">()</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="string">&quot;I am a cow!&quot;</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> Object <span class="title function_">createAnimal</span><span class="params">(String type)</span> <span class="keyword">throws</span> IllegalArgumentException &#123;</span><br><span class="line">        <span class="keyword">switch</span> (type) &#123;</span><br><span class="line">            <span class="keyword">case</span> <span class="string">&quot;Monkey&quot;</span>:</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">Monkey</span>();</span><br><span class="line">            <span class="keyword">case</span> <span class="string">&quot;Cow&quot;</span>:</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">Cow</span>();</span><br><span class="line">            <span class="keyword">default</span>:</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IllegalArgumentException</span>(<span class="string">&quot;Unknown animal type: &quot;</span> + type);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">Object</span> <span class="variable">animal1</span> <span class="operator">=</span> createAnimal(<span class="string">&quot;Monkey&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// java8 写法，后面如果明确用做精确的类型，需要强制转换</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (animal1 <span class="keyword">instanceof</span> Monkey) &#123;</span><br><span class="line">            System.out.println(animal1);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="type">Object</span> <span class="variable">animal2</span> <span class="operator">=</span> createAnimal(<span class="string">&quot;Cow&quot;</span>);</span><br><span class="line">        <span class="keyword">if</span> (animal2 <span class="keyword">instanceof</span> Cow) &#123;</span><br><span class="line">            System.out.println(animal2);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// java17 写法，不需要强制转换</span></span><br><span class="line">        <span class="keyword">if</span> (createAnimal(<span class="string">&quot;Monkey&quot;</span>) <span class="keyword">instanceof</span> Monkey animal3) &#123;</span><br><span class="line">            System.out.println(animal3);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (createAnimal(<span class="string">&quot;Cow&quot;</span>) <span class="keyword">instanceof</span> Cow animal4) &#123;</span><br><span class="line">            System.out.println(animal4);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1><span id="javascript">Javascript</span><a href="#javascript" class="header-anchor">#</a></h1><p>动态类型语言，使用instanceof运算符判断</p>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Animal</span> &#123;</span><br><span class="line">    <span class="title function_">toString</span>(<span class="params"></span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&#x27;I am an animal&#x27;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Monkey</span> <span class="keyword">extends</span> <span class="title class_ inherited__">Animal</span> &#123;</span><br><span class="line">    <span class="title function_">toString</span>(<span class="params"></span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&#x27;I am a monkey&#x27;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Cow</span> <span class="keyword">extends</span> <span class="title class_ inherited__">Animal</span> &#123;</span><br><span class="line">    <span class="title function_">toString</span>(<span class="params"></span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&#x27;I am a cow&#x27;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">createAnimal</span>(<span class="params">animalType</span>) &#123;</span><br><span class="line">    <span class="keyword">switch</span> (animalType) &#123;</span><br><span class="line">        <span class="keyword">case</span> <span class="string">&#x27;Monkey&#x27;</span>:</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">Monkey</span>();</span><br><span class="line">        <span class="keyword">case</span> <span class="string">&#x27;Cow&#x27;</span>:</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">Cow</span>();</span><br><span class="line">        <span class="attr">default</span>:</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">Error</span>(<span class="string">`Unknown animal type: <span class="subst">$&#123;animalType&#125;</span>`</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">    <span class="keyword">const</span> animal1 = <span class="title function_">createAnimal</span>(<span class="string">&#x27;Monkey&#x27;</span>);</span><br><span class="line">    <span class="keyword">if</span> (animal1 <span class="keyword">instanceof</span> <span class="title class_">Monkey</span>) &#123;</span><br><span class="line">        <span class="variable language_">console</span>.<span class="title function_">log</span>(animal1.<span class="title function_">toString</span>());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> animal2 = <span class="title function_">createAnimal</span>(<span class="string">&#x27;Cow&#x27;</span>);</span><br><span class="line">    <span class="keyword">if</span> (animal2 <span class="keyword">instanceof</span> <span class="title class_">Cow</span>) &#123;</span><br><span class="line">        <span class="variable language_">console</span>.<span class="title function_">log</span>(animal2.<span class="title function_">toString</span>());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> animal3 = <span class="title function_">createAnimal</span>(<span class="string">&#x27;Dog&#x27;</span>);</span><br><span class="line">&#125; <span class="keyword">catch</span> (error) &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">error</span>(error.<span class="property">message</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1><span id="kotlin">Kotlin</span><a href="#kotlin" class="header-anchor">#</a></h1><p>Kotlin可以使用Sealed Class(密封类)和Any类型两种方式。使用Any的场景，与Java返回Object类似。Sealed Class更加安全、更方便一些。</p>
+<h2><span id="shi-yong-any-lei-xing">使用Any类型</span><a href="#shi-yong-any-lei-xing" class="header-anchor">#</a></h2><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">open</span> <span class="keyword">class</span> <span class="title class_">Animal</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Monkey</span>: <span class="type">Animal</span>() &#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">toString</span><span class="params">()</span></span>: String &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;I am a monkey!&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Cow</span>: <span class="type">Animal</span>() &#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">toString</span><span class="params">()</span></span>: String &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;I am a cow!&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">createAnimal</span><span class="params">(type: <span class="type">String</span>)</span></span>: Any &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">when</span> (type) &#123;</span><br><span class="line">        <span class="string">&quot;Monkey&quot;</span> -&gt; Monkey()</span><br><span class="line">        <span class="string">&quot;Cow&quot;</span> -&gt; Cow()</span><br><span class="line">        <span class="keyword">else</span> -&gt; <span class="keyword">throw</span> IllegalArgumentException(<span class="string">&quot;Unknown animal type: <span class="variable">$type</span>&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> animal1 = createAnimal(<span class="string">&quot;Monkey&quot;</span>)</span><br><span class="line">    <span class="keyword">when</span> (animal1) &#123;</span><br><span class="line">        <span class="keyword">is</span> Monkey -&gt; println(animal1)</span><br><span class="line">        <span class="keyword">is</span> Cow -&gt; println(animal1)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> animal2 = createAnimal(<span class="string">&quot;Cow&quot;</span>)</span><br><span class="line">    <span class="keyword">when</span> (animal2) &#123;</span><br><span class="line">        <span class="keyword">is</span> Monkey -&gt; println(animal2)</span><br><span class="line">        <span class="keyword">is</span> Cow -&gt; println(animal2)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2><span id="shi-yong-sealedclass">使用SealedClass</span><a href="#shi-yong-sealedclass" class="header-anchor">#</a></h2><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">sealed</span> <span class="keyword">class</span> <span class="title class_">Animal</span> &#123;</span><br><span class="line">    <span class="keyword">data</span> <span class="keyword">class</span> <span class="title class_">Monkey</span>(<span class="keyword">val</span> info: String = <span class="string">&quot;I am a monkey!&quot;</span>) : Animal()</span><br><span class="line">    <span class="keyword">data</span> <span class="keyword">class</span> <span class="title class_">Cow</span>(<span class="keyword">val</span> info: String = <span class="string">&quot;I am a cow!&quot;</span>) : Animal()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">createAnimal</span><span class="params">(type: <span class="type">String</span>)</span></span>: Animal &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">when</span> (type) &#123;</span><br><span class="line">        <span class="string">&quot;Monkey&quot;</span> -&gt; Animal.Monkey()</span><br><span class="line">        <span class="string">&quot;Cow&quot;</span> -&gt; Animal.Cow()</span><br><span class="line">        <span class="keyword">else</span> -&gt; <span class="keyword">throw</span> IllegalArgumentException(<span class="string">&quot;Unknown animal type: <span class="variable">$type</span>&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> animal1 = createAnimal(<span class="string">&quot;Monkey&quot;</span>)</span><br><span class="line">    <span class="keyword">when</span> (animal1) &#123;</span><br><span class="line">        <span class="keyword">is</span> Animal.Monkey -&gt; println(animal1.info)</span><br><span class="line">        <span class="keyword">is</span> Animal.Cow -&gt; println(animal1.info)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> animal2 = createAnimal(<span class="string">&quot;Cow&quot;</span>)</span><br><span class="line">    <span class="keyword">when</span> (animal2) &#123;</span><br><span class="line">        <span class="keyword">is</span> Animal.Monkey -&gt; println(animal2.info)</span><br><span class="line">        <span class="keyword">is</span> Animal.Cow -&gt; println(animal2.info)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1><span id="python">Python</span><a href="#python" class="header-anchor">#</a></h1><p>Python是动态类型的语言，可以简单基于一些条件返回不同类型的对象，然后在接收到返回值之后使用type()函数或isinstance()函数来确定其类型</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Animal</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__str__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;I am an animal&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Monkey</span>(<span class="title class_ inherited__">Animal</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__str__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;I am a monkey&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Cow</span>(<span class="title class_ inherited__">Animal</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__str__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;I am a cow&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">create_animal</span>(<span class="params">animal_type</span>):</span><br><span class="line">    <span class="keyword">if</span> animal_type == <span class="string">&quot;Monkey&quot;</span>:</span><br><span class="line">        <span class="keyword">return</span> Monkey()</span><br><span class="line">    <span class="keyword">elif</span> animal_type == <span class="string">&quot;Cow&quot;</span>:</span><br><span class="line">        <span class="keyword">return</span> Cow()</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">raise</span> ValueError(<span class="string">f&quot;Unknown animal type: <span class="subst">&#123;animal_type&#125;</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">main</span>():</span><br><span class="line">    animal1 = create_animal(<span class="string">&quot;Monkey&quot;</span>)</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">isinstance</span>(animal1, Monkey):</span><br><span class="line">        <span class="built_in">print</span>(animal1)</span><br><span class="line"></span><br><span class="line">    animal2 = create_animal(<span class="string">&quot;Cow&quot;</span>)</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">isinstance</span>(animal2, Cow):</span><br><span class="line">        <span class="built_in">print</span>(animal2)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    main()</span><br></pre></td></tr></table></figure>
+
+<h1><span id="ruby">Ruby</span><a href="#ruby" class="header-anchor">#</a></h1><p>Ruby也较为简单，在方法内部直接返回不同类型的对象。然后，可以使用<strong>is_a</strong>方法或<strong>class</strong>方法来确定返回对象的实际类型。</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Animal</span></span><br><span class="line">  <span class="keyword">def</span> <span class="title function_">to_s</span></span><br><span class="line">    <span class="string">&quot;I am an animal&quot;</span></span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Monkey</span> &lt; <span class="title class_ inherited__">Animal</span></span><br><span class="line">  <span class="keyword">def</span> <span class="title function_">to_s</span></span><br><span class="line">    <span class="string">&quot;I am a monkey&quot;</span></span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Cow</span> &lt; <span class="title class_ inherited__">Animal</span></span><br><span class="line">  <span class="keyword">def</span> <span class="title function_">to_s</span></span><br><span class="line">    <span class="string">&quot;I am a cow&quot;</span></span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">create_animal</span>(<span class="params">animal_type</span>)</span><br><span class="line">  <span class="keyword">case</span> animal_type</span><br><span class="line">  <span class="keyword">when</span> <span class="string">&quot;Monkey&quot;</span></span><br><span class="line">    <span class="title class_">Monkey</span>.new</span><br><span class="line">  <span class="keyword">when</span> <span class="string">&quot;Cow&quot;</span></span><br><span class="line">    <span class="title class_">Cow</span>.new</span><br><span class="line">  <span class="keyword">else</span></span><br><span class="line">    <span class="keyword">raise</span> <span class="string">&quot;Unknown animal type: <span class="subst">#&#123;animal_type&#125;</span>&quot;</span></span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">begin</span></span><br><span class="line">  animal1 = create_animal(<span class="string">&quot;Monkey&quot;</span>)</span><br><span class="line">  <span class="keyword">if</span> animal1.is_a? <span class="title class_">Monkey</span></span><br><span class="line">    puts animal1</span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">  animal2 = create_animal(<span class="string">&quot;Cow&quot;</span>)</span><br><span class="line">  <span class="keyword">if</span> animal2.is_a? <span class="title class_">Cow</span></span><br><span class="line">    puts animal2</span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+
+<h1><span id="rust">Rust</span><a href="#rust" class="header-anchor">#</a></h1><p>在Rust中，可以使用enum（枚举）来创建一个持有多种不同类型的数据结构。然后使用match语句来做模式匹配。</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">use</span> std::fmt;</span><br><span class="line"></span><br><span class="line"><span class="keyword">enum</span> <span class="title class_">Animal</span> &#123;</span><br><span class="line">    Monkey,</span><br><span class="line">    Cow,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">impl</span> <span class="title class_">fmt</span>::Display <span class="keyword">for</span> <span class="title class_">Animal</span> &#123;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">fmt</span>(&amp;<span class="keyword">self</span>, f: &amp;<span class="keyword">mut</span> fmt::Formatter&lt;<span class="symbol">&#x27;_</span>&gt;) <span class="punctuation">-&gt;</span> fmt::<span class="type">Result</span> &#123;</span><br><span class="line">        <span class="keyword">match</span> <span class="keyword">self</span> &#123;</span><br><span class="line">            Animal::Monkey =&gt; <span class="built_in">write!</span>(f, <span class="string">&quot;I am a monkey!&quot;</span>),</span><br><span class="line">            Animal::Cow =&gt; <span class="built_in">write!</span>(f, <span class="string">&quot;I am a cow!&quot;</span>),</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">create_animal</span>(animal_type: &amp;<span class="type">str</span>) <span class="punctuation">-&gt;</span> <span class="type">Result</span>&lt;Animal, <span class="type">String</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">match</span> animal_type &#123;</span><br><span class="line">        <span class="string">&quot;Monkey&quot;</span> =&gt; <span class="title function_ invoke__">Ok</span>(Animal::Monkey),</span><br><span class="line">        <span class="string">&quot;Cow&quot;</span> =&gt; <span class="title function_ invoke__">Ok</span>(Animal::Cow),</span><br><span class="line">        _ =&gt; <span class="title function_ invoke__">Err</span>(<span class="built_in">format!</span>(<span class="string">&quot;Unknown animal type: &#123;&#125;&quot;</span>, animal_type)),</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">main</span>() &#123;</span><br><span class="line">    <span class="keyword">match</span> <span class="title function_ invoke__">create_animal</span>(<span class="string">&quot;Monkey&quot;</span>) &#123;</span><br><span class="line">        <span class="title function_ invoke__">Ok</span>(animal) =&gt; <span class="keyword">match</span> animal &#123;</span><br><span class="line">            Animal::Monkey =&gt; <span class="built_in">println!</span>(<span class="string">&quot;&#123;&#125;&quot;</span>, animal),</span><br><span class="line">            _ =&gt; (),</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="title function_ invoke__">Err</span>(e) =&gt; <span class="built_in">println!</span>(<span class="string">&quot;&#123;&#125;&quot;</span>, e),</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">match</span> <span class="title function_ invoke__">create_animal</span>(<span class="string">&quot;Cow&quot;</span>) &#123;</span><br><span class="line">        <span class="title function_ invoke__">Ok</span>(animal) =&gt; <span class="keyword">match</span> animal &#123;</span><br><span class="line">            Animal::Cow =&gt; <span class="built_in">println!</span>(<span class="string">&quot;&#123;&#125;&quot;</span>, animal),</span><br><span class="line">            _ =&gt; (),</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="title function_ invoke__">Err</span>(e) =&gt; <span class="built_in">println!</span>(<span class="string">&quot;&#123;&#125;&quot;</span>, e),</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">match</span> <span class="title function_ invoke__">create_animal</span>(<span class="string">&quot;Dog&quot;</span>) &#123;</span><br><span class="line">        <span class="title function_ invoke__">Ok</span>(_) =&gt; (),</span><br><span class="line">        <span class="title function_ invoke__">Err</span>(e) =&gt; <span class="built_in">println!</span>(<span class="string">&quot;&#123;&#125;&quot;</span>, e),</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1><span id="scala">Scala</span><a href="#scala" class="header-anchor">#</a></h1><p>scala中，可以使用sealed trait和case class来创建一个能够返回多种不同类型的方法。Sealed trait可以定义一个有限的子类集合，可以确保类型安全</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">sealed</span> <span class="class"><span class="keyword">trait</span> <span class="title">Animal</span> </span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">info</span></span>: <span class="type">String</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">case</span> <span class="class"><span class="keyword">class</span> <span class="title">Monkey</span>(<span class="params"></span>) <span class="keyword">extends</span> <span class="title">Animal</span> </span>&#123;</span><br><span class="line">  <span class="keyword">val</span> info: <span class="type">String</span> = <span class="string">&quot;I am a monkey!&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">case</span> <span class="class"><span class="keyword">class</span> <span class="title">Cow</span>(<span class="params"></span>) <span class="keyword">extends</span> <span class="title">Animal</span> </span>&#123;</span><br><span class="line">  <span class="keyword">val</span> info: <span class="type">String</span> = <span class="string">&quot;I am a cow!&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">object</span> <span class="title">MultiTypeReturnExample</span> </span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">createAnimal</span></span>(animalType: <span class="type">String</span>): <span class="type">Animal</span> = &#123;</span><br><span class="line">    animalType <span class="keyword">match</span> &#123;</span><br><span class="line">      <span class="keyword">case</span> <span class="string">&quot;Monkey&quot;</span> =&gt; <span class="type">Monkey</span>()</span><br><span class="line">      <span class="keyword">case</span> <span class="string">&quot;Cow&quot;</span> =&gt; <span class="type">Cow</span>()</span><br><span class="line">      <span class="keyword">case</span> _ =&gt; <span class="keyword">throw</span> <span class="keyword">new</span> <span class="type">IllegalArgumentException</span>(<span class="string">s&quot;Unknown animal type: <span class="subst">$animalType</span>&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">main</span></span>(args: <span class="type">Array</span>[<span class="type">String</span>]): <span class="type">Unit</span> = &#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">      <span class="keyword">val</span> animal1 = createAnimal(<span class="string">&quot;Monkey&quot;</span>)</span><br><span class="line">      animal1 <span class="keyword">match</span> &#123;</span><br><span class="line">        <span class="keyword">case</span> <span class="type">Monkey</span>() =&gt; println(animal1.info)</span><br><span class="line">        <span class="keyword">case</span> _ =&gt;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">val</span> animal2 = createAnimal(<span class="string">&quot;Cow&quot;</span>)</span><br><span class="line">      animal2 <span class="keyword">match</span> &#123;</span><br><span class="line">        <span class="keyword">case</span> <span class="type">Cow</span>() =&gt; println(animal2.info)</span><br><span class="line">        <span class="keyword">case</span> _ =&gt;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125; <span class="keyword">catch</span> &#123;</span><br><span class="line">      <span class="keyword">case</span> e: <span class="type">IllegalArgumentException</span> =&gt; println(e.getMessage)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1><span id="typescript">TypeScript</span><a href="#typescript" class="header-anchor">#</a></h1><p>总得来说，和javascript区别不大</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">abstract</span> <span class="keyword">class</span> <span class="title class_">Animal</span> &#123;</span><br><span class="line">  <span class="keyword">abstract</span> <span class="title function_">toString</span>(): <span class="built_in">string</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Monkey</span> <span class="keyword">extends</span> <span class="title class_ inherited__">Animal</span> &#123;</span><br><span class="line">  <span class="title function_">toString</span>(): <span class="built_in">string</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&#x27;I am a monkey&#x27;</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Cow</span> <span class="keyword">extends</span> <span class="title class_ inherited__">Animal</span> &#123;</span><br><span class="line">  <span class="title function_">toString</span>(): <span class="built_in">string</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&#x27;I am a cow&#x27;</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">createAnimal</span>(<span class="params">animalType: <span class="built_in">string</span></span>): <span class="title class_">Animal</span> &#123;</span><br><span class="line">  <span class="keyword">switch</span> (animalType) &#123;</span><br><span class="line">    <span class="keyword">case</span> <span class="string">&#x27;Monkey&#x27;</span>:</span><br><span class="line">      <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">Monkey</span>();</span><br><span class="line">    <span class="keyword">case</span> <span class="string">&#x27;Cow&#x27;</span>:</span><br><span class="line">      <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">Cow</span>();</span><br><span class="line">    <span class="attr">default</span>:</span><br><span class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">Error</span>(<span class="string">`Unknown animal type: <span class="subst">$&#123;animalType&#125;</span>`</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">  <span class="keyword">const</span> animal1 = <span class="title function_">createAnimal</span>(<span class="string">&#x27;Monkey&#x27;</span>);</span><br><span class="line">  <span class="keyword">if</span> (animal1 <span class="keyword">instanceof</span> <span class="title class_">Monkey</span>) &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(animal1.<span class="title function_">toString</span>());</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">const</span> animal2 = <span class="title function_">createAnimal</span>(<span class="string">&#x27;Cow&#x27;</span>);</span><br><span class="line">  <span class="keyword">if</span> (animal2 <span class="keyword">instanceof</span> <span class="title class_">Cow</span>) &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(animal2.<span class="title function_">toString</span>());</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">const</span> animal3 = <span class="title function_">createAnimal</span>(<span class="string">&#x27;Dog&#x27;</span>);</span><br><span class="line">&#125; <span class="keyword">catch</span> (error) &#123;</span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">error</span>(error.<span class="property">message</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/spring-unittests/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="shoothzj">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/spring-unittests/" class="post-title-link" itemprop="url">Spring单元测试总结</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-08-12 11:13:01" itemprop="dateCreated datePublished" datetime="2023-08-12T11:13:01+00:00">2023-08-12</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2024-11-24 11:33:05" itemprop="dateModified" datetime="2024-11-24T11:33:05+00:00">2024-11-24</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2><span id="mu-lu">目录</span><a href="#mu-lu" class="header-anchor">#</a></h2><ul>
+<li>模块组织</li>
+<li>测试手段</li>
+<li>依赖组件</li>
+</ul>
+<h2><span id="dian-xing-spring-dan-yuan-ce-shi-mo-kuai-zu-zhi">典型Spring单元测试模块组织</span><a href="#dian-xing-spring-dan-yuan-ce-shi-mo-kuai-zu-zhi" class="header-anchor">#</a></h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">-- xxx-app</span><br><span class="line">-- xxx-util</span><br><span class="line">-- test-common</span><br></pre></td></tr></table></figure>
+
+<p>test-common尽量减少依赖，仅依赖必须的非spring组件。也可以统一将需要使用的resources文件放到test-common中。由test-common统一管理，避免每个模块测试都需要拷贝必须的文件。所需的maven配置如下：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">build</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">resources</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">resource</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">directory</span>&gt;</span>src/main/resources<span class="tag">&lt;/<span class="name">directory</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">includes</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">include</span>&gt;</span>**<span class="tag">&lt;/<span class="name">include</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">include</span>&gt;</span>**/**<span class="tag">&lt;/<span class="name">include</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">includes</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">resource</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">resources</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">plugins</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">plugin</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.maven.plugins<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>maven-resources-plugin<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">version</span>&gt;</span>$&#123;maven-resources-plugin.version&#125;<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">executions</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">execution</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">id</span>&gt;</span>copy-resources<span class="tag">&lt;/<span class="name">id</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">phase</span>&gt;</span>process-resources<span class="tag">&lt;/<span class="name">phase</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">goals</span>&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">goal</span>&gt;</span>copy-resources<span class="tag">&lt;/<span class="name">goal</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;/<span class="name">goals</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">outputDirectory</span>&gt;</span>$&#123;project.build.directory&#125;/resources<span class="tag">&lt;/<span class="name">outputDirectory</span>&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">resources</span>&gt;</span></span><br><span class="line">                            <span class="tag">&lt;<span class="name">resource</span>&gt;</span></span><br><span class="line">                                <span class="tag">&lt;<span class="name">directory</span>&gt;</span>src/main/resources<span class="tag">&lt;/<span class="name">directory</span>&gt;</span></span><br><span class="line">                            <span class="tag">&lt;/<span class="name">resource</span>&gt;</span></span><br><span class="line">                        <span class="tag">&lt;/<span class="name">resources</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;/<span class="name">execution</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">executions</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">plugin</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">plugins</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">build</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>一些典型的配置文件，比如log4j2配置文件，同时，由于test-common不属于测试代码，可能在某些组织下会有更高的要求（如不能存在敏感信息等），如组织有这样的要求，则这类内容不适合放在test-common里统一复用:</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span> encoding=<span class="string">&quot;UTF-8&quot;</span>?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">Configuration</span> <span class="attr">status</span>=<span class="string">&quot;info&quot;</span> <span class="attr">monitorInterval</span>=<span class="string">&quot;10&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">Appenders</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">Console</span> <span class="attr">name</span>=<span class="string">&quot;Console&quot;</span> <span class="attr">target</span>=<span class="string">&quot;SYSTEM_OUT&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">PatternLayout</span> <span class="attr">pattern</span>=<span class="string">&#x27;%d&#123;yyyy-MM-dd,HH:mm:ss,SSSXXX&#125;(%C:%L):%4p%X[%t#%T]--&gt;%m%n&#x27;</span>/&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">Console</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">Appenders</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">Loggers</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">Root</span> <span class="attr">level</span>=<span class="string">&quot;INFO&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">AppenderRef</span> <span class="attr">ref</span>=<span class="string">&quot;Console&quot;</span>/&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">Root</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">Loggers</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">Configuration</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h2><span id="ce-shi-shou-duan">测试手段</span><a href="#ce-shi-shou-duan" class="header-anchor">#</a></h2><h3><span id="li-yong-restassured-duan-dao-duan-ce-shi-http-jie-kou">利用RestAssured端到端测试http接口</span><a href="#li-yong-restassured-duan-dao-duan-ce-shi-http-jie-kou" class="header-anchor">#</a></h3><p>添加依赖</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>io.rest-assured<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>rest-assured<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>5.3.1<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">scope</span>&gt;</span>test<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>为了在SpringBoot测试中使用 <strong><code>RestAssured</code></strong>, 需要配置端口 <strong>webEnvironment &#x3D; SpringBootTest.WebEnvironment.RANDOM_PORT</strong>。如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MyRestControllerTest</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@LocalServerPort</span></span><br><span class="line">    <span class="type">int</span> port;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@BeforeEach</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setUp</span><span class="params">()</span> &#123;</span><br><span class="line">        RestAssured.port = port;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>随后可以使用RestAssured来请求接口</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">RestAssured.given().contentType(ContentType.JSON).body(<span class="string">&quot;&#123;&#125;&quot;</span>).post(<span class="string">&quot;url&quot;</span>).then().statusCode(<span class="number">200</span>);</span><br></pre></td></tr></table></figure>
+
+<h2><span id="yi-lai-zu-jian">依赖组件</span><a href="#yi-lai-zu-jian" class="header-anchor">#</a></h2><h3><span id="mariadb">mariadb</span><a href="#mariadb" class="header-anchor">#</a></h3><p>mariadb可以使用mariadb4j</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>ch.vorburger.mariaDB4j<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>mariaDB4j<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>3.0.1<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">scope</span>&gt;</span>test<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>书写Extension并使用</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> ch.vorburger.mariadb4j.DB;</span><br><span class="line"><span class="keyword">import</span> ch.vorburger.mariadb4j.DBConfigurationBuilder;</span><br><span class="line"><span class="keyword">import</span> org.junit.jupiter.api.extension.AfterAllCallback;</span><br><span class="line"><span class="keyword">import</span> org.junit.jupiter.api.extension.BeforeAllCallback;</span><br><span class="line"><span class="keyword">import</span> org.junit.jupiter.api.extension.ExtensionContext;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MariaDBExtension</span> <span class="keyword">implements</span> <span class="title class_">BeforeAllCallback</span>, AfterAllCallback &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> DB database;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">beforeAll</span><span class="params">(ExtensionContext context)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">DBConfigurationBuilder</span> <span class="variable">configBuilder</span> <span class="operator">=</span> DBConfigurationBuilder.newBuilder();</span><br><span class="line">        configBuilder.setPort(<span class="number">3306</span>);</span><br><span class="line">        database = DB.newEmbeddedDB(configBuilder.build());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">afterAll</span><span class="params">(ExtensionContext context)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="keyword">if</span> (database != <span class="literal">null</span>) &#123;</span><br><span class="line">            database.stop();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3><span id="ignite">ignite</span><a href="#ignite" class="header-anchor">#</a></h3><p>Ignite可以使用现有的junit5集成</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>io.github.embedded-middleware<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>embedded-ignite-junit5<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>0.0.3<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>可以直接使用EmbeddedIgniteExtension，还可以使用EmbeddedIgnitePorts自定义Ignite的关键端口号</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -222,7 +637,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-07-11 00:09:50" itemprop="dateModified" datetime="2024-07-11T00:09:50+00:00">2024-07-11</time>
+      <time title="修改时间：2024-11-24 11:33:05" itemprop="dateModified" datetime="2024-11-24T11:33:05+00:00">2024-11-24</time>
     </span>
 
   
@@ -302,7 +717,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-07-11 00:09:50" itemprop="dateModified" datetime="2024-07-11T00:09:50+00:00">2024-07-11</time>
+      <time title="修改时间：2024-11-24 11:33:05" itemprop="dateModified" datetime="2024-11-24T11:33:05+00:00">2024-11-24</time>
     </span>
 
   
@@ -449,7 +864,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-07-11 00:09:50" itemprop="dateModified" datetime="2024-07-11T00:09:50+00:00">2024-07-11</time>
+      <time title="修改时间：2024-11-24 11:33:05" itemprop="dateModified" datetime="2024-11-24T11:33:05+00:00">2024-11-24</time>
     </span>
 
   
@@ -559,7 +974,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-07-11 00:09:50" itemprop="dateModified" datetime="2024-07-11T00:09:50+00:00">2024-07-11</time>
+      <time title="修改时间：2024-11-24 11:33:05" itemprop="dateModified" datetime="2024-11-24T11:33:05+00:00">2024-11-24</time>
     </span>
 
   
@@ -641,7 +1056,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-07-11 00:09:50" itemprop="dateModified" datetime="2024-07-11T00:09:50+00:00">2024-07-11</time>
+      <time title="修改时间：2024-11-24 11:33:05" itemprop="dateModified" datetime="2024-11-24T11:33:05+00:00">2024-11-24</time>
     </span>
 
   
@@ -723,7 +1138,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-07-11 00:09:50" itemprop="dateModified" datetime="2024-07-11T00:09:50+00:00">2024-07-11</time>
+      <time title="修改时间：2024-11-24 11:33:05" itemprop="dateModified" datetime="2024-11-24T11:33:05+00:00">2024-11-24</time>
     </span>
 
   
@@ -800,7 +1215,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-07-11 00:09:50" itemprop="dateModified" datetime="2024-07-11T00:09:50+00:00">2024-07-11</time>
+      <time title="修改时间：2024-11-24 11:33:05" itemprop="dateModified" datetime="2024-11-24T11:33:05+00:00">2024-11-24</time>
     </span>
 
   
@@ -828,329 +1243,6 @@
 
 <p>那么servlet里面的数据如何编码，我们可以dive一下，首先servlet里面有一个函数叫**<code>response.setCharacterEncoding();</code>**这个函数可以指定编码格式。其次，servlet还会通过上面的setContentType函数来做一定的推断，比如content-type中携带了charset，就使用content-type中的charset。还有些特定的content-type，比如text&#x2F;json，在没有设置的情况下，servlet容器会假设它使用utf-8编码。在推断不出来，也没有手动设置的情况下，jetty默认的编码是iso-8859-1，这就解释了乱码的问题。</p>
 
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E5%B9%BF%E6%92%AD%E6%A8%A1%E5%BC%8F%E5%AE%9E%E8%B7%B5/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="shoothzj">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E5%B9%BF%E6%92%AD%E6%A8%A1%E5%BC%8F%E5%AE%9E%E8%B7%B5/" class="post-title-link" itemprop="url">微服务广播模式实践</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2023-06-01 23:19:45" itemprop="dateCreated datePublished" datetime="2023-06-01T23:19:45+00:00">2023-06-01</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-07-11 00:09:50" itemprop="dateModified" datetime="2024-07-11T00:09:50+00:00">2024-07-11</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>微服务广播模式，指的是在微服务多实例部署的场景下，将消息广播到多个微服务实例的一种模式。</p>
-<p><img src="/images/20230601/p1.png" alt="Untitled"></p>
-<p>广播模式，一般用来维护微服务的内存数据，根据数据类型的不同，有助于解决两类问题。通常广播模式会使用支持发布订阅的消息中间件实现（如Redis、Kafka、Pulsar等），本文也基于消息中间件进行讨论。</p>
-<h2><span id="li-yong-guang-bo-mo-shi-wei-hu-yi-zhi-de-huan-cun">利用广播模式维护一致的缓存</span><a href="#li-yong-guang-bo-mo-shi-wei-hu-yi-zhi-de-huan-cun" class="header-anchor">#</a></h2><p>这应该是广播模式利用最多的一种场景，假想一个拥有海量用户的电商网站、或是一个亿级设备连接的IoT平台。势必会存在一些缓存数据，像是用户的购物车信息，或是设备的密钥缓存。如果没有广播模式，可能会存在这样的问题</p>
-<p><img src="/images/20230601/p2.png" alt="Untitled"></p>
-<p>当用户更新了它的购物车之后，微服务实例1的数据发生了更新，数据库的数据也成功更新。但是微服务实例2中的缓存数据未能更新，那么如果用户的请求均衡到了实例2，就会发生意想不到的后果。</p>
-<p>这种情况下我们可以让微服务1在广播通道中发送一个缓存的invalidate消息，将微服务实例2中该用户的缓存清零，使得微服务实例2在下一次处理该用户的请求时，从数据库中读取最新的消息。</p>
-<p>使用该模式需要注意的点：</p>
-<ul>
-<li>每个微服务实例应该使用不同的消费组，可以通过微服务的IP、主机名、UUID等拼装成订阅组名称，这才称得上广播之名</li>
-<li>微服务消费消息的时候，应从Latest开始消费，避免从Earliest开始消费无用的缓存清理消息</li>
-<li>由于每一次微服务重启都会产生一个新的消费组，需要注意消费组的老化，可以通过消息中间件自带的不活跃消费组老化能力兜底，建议通过gracefulExit、监听kill信号等机制来主动删除消费组信息</li>
-</ul>
-<p>为什么说消费组老化比较重要呢，因为很多监控系统都会根据消费组的积压来做告警，很容易产生误告警。</p>
-<h2><span id="li-yong-guang-bo-mo-shi-wei-hu-nei-cun-zhong-de-shu-ju">利用广播模式维护内存中的数据</span><a href="#li-yong-guang-bo-mo-shi-wei-hu-nei-cun-zhong-de-shu-ju" class="header-anchor">#</a></h2><p>这种模式相对比较少见，常见于key的基数不是很大，能够将数据完整地存储在内存中，比如电商平台的企业卖家个数、物联网平台的用户个数等，并且对数据的一致性要求不是很高（因为广播模式情况下，对于两个微服务实例来说没有一致性保障）。像Apache Pulsar设计的TableView，在我看来，就是做这个事的一个最佳实践。Pulsar内部大量使用了topic存储数据，就是采用这个方式。</p>
-<p>使用该模式需要注意的点：</p>
-<ul>
-<li>同上，需要使用不同的消费组名称</li>
-<li>微服务消费消息的时候，应该从Earliest开始消费，保证所有微服务内存中的消息视图一致</li>
-<li>同上，需要注意消费组的老化</li>
-</ul>
-<h2><span id="wei-shi-me-xu-yao-xiao-fei-zu-lao-hua-zuo-wei-bao-di-shou-duan">为什么需要消费组老化作为保底手段</span><a href="#wei-shi-me-xu-yao-xiao-fei-zu-lao-hua-zuo-wei-bao-di-shou-duan" class="header-anchor">#</a></h2><p>因为在极端场景下，无论是graceful的代码，还是监听kill信号的代码，都不能保证代码百分百地被执行。需要兜底。</p>
-<h2><span id="kafka-xiao-fei-zu-lao-hua">Kafka消费组老化</span><a href="#kafka-xiao-fei-zu-lao-hua" class="header-anchor">#</a></h2><p>Kafka通过<strong>offsets.retention.minutes</strong>参数控制消费组中offsets保留时间，在此时间内如果没有提交offset，offsets将会被删除。Kafka判定消息组中没有在线的消费者（如empty状态），且没有offsets时，将会删除此消费组。</p>
-<h2><span id="pulsar-xiao-fei-zu-lao-hua">Pulsar消费组老化</span><a href="#pulsar-xiao-fei-zu-lao-hua" class="header-anchor">#</a></h2><p>pulsar的消费组老化策略更加灵活，可以配置到namespace级别。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">bin/pulsar-admin namespaces | grep expiration</span><br><span class="line">    get-subscription-expiration-time      Get subscription expiration time for </span><br><span class="line">      Usage: get-subscription-expiration-time [options] tenant/namespace</span><br><span class="line">    set-subscription-expiration-time      Set subscription expiration time for </span><br><span class="line">      Usage: set-subscription-expiration-time [options] tenant/namespace</span><br><span class="line">            Subscription expiration time in minutes</span><br><span class="line">    remove-subscription-expiration-time      Remove subscription expiration </span><br><span class="line">      Usage: remove-subscription-expiration-time [options] tenant/namespace</span><br></pre></td></tr></table></figure>
-
-<p>这里注意要合理地配置消费组的老化时间，在pulsar的当前版本（2.11版本）下，catch up读，也就是说消费组平时积压量不大。如果将消费组的老化时间配置大于等于消息的老化时间，会出现消费组老化不了的现象。</p>
-<p>当然，由于消费组和消息老化都是定时任务，预估时间时，要考虑一定的buffer。</p>
-<p>这里让我们稍稍dive一下原理，消费组的老化是通过判断Cursor游标的LastActive time来判断能否老化的。如果该消费组的游标位置到达了消息老化区域，被老化掉了，消费组的游标位置就会强制更新到一个可用的位置，这个时候会更新游标的LastActive time到当前时间，周而复始，导致消费组无法老化。举个🌰</p>
-<p>假设消费组的老化时间为4h，消息的老化时间为3h，就可能会发生这样的事情</p>
-<p><img src="/images/20230601/p3.png" alt="Untitled"></p>
-<h2><span id="zong-jie">总结</span><a href="#zong-jie" class="header-anchor">#</a></h2><p>广播模式在微服务架构中起到了重要的角色，尤其是在需要在微服务实例之间同步数据的场景中，它具有显著的优势。它能够帮助维护内存数据的缓存一致性。希望本篇文章能提供您全面的广播模式的知识。</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/%E6%8F%90%E5%8D%87%E7%BD%91%E7%BB%9C%E5%8D%8F%E8%AE%AE%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%AE%9A%E4%BD%8D%E8%83%BD%E5%8A%9B/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="shoothzj">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/%E6%8F%90%E5%8D%87%E7%BD%91%E7%BB%9C%E5%8D%8F%E8%AE%AE%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%AE%9A%E4%BD%8D%E8%83%BD%E5%8A%9B/" class="post-title-link" itemprop="url">提升网络协议服务器的定位能力</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2023-05-30 21:56:16" itemprop="dateCreated datePublished" datetime="2023-05-30T21:56:16+00:00">2023-05-30</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-07-11 00:09:50" itemprop="dateModified" datetime="2024-07-11T00:09:50+00:00">2024-07-11</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>近期，我再次涉足于协议服务器相关的工作领域，致力于定位并解决各种问题。简单总结一些心得给大家。如果想要定位出协议服务器的问题，那么这些能力可能至关重要。</p>
-<p>注：我这里比较偏向协议本身的问题，不涉及一些通用的网络问题（如网络吞吐量上不去、响应时间长等等）</p>
-<h2><span id="dui-cpu-he-nei-cun-de-tong-yong-fen-xi-neng-li">对CPU和内存的通用分析能力</span><a href="#dui-cpu-he-nei-cun-de-tong-yong-fen-xi-neng-li" class="header-anchor">#</a></h2><p>首先，网络协议服务器本质上也是一个应用程序。因此，需要具备一些关于CPU和内存的通用分析能力。PU&#x2F;内存火焰图，内存dump分析，锁分析，以及远程调试（研发态手段）这些手段都要具备</p>
-<h2><span id="ri-zhi-he-wang-luo-lian-jie-de-guan-lian">日志和网络连接的关联</span><a href="#ri-zhi-he-wang-luo-lian-jie-de-guan-lian" class="header-anchor">#</a></h2><p>为了有效地定位网络问题，日志需要精确到毫秒级别。没有毫秒级别的精度，定位网络问题就会变得极其困难。所以golang的logrus默认只有秒级别，我觉得不太好，用rfc3339就很好。</p>
-<p>在打印日志时，我们不能太过随意。例如，“connection lost”这样的日志，在调试阶段可能看似无大碍，但当真正的业务量和连接数大幅增加时，这种模糊的日志信息就会让人束手无策。</p>
-<p>理想的日志至少应包含网络地址信息，这样我们可以根据网络地址和时间点来查阅日志。如果有抓包的话，那就更好了，可以从中获取大量信息。</p>
-<p>当然，我们并不需要在所有的日志中都包含网络地址信息。例如，一旦完成了用户身份的鉴定，我们就可以打印用户的身份信息，这样更方便与后续的业务流程进行整合。如果需要查询网络地址信息，可以回溯到建立连接时的日志。举个🌰</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">2023-05-30 23:59:01.000 [INFO] 127.0.0.1:62345 connected</span><br><span class="line">2023-05-30 23:59:02.000 [INFO] 127.0.0.1:62345 authed, username is Wolverine</span><br><span class="line">2023-05-30 23:59:03.000 [INFO] Wolverine killed magneto</span><br></pre></td></tr></table></figure>
-
-<p>假设一条数据链上有大量的消息呢？在现代的网络环境中，一条TCP链接可以轻易达到5M bit&#x2F;s以上的数据流。即使我们提供了时间点信息，仍然很难找到具有问题的报文（在同一秒内可能有上千条报文）。在这种情况下，就需要引入会话的ID信息。许多TCP协议会携带这种信息，换句话说，支持IO复用的协议都会有这种信息（比如MQTT的messageId，Kafka的correlationId等）。此类信息应该被正确地打印在日志中。</p>
-<h2><span id="zhen-dui-te-zheng-zhi-de-gen-zong-neng-li">针对特征值的跟踪能力</span><a href="#zhen-dui-te-zheng-zhi-de-gen-zong-neng-li" class="header-anchor">#</a></h2><p>你可能已经在调试日志中包含了非常详尽的信息，然而在实际环境中，这可能并没有太大用处。</p>
-<p>原因是一旦全面开启debug日志，性能消耗会大幅增加。除非你的系统性能冗余极大，否则根本无法正常运行。</p>
-<p>为此，我们可以提升debug的能力，针对特定的特征值开启debug，例如网络地址、mqtt的clientId、消息中间件的topic等。应用程序仅针对这些特征值打印详细的日志，这样的开销就相对较小，而且这种方法已经在生产环境中被我多次验证。</p>
-<h2><span id="jiang-wang-luo-bao-wen-yu-ye-wu-trace-guan-lian-qi-lai">将网络报文与业务trace关联起来</span><a href="#jiang-wang-luo-bao-wen-yu-ye-wu-trace-guan-lian-qi-lai" class="header-anchor">#</a></h2><p>在网络协议服务器中，我们需要将网络报文与业务trace关联起来。这种关联能力的实现可以大大提高我们定位业务端到端问题的效率和准确性。 理想情况下，我们应该能够根据网络报文来查找相关的业务trace，反之亦然，根据业务trace来查找对应的网络报文。但这些手段都需要业务端的配合，比如在报文中携带traceId，或者在业务trace中携带网络地址信息。</p>
-<p>以mqtt协议为例，可以在payload中带上</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    &quot;traceId&quot;: &quot;xxxx&quot;,</span><br><span class="line">    &quot;data&quot;: &quot;xxxx&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>在这个例子中，<code>traceId</code>就是我们为业务trace设定的唯一标识符，而<code>data</code>则是实际的业务数据。通过在网络报文中携带这些信息，我们就可以轻松地将网络报文与其对应的业务trace关联起来。</p>
-<p>然而，这种方法在研发和测试环境中实现相对容易，但在生产环境中可能会遇到更多的困难。首先，对于在网络报文中携带<code>traceId</code>这一做法，业界并未形成统一的规范和实践。这导致在生产环境，极难做到。</p>
-<p>更具挑战性的是，如果你面对的是一个端到端的复杂系统，将traceId从系统的入口传递到出口可能会遇到许多难以预见的问题。例如系统不支持这类数据的专递，这就封死了这条路。</p>
-<h2><span id="cha-kan-yuan-shi-bao-wen-de-neng-li">查看原始报文的能力</span><a href="#cha-kan-yuan-shi-bao-wen-de-neng-li" class="header-anchor">#</a></h2><p>查看原始报文的能力极其重要，特别是在协议栈的实现尚不成熟的情况下。如果无法查看原始报文，定位问题就会变得非常困难。我曾说过：“如果拿到了原始报文，还是无法复现问题，那我们的研发能力在哪里？”虽然这句话可能有些极端，但它准确地强调了抓包的重要性。</p>
-<p>我们可以从抓包看出网络的连通性、网络的延迟、网络的吞吐量、报文的格式、报文的正确性等等。如果途径了多个网元，那么是谁的错？（一般来说，看抓包，谁先发RST，就从谁身上找原因）</p>
-<p>虽然抓包的命令比较简单<em>tcpdump port 8080 -i eth0 -s0 -w my.pcap</em>就抓了，但实际想做成，最大的阻力是这两个，TLS和复杂的现网环境</p>
-<p>在旧版本的TLS密钥交换算法下，只要有私钥和密码，就可以顺利解包，但现在的tls，都支持前向加密，什么叫前向加密呢？简单地来说，就是给你私钥和密码，你也解不出来。有tls debuginfo和ebpf能解决这两个问题，tls debug-info的原理是将密钥交换时的密钥输出持久化到某个地方，然后拿这个去解，实际很少见有人用这个方案。ebpf一需要linux内核高版本，同时还需要开启功能，安装kernel-debug-info，门槛也比较高。</p>
-<p>现网环境，像抓包嗅探的这种工具，有时候可能是禁止上传的，或者即使能上传成功，也需要很长的时间。</p>
-<p>也许我们可以通过“应用层抓包”来解决上述的问题，在网络层，我们支持受限的抓包能力，比如可以抓针对某个特征值（比如网络地址、messageId）的包，因为我们在应用层，可使用的过滤条件更多，更精细，输出到某个路径，这个报文的组装，完全在应用网络层，虽然看不到物理层的一些信息，但对于应用程序来说，除非我是做nat设备的，一般用不到这些信息。继续用这个报文来分析问题。实现应用层抓包，也要注意对内存的占用等等，不能因为这个功能，把整个进程搞崩溃。</p>
-<h2><span id="ying-yong-ceng-zhua-bao-de-yi-xie-si-kao">应用层抓包的一些思考</span><a href="#ying-yong-ceng-zhua-bao-de-yi-xie-si-kao" class="header-anchor">#</a></h2><h3><span id="zhua-bao-di-dian-de-xuan-ze">抓包地点的选择</span><a href="#zhua-bao-di-dian-de-xuan-ze" class="header-anchor">#</a></h3><p>在应用层抓包，第一步就是确定抓包的地点。由于我们是在应用层进行操作，因此抓包地点一般位于应用程序与网络协议栈的交接处。例如，你可以在数据包刚被应用接收，还未被处理之前进行抓包，或者在数据包即将被应用发送出去，还未进入网络协议栈之前进行抓包。</p>
-<h3><span id="guo-lu-tiao-jian-de-she-ding">过滤条件的设定</span><a href="#guo-lu-tiao-jian-de-she-ding" class="header-anchor">#</a></h3><p>设定过滤条件是抓包的关键，因为在实际环境中，数据流量可能非常大，如果没有过滤条件，抓包的数据量可能会非常庞大，对应用和系统的性能产生影响。在应用层，我们可以设置更多更精细的过滤条件，如网络地址、端口、协议类型、特定的字段等。这些过滤条件可以帮助我们更精确地定位问题，减少无效的数据。</p>
-<h3><span id="shu-ju-cun-chu-wen-ti">数据存储问题</span><a href="#shu-ju-cun-chu-wen-ti" class="header-anchor">#</a></h3><p>将抓到的数据存储起来也是很重要的一步。可以选择将数据存储到内存或者硬盘。需要注意的是，如果选择存储到内存，要考虑到内存的大小，避免因为抓包数据过大导致内存溢出。如果选择存储到硬盘，要考虑到硬盘的读写速度和容量，避免因为抓包数据过大导致硬盘满载。</p>
-<h2><span id="zong-jie">总结</span><a href="#zong-jie" class="header-anchor">#</a></h2><p>本文首先阐述了网络协议服务器的一些问题定位能力，包括CPU内存分析能力、日志和网络连接的关联能力、针对特征值的跟踪能力，以及查看原始报文的能力，也讨论了将网络报文与业务trace有效关联的重要性和实现挑战。强调了抓包的重要性和对于解密TLS报文的挑战。为了解决网络层抓包遇到的困难，我们可以考虑应用层抓包方案。最后，我们讨论了应用层抓包的一些关键问题，包括抓包地点的选择、过滤条件的设定和数据存储问题。</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/pulsar/pulsar-msg-topic-level-policy-aging/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="shoothzj">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 张俭的博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/pulsar/pulsar-msg-topic-level-policy-aging/" class="post-title-link" itemprop="url">Pulsar消息积压topic级别策略老化的两种方案</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2023-05-11 11:21:15" itemprop="dateCreated datePublished" datetime="2023-05-11T11:21:15+00:00">2023-05-11</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-07-11 00:09:50" itemprop="dateModified" datetime="2024-07-11T00:09:50+00:00">2024-07-11</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p><code>Pulsar</code>像大多数消息中间件一样,支持按时间和大小对消息积压进行老化。但是默认的策略只能在namespace级别配置。本文将介绍如何在topic级别实现老化策略的两种方案。</p>
-<h2><span id="fang-an-yi-kai-qi-topiclevelpolicy-lai-shi-xian">方案一：开启 TopicLevelPolicy 来实现</span><a href="#fang-an-yi-kai-qi-topiclevelpolicy-lai-shi-xian" class="header-anchor">#</a></h2><p>默认的策略配置通过在<code>Zookeeper</code>上配置对应的策略，可以通过<code>./pulsar zookeeper-shell</code>命令来登录zookeeper集群查询。但是如果将这一实现方式扩展到topic级别，将会产生大量的（百万、千万级别）的ZooKeeper节点，这对于<code>ZooKeeper</code>集群来说几乎是不可接受的。因此，Pulsar提供了一种新的实现方式，即通过<code>Topic</code>来存储策略配置，而不是通过<code>ZooKeeper</code>来存储。</p>
-<p><code>Pulsar</code>，从2.7.0版本开始，引入了<code>SystemTopic</code>，用于存储<code>Topic</code>的元数据信息，包括<code>Topic</code>的策略配置。主题级策略使用户可以更灵活地管理主题,并不会给 ZooKeeper 带来额外负担。</p>
-<p>您可以通过如下配置来开启<code>TopicLevelPolicy</code>：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">systemTopicEnabled=true</span><br><span class="line">topicLevelPoliciesEnabled=true</span><br></pre></td></tr></table></figure>
-
-<p>然后通过<code>set-backlog-quota</code>命令来设置您想要的老化时间和老化大小</p>
-<p>PS: 完整的一些功能，如命令行<code>set-backlog-quota</code>，在3.0.0版本中支持</p>
-<h2><span id="fang-an-er-tong-guo-zi-ding-yi-dai-ma-lai-shi-xian">方案二：通过自定义代码来实现</span><a href="#fang-an-er-tong-guo-zi-ding-yi-dai-ma-lai-shi-xian" class="header-anchor">#</a></h2><p><code>Pulsar</code>的<code>TopicLevelPolicy</code>实现需要通过topic存储策略配置，而不是通过<code>ZooKeeper</code>来存储。在实际的极端场景下，<code>Topic</code>中存储的内容可能会丢失（因为未开启<code>Bookkeeper</code>立即落盘或磁盘文件损坏等原因），这将导致策略配置丢失，从而导致策略失效。因此，我们可以通过自定义代码来实现topic级别的策略配置，这样可以避免策略配置丢失的问题。</p>
-<p>举个例子，业务可以将策略存放在<code>Mysql</code>中，然后通过<code>Pulsar</code>的<code>Admin API</code>来让策略生效</p>
-<h3><span id="zi-ding-yi-dai-ma-shi-xian-backlog-shi-jian-ce-lue">自定义代码实现Backlog时间策略</span><a href="#zi-ding-yi-dai-ma-shi-xian-backlog-shi-jian-ce-lue" class="header-anchor">#</a></h3><pre class="mermaid">sequenceDiagram
-    participant C as Client
-    participant B as Broker
-    loop
-        C ->> B: expire-messages-all-subscriptions Request
-        B -->> C: expire-messages-all-subscriptions Response
-    end</pre>
-
-<h3><span id="zi-ding-yi-dai-ma-shi-xian-backlog-da-xiao-ce-lue">自定义代码实现Backlog大小策略</span><a href="#zi-ding-yi-dai-ma-shi-xian-backlog-da-xiao-ce-lue" class="header-anchor">#</a></h3><pre class="mermaid">sequenceDiagram
-    participant C as Client
-    participant B as Broker
-    loop
-        C ->> B: stats-internal Request
-        B -->> C: stats-internal Response
-        alt messageBacklogSize < maxMessageBacklogSize
-        else messageBacklogSize >= maxMessageBacklogSize
-            Note over B,C: estimate the backlog position
-            C ->> B: get-message-by-id Request
-            B -->> C: get-message-by-id
-            Note over B,C: get the timestamp of the message
-            C ->> B: expire-messages-all-subscriptions Request
-            B -->> C: expire-messages-all-subscriptions Response
-        end
-    end</pre>
-
-
-<script type="module"> import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.esm.min.mjs';	mermaid.initialize({startOnLoad: true, flowchart: {curve: 'linear'}}); </script>
       
     </div>
 

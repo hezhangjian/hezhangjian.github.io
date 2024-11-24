@@ -146,13 +146,13 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">72</span>
+          <span class="site-state-item-count">75</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">41</span>
+        <span class="site-state-item-count">43</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -177,6 +177,287 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/nginx/nginx-sni/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="shoothzj">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/nginx/nginx-sni/" class="post-title-link" itemprop="url">Nginx支持SNI转发</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-05 15:20:31" itemprop="dateCreated datePublished" datetime="2020-12-05T15:20:31+00:00">2020-12-05</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2024-11-24 11:33:05" itemprop="dateModified" datetime="2024-11-24T11:33:05+00:00">2024-11-24</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>SNI是一个TLS的扩展字段，经常用于访问域名跳转到不同的后端地址。</p>
+<p>配置方式如下：打开nginx.conf文件，以ttbb&#x2F;nginx:nake镜像为例&#x2F;usr&#x2F;local&#x2F;openresty&#x2F;nginx&#x2F;conf&#x2F;nginx.conf</p>
+<p>如下为默认的nginx.conf配置</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">#user  nobody;</span><br><span class="line">worker_processes  1;</span><br><span class="line"></span><br><span class="line">#error_log  logs/error.log;</span><br><span class="line">#error_log  logs/error.log  notice;</span><br><span class="line">#error_log  logs/error.log  info;</span><br><span class="line"></span><br><span class="line">#pid        logs/nginx.pid;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">events &#123;</span><br><span class="line">    worker_connections  1024;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">http &#123;</span><br><span class="line">    include       mime.types;</span><br><span class="line">    default_type  application/octet-stream;</span><br><span class="line"></span><br><span class="line">    #log_format  main  &#x27;$remote_addr - $remote_user [$time_local] &quot;$request&quot; &#x27;</span><br><span class="line">    #                  &#x27;$status $body_bytes_sent &quot;$http_referer&quot; &#x27;</span><br><span class="line">    #                  &#x27;&quot;$http_user_agent&quot; &quot;$http_x_forwarded_for&quot;&#x27;;</span><br><span class="line"></span><br><span class="line">    #access_log  logs/access.log  main;</span><br><span class="line"></span><br><span class="line">    sendfile        on;</span><br><span class="line">    #tcp_nopush     on;</span><br><span class="line"></span><br><span class="line">    #keepalive_timeout  0;</span><br><span class="line">    keepalive_timeout  65;</span><br><span class="line"></span><br><span class="line">    #gzip  on;</span><br><span class="line"></span><br><span class="line">    server &#123;</span><br><span class="line">        listen       80;</span><br><span class="line">        server_name  localhost;</span><br><span class="line"></span><br><span class="line">        #charset koi8-r;</span><br><span class="line"></span><br><span class="line">        #access_log  logs/host.access.log  main;</span><br><span class="line"></span><br><span class="line">        location / &#123;</span><br><span class="line">            root   html;</span><br><span class="line">            index  index.html index.htm;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        #error_page  404              /404.html;</span><br><span class="line"></span><br><span class="line">        # redirect server error pages to the static page /50x.html</span><br><span class="line">        #</span><br><span class="line">        error_page   500 502 503 504  /50x.html;</span><br><span class="line">        location = /50x.html &#123;</span><br><span class="line">            root   html;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        # proxy the PHP scripts to Apache listening on 127.0.0.1:80</span><br><span class="line">        #</span><br><span class="line">        #location ~ \.php$ &#123;</span><br><span class="line">        #    proxy_pass   http://127.0.0.1;</span><br><span class="line">        #&#125;</span><br><span class="line"></span><br><span class="line">        # pass the PHP scripts to FastCGI server listening on 127.0.0.1:9000</span><br><span class="line">        #</span><br><span class="line">        #location ~ \.php$ &#123;</span><br><span class="line">        #    root           html;</span><br><span class="line">        #    fastcgi_pass   127.0.0.1:9000;</span><br><span class="line">        #    fastcgi_index  index.php;</span><br><span class="line">        #    fastcgi_param  SCRIPT_FILENAME  /scripts$fastcgi_script_name;</span><br><span class="line">        #    include        fastcgi_params;</span><br><span class="line">        #&#125;</span><br><span class="line"></span><br><span class="line">        # deny access to .htaccess files, if Apache&#x27;s document root</span><br><span class="line">        # concurs with nginx&#x27;s one</span><br><span class="line">        #</span><br><span class="line">        #location ~ /\.ht &#123;</span><br><span class="line">        #    deny  all;</span><br><span class="line">        #&#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    # another virtual host using mix of IP-, name-, and port-based configuration</span><br><span class="line">    #</span><br><span class="line">    #server &#123;</span><br><span class="line">    #    listen       8000;</span><br><span class="line">    #    listen       somename:8080;</span><br><span class="line">    #    server_name  somename  alias  another.alias;</span><br><span class="line"></span><br><span class="line">    #    location / &#123;</span><br><span class="line">    #        root   html;</span><br><span class="line">    #        index  index.html index.htm;</span><br><span class="line">    #    &#125;</span><br><span class="line">    #&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    # HTTPS server</span><br><span class="line">    #</span><br><span class="line">    #server &#123;</span><br><span class="line">    #    listen       443 ssl;</span><br><span class="line">    #    server_name  localhost;</span><br><span class="line"></span><br><span class="line">    #    ssl_certificate      cert.pem;</span><br><span class="line">    #    ssl_certificate_key  cert.key;</span><br><span class="line"></span><br><span class="line">    #    ssl_session_cache    shared:SSL:1m;</span><br><span class="line">    #    ssl_session_timeout  5m;</span><br><span class="line"></span><br><span class="line">    #    ssl_ciphers  HIGH:!aNULL:!MD5;</span><br><span class="line">    #    ssl_prefer_server_ciphers  on;</span><br><span class="line"></span><br><span class="line">    #    location / &#123;</span><br><span class="line">    #        root   html;</span><br><span class="line">    #        index  index.html index.htm;</span><br><span class="line">    #    &#125;</span><br><span class="line">    #&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在最后面添加上</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">stream &#123;</span><br><span class="line"></span><br><span class="line">map $ssl_preread_server_name $name &#123;</span><br><span class="line">    backend.example.com      backend;</span><br><span class="line">    default                  backend2;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">upstream backend &#123;</span><br><span class="line">    server 192.168.0.3:12345;</span><br><span class="line">    server 192.168.0.4:12345;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">upstream backend2 &#123;</span><br><span class="line">    server 127.0.0.1:8071;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">server &#123;</span><br><span class="line">    listen      12346;</span><br><span class="line">    proxy_pass  $name;</span><br><span class="line">    ssl_preread on;</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个时候，我们已经开启了SNI转发的功能，如果你使用backend.example.com的域名访问服务器，就会转发到backend，如果使用其他域名，就会转发到backend2</p>
+<p>测试的时候，让我们在&#x2F;etc&#x2F;hosts里进行设置，添加</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1 backend.example.com</span><br></pre></td></tr></table></figure>
+
+<p>然后进行请求</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl https://backend.example.com:12346</span><br></pre></td></tr></table></figure>
+
+<p>这里注意请求要使用https，http协议或者是tcp可没有SNI的说法</p>
+<p><img src="/nginx/nginx-sni/nginx-sni-backend.png" alt="nginx-sni-backend"></p>
+<p>发现请求的确实是backend</p>
+<p>然后测试请求127.0.0.1:12346</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl https://127.0.0.1:12346</span><br></pre></td></tr></table></figure>
+
+<p><img src="/nginx/nginx-sni/nginx-sni-127.png" alt="nginx-sni-127"></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/code/java/java-ping/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="shoothzj">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/code/java/java-ping/" class="post-title-link" itemprop="url">JAVA Ping命令心跳探测 InetAddress isReachable分析</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-01-12 09:35:09" itemprop="dateCreated datePublished" datetime="2020-01-12T09:35:09+00:00">2020-01-12</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2024-11-24 11:33:05" itemprop="dateModified" datetime="2024-11-24T11:33:05+00:00">2024-11-24</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1><span id="ye-wu-xu-qiu-fen-xi-yu-jie-jue-fang-an">业务需求分析与解决方案</span><a href="#ye-wu-xu-qiu-fen-xi-yu-jie-jue-fang-an" class="header-anchor">#</a></h1><p>在业务场景中，当需要利用ping命令对主机进行心跳探测时，直接在代码中fork进程执行ping命令虽然可行，但这种方法开销较大，并且处理流程易出错，与使用标准库相比缺乏优雅性。因此，本文探讨了使用Java的InetAddress类的isReachable方法作为替代方案。</p>
+<p>根据资料指出，Java的InetAddress类在root用户权限下通过执行ping命令进行探测，在非root用户权限下则通过访问TCP端口7进行探测。为验证这一点，本文撰写了相应的demo代码并进行了测试（详见：<a target="_blank" rel="noopener" href="https://github.com/shoothzj/heart-beat">GitHub - heart-beat</a>）。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">import lombok.extern.slf4j.Slf4j;</span><br><span class="line"></span><br><span class="line">import java.net.InetAddress;</span><br><span class="line"></span><br><span class="line">@Slf4j</span><br><span class="line">public class PingTestMain &#123;</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) throws Exception &#123;</span><br><span class="line">        String testIp = System.getProperty(&quot;TestIp&quot;);</span><br><span class="line">        InetAddress inetAddress = InetAddress.getByName(testIp);</span><br><span class="line">        boolean addressReachable = inetAddress.isReachable(500);</span><br><span class="line">        log.info(&quot;address is reachable is &#123;&#125;&quot;, addressReachable);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1><span id="ce-shi-shi-yan">测试实验</span><a href="#ce-shi-shi-yan" class="header-anchor">#</a></h1><h2><span id="root-yong-hu-xia-zhi-xing-cheng-xu">root用户下执行程序</span><a href="#root-yong-hu-xia-zhi-xing-cheng-xu" class="header-anchor">#</a></h2><p><img src="/code/java/java-ping/java-ping-root-success.png" alt="java-ping-root-success.png"></p>
+<p>java程序打印结果也是true</p>
+<h2><span id="zai-pu-tong-yong-hu-quan-xian-xia-de-ce-shi">在普通用户权限下的测试</span><a href="#zai-pu-tong-yong-hu-quan-xian-xia-de-ce-shi" class="header-anchor">#</a></h2><p><img src="/code/java/java-ping/java-ping-user-fail.png" alt="java-ping-user-fail.png"></p>
+<p>此时可以看到,我们的客户端程序向目标tcp7端口发送了一个报文,虽然java程序打印结果为true,但是因为收到了RST包导致的.在当今的网络安全要求下,7端口往往不会开放</p>
+<h2><span id="zai-mu-biao-wang-luo-ping-bi-tcp-duan-kou-7-de-qing-kuang-xia-zhi-xing-cheng-xu">在目标网络屏蔽TCP端口7的情况下执行程序</span><a href="#zai-mu-biao-wang-luo-ping-bi-tcp-duan-kou-7-de-qing-kuang-xia-zhi-xing-cheng-xu" class="header-anchor">#</a></h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iptables -A INPUT -p tcp --dport 7 -j DROP</span><br></pre></td></tr></table></figure>
+
+<p>发送的报文没有收到RST包,此时java程序返回false.不是我们预期的结果</p>
+<h2><span id="pu-tong-yong-hu-quan-xian-xia-xi-dai-te-quan-de-ce-shi">普通用户权限下携带特权的测试</span><a href="#pu-tong-yong-hu-quan-xian-xia-xi-dai-te-quan-de-ce-shi" class="header-anchor">#</a></h2><p>进一步的研究发现，Java程序发送ping命令需要创建raw socket，这要求程序具有root权限或cap_net_raw权限。赋予Java程序创建raw socket的权限后重新测试，发现程序能够正确发送ping命令，达到预期效果。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">setcap cap_net_raw+ep /usr/java/jdk-13.0.1/bin/java</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>发现如下报错</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java: error while loading shared libraries: libjli.so: cannot open shared object file: No such file or directory</span><br></pre></td></tr></table></figure>
+<p>使用<a target="_blank" rel="noopener" href="https://askubuntu.com/questions/334365/how-to-add-a-directory-to-linker-command-line-in-linux%E8%A7%84%E9%81%BF%E6%B7%BB%E5%8A%A0so%E6%96%87%E4%BB%B6%E6%9D%83%E9%99%90">https://askubuntu.com/questions/334365/how-to-add-a-directory-to-linker-command-line-in-linux规避添加so文件权限</a></p>
+<p>随后抓包,发现还是发送了ping命令,达到了我们预期的效果</p>
+<h1><span id="zong-jie">总结</span><a href="#zong-jie" class="header-anchor">#</a></h1><p>本文通过一系列测试得出结论，root用户权限下的Java程序会使用ping命令进行探测。若普通用户不具备相应权限，则会尝试探测TCP端口7，但在安全组未开启该端口的情况下会导致预期结果不一致。推荐赋予java程序特权,使得InetAddress类能够使用ping命令进行探测</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://shoothzj.github.io/wireshark/wireshark-display-filter/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="shoothzj">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 张俭的博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/wireshark/wireshark-display-filter/" class="post-title-link" itemprop="url">WireShark 显示过滤器</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-09-09 09:55:09" itemprop="dateCreated datePublished" datetime="2018-09-09T09:55:09+00:00">2018-09-09</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2024-11-24 11:33:05" itemprop="dateModified" datetime="2024-11-24T11:33:05+00:00">2024-11-24</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1><span id="ru-he-shi-yong-xian-shi-guo-lu-qi">如何使用显示过滤器</span><a href="#ru-he-shi-yong-xian-shi-guo-lu-qi" class="header-anchor">#</a></h1><p><img src="/wireshark/wireshark-display-filter/wireshark-display-filter1.png" alt="wireshark-display-filter1"><br>或者按住 CTRL + F，输入显示过滤器<br><img src="/wireshark/wireshark-display-filter/wireshark-display-filter2.png" alt="wireshark-display-filter2"></p>
+<h2><span id="er-ceng-xian-shi-guo-lu-qi-ju-li">二层显示过滤器举例</span><a href="#er-ceng-xian-shi-guo-lu-qi-ju-li" class="header-anchor">#</a></h2><h3><span id="chang-du-xiao-yu-128-zi-jie-de-shu-ju-bao">长度小于128字节的数据包</span><a href="#chang-du-xiao-yu-128-zi-jie-de-shu-ju-bao" class="header-anchor">#</a></h3><p>frame.len&lt;&#x3D;128</p>
+<h3><span id="pai-chu-arp-liu-liang">排除ARP流量</span><a href="#pai-chu-arp-liu-liang" class="header-anchor">#</a></h3><p>!arp</p>
+<h2><span id="san-ceng-xian-shi-guo-lu-qi-ju-li">三层显示过滤器举例</span><a href="#san-ceng-xian-shi-guo-lu-qi-ju-li" class="header-anchor">#</a></h2><h3><span id="zhi-xian-shi-192-168-0-1-ip-xiang-guan-shu-ju-bao">只显示192.168.0.1 IP相关数据包</span><a href="#zhi-xian-shi-192-168-0-1-ip-xiang-guan-shu-ju-bao" class="header-anchor">#</a></h3><p>ip.addr&#x3D;&#x3D;192.168.0.1</p>
+<h2><span id="si-ceng-xian-shi-guo-lu-qi-ju-li">四层显示过滤器举例</span><a href="#si-ceng-xian-shi-guo-lu-qi-ju-li" class="header-anchor">#</a></h2><h3><span id="pai-chu-rdp-liu-liang">排除RDP流量</span><a href="#pai-chu-rdp-liu-liang" class="header-anchor">#</a></h3><p>!tcp.port&#x3D;&#x3D;3389</p>
+<h3><span id="ju-you-syn-biao-zhi-de-tcp-shu-ju-bao">具有SYN标志的TCP数据包</span><a href="#ju-you-syn-biao-zhi-de-tcp-shu-ju-bao" class="header-anchor">#</a></h3><p>tcp.flags.syn&#x3D;&#x3D;1</p>
+<h3><span id="ju-you-rst-biao-zhi-de-tcp-shu-ju-bao">具有RST标志的TCP数据包</span><a href="#ju-you-rst-biao-zhi-de-tcp-shu-ju-bao" class="header-anchor">#</a></h3><p>tcp.flags.rst&#x3D;&#x3D;1</p>
+<h3><span id="tcp-que-ren-shi-jian-jiao-jiu">TCP确认时间较久</span><a href="#tcp-que-ren-shi-jian-jiao-jiu" class="header-anchor">#</a></h3><p>tcp.analysis.ack_rtt &gt; 0.2 and tcp.len &#x3D;&#x3D; 0<br>###启用TCP Relative Sequence Number的情况<br>如何启用?<br>Edit -&gt; Preferences -&gt; Protocols -&gt; TCP Relative Sequence Numbers</p>
+<h3><span id="wo-shou-bei-dui-fang-ju-jue-de-bao">握手被对方拒绝的包</span><a href="#wo-shou-bei-dui-fang-ju-jue-de-bao" class="header-anchor">#</a></h3><p>tcp.flags.reset &#x3D;&#x3D; 1 &amp;&amp; tcp.seq &#x3D;&#x3D; 1</p>
+<h3><span id="ke-hu-duan-chong-chuan">客户端重传</span><a href="#ke-hu-duan-chong-chuan" class="header-anchor">#</a></h3><p>tcp.flags.syn &#x3D;&#x3D; 1 &amp;&amp; tcp.analysis.retransmission</p>
+<h3><span id="tcp-bao-han">Tcp包含</span><a href="#tcp-bao-han" class="header-anchor">#</a></h3><p>tcp contains {str}</p>
+<h2><span id="ying-yong-ceng-xian-shi-guo-lu-qi-ju-li">应用层显示过滤器举例</span><a href="#ying-yong-ceng-xian-shi-guo-lu-qi-ju-li" class="header-anchor">#</a></h2><h3><span id="suo-you-http-liu-liang">所有http流量</span><a href="#suo-you-http-liu-liang" class="header-anchor">#</a></h3><p>http</p>
+<h3><span id="wen-ben-guan-li-liu-liang">文本管理流量</span><a href="#wen-ben-guan-li-liu-liang" class="header-anchor">#</a></h3><p>tcp.port &#x3D;&#x3D; 23 || tcp.port &#x3D;&#x3D; 21</p>
+<h3><span id="wen-ben-email-liu-liang">文本email流量</span><a href="#wen-ben-email-liu-liang" class="header-anchor">#</a></h3><p>email || pop || imap</p>
+<h3><span id="zhi-xian-shi-fang-wen-mou-zhi-ding-zhu-ji-ming-de-http-xie-yi-shu-ju-bao">只显示访问某指定主机名的HTTP协议数据包</span><a href="#zhi-xian-shi-fang-wen-mou-zhi-ding-zhu-ji-ming-de-http-xie-yi-shu-ju-bao" class="header-anchor">#</a></h3><p>http.host &#x3D;&#x3D; &lt;”hostname”&gt;</p>
+<h3><span id="zhi-xian-shi-bao-han-http-get-fang-fa-de-http-xie-yi-shu-ju-bao">只显示包含HTTP GET方法的HTTP协议数据包</span><a href="#zhi-xian-shi-bao-han-http-get-fang-fa-de-http-xie-yi-shu-ju-bao" class="header-anchor">#</a></h3><p>http.request.method &#x3D;&#x3D; ‘GET’</p>
+<h3><span id="zhi-xian-shi-http-ke-hu-duan-fa-qi-de-bao-han-zhi-ding-uri-qing-qiu-de-http-xie-yi-shu-ju-bao">只显示HTTP 客户端发起的包含指定URI请求的HTTP协议数据包</span><a href="#zhi-xian-shi-http-ke-hu-duan-fa-qi-de-bao-han-zhi-ding-uri-qing-qiu-de-http-xie-yi-shu-ju-bao" class="header-anchor">#</a></h3><p>http.request.uri &#x3D;&#x3D; &lt;”Full request URI”&gt;</p>
+<h3><span id="zhi-xian-shi-bao-han-zip-wen-jian-de-shu-ju-bao">只显示包含ZIP文件的数据包</span><a href="#zhi-xian-shi-bao-han-zip-wen-jian-de-shu-ju-bao" class="header-anchor">#</a></h3><p>http matches “.zip” &amp;&amp; http.request.method &#x3D;&#x3D; ‘GET’</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -222,7 +503,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-07-11 00:09:50" itemprop="dateModified" datetime="2024-07-11T00:09:50+00:00">2024-07-11</time>
+      <time title="修改时间：2024-11-24 11:33:05" itemprop="dateModified" datetime="2024-11-24T11:33:05+00:00">2024-11-24</time>
     </span>
 
   
@@ -341,7 +622,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-07-11 00:09:50" itemprop="dateModified" datetime="2024-07-11T00:09:50+00:00">2024-07-11</time>
+      <time title="修改时间：2024-11-24 11:33:05" itemprop="dateModified" datetime="2024-11-24T11:33:05+00:00">2024-11-24</time>
     </span>
 
   

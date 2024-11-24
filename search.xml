@@ -56,25 +56,6 @@
       </tags>
   </entry>
   <entry>
-    <title>jetty servlet的编码字符集选择</title>
-    <url>/java-servlet-encoding-charset/</url>
-    <content><![CDATA[<p>记一次中文指标乱码问题，问题也很简单，如下图所示：</p>
-<p><img src="/images/20230603/p1.png" alt="Untitled"></p>
-<p>从metricbeat开始找原因，发现其实只要是UTF-8的编码格式就都可以解析，最终发现是webServer返回的数据非UTF-8格式，修改方案也很简单。将servlet中的content-type里面的<strong>text&#x2F;plain</strong>修改成<strong>text&#x2F;plain; charset&#x3D;utf-8</strong>就可以了，如下面代码所示:</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">doGet</span><span class="params">(HttpServletRequest request, HttpServletResponse response)</span></span><br><span class="line">        <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">    response.setContentType(<span class="string">&quot;text/plain&quot;</span>);</span><br><span class="line">    response.setStatus(HttpServletResponse.SC_OK);</span><br><span class="line">    response.getWriter().write(<span class="string">&quot;&lt;h1&gt;哈哈&lt;/h1&gt;&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>我们可以轻易使用一个demo来复现这个问题，在maven中添加如下依赖</p>
-<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.eclipse.jetty<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>jetty-server<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>9.4.35.v20201120<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.eclipse.jetty<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>jetty-servlet<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>9.4.35.v20201120<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> com.shoothzj.jetty;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.eclipse.jetty.server.Server;</span><br><span class="line"><span class="keyword">import</span> org.eclipse.jetty.servlet.ServletContextHandler;</span><br><span class="line"><span class="keyword">import</span> org.eclipse.jetty.servlet.ServletHolder;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServlet;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServletRequest;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServletResponse;</span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">SimpleJettyServer</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">Server</span> <span class="variable">server</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Server</span>(<span class="number">8080</span>);</span><br><span class="line"></span><br><span class="line">        <span class="type">ServletContextHandler</span> <span class="variable">context</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ServletContextHandler</span>(ServletContextHandler.SESSIONS);</span><br><span class="line">        context.setContextPath(<span class="string">&quot;/&quot;</span>);</span><br><span class="line">        server.setHandler(context);</span><br><span class="line"></span><br><span class="line">        context.addServlet(<span class="keyword">new</span> <span class="title class_">ServletHolder</span>(<span class="keyword">new</span> <span class="title class_">HelloDefaultServlet</span>()), <span class="string">&quot;/hello-default&quot;</span>);</span><br><span class="line">        context.addServlet(<span class="keyword">new</span> <span class="title class_">ServletHolder</span>(<span class="keyword">new</span> <span class="title class_">HelloUTF8Servlet</span>()), <span class="string">&quot;/hello-utf8&quot;</span>);</span><br><span class="line"></span><br><span class="line">        server.start();</span><br><span class="line">        server.join();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">HelloDefaultServlet</span> <span class="keyword">extends</span> <span class="title class_">HttpServlet</span> &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">doGet</span><span class="params">(HttpServletRequest request, HttpServletResponse response)</span></span><br><span class="line">                <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">            response.setContentType(<span class="string">&quot;text/plain&quot;</span>);</span><br><span class="line">            response.setStatus(HttpServletResponse.SC_OK);</span><br><span class="line">            response.getWriter().write(<span class="string">&quot;&lt;h1&gt;哈哈&lt;/h1&gt;&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">HelloUTF8Servlet</span> <span class="keyword">extends</span> <span class="title class_">HttpServlet</span> &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">doGet</span><span class="params">(HttpServletRequest request, HttpServletResponse response)</span></span><br><span class="line">                <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">            response.setContentType(<span class="string">&quot;text/plain; charset=UTF-8&quot;</span>);</span><br><span class="line">            response.setStatus(HttpServletResponse.SC_OK);</span><br><span class="line">            response.getWriter().write(<span class="string">&quot;&lt;h1&gt;哈哈&lt;/h1&gt;&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>通过curl命令来复现这个问题</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl localhost:8080/hello-default</span><br><span class="line">&lt;h1&gt;??&lt;/h1&gt;%</span><br><span class="line">curl localhost:8080/hello-utf8</span><br><span class="line">&lt;h1&gt;哈哈&lt;/h1&gt;%</span><br></pre></td></tr></table></figure>
-
-<p>那么servlet里面的数据如何编码，我们可以dive一下，首先servlet里面有一个函数叫**<code>response.setCharacterEncoding();</code>**这个函数可以指定编码格式。其次，servlet还会通过上面的setContentType函数来做一定的推断，比如content-type中携带了charset，就使用content-type中的charset。还有些特定的content-type，比如text&#x2F;json，在没有设置的情况下，servlet容器会假设它使用utf-8编码。在推断不出来，也没有手动设置的情况下，jetty默认的编码是iso-8859-1，这就解释了乱码的问题。</p>
-]]></content>
-  </entry>
-  <entry>
     <title>通用4层获取源IP的负载均衡网关建设</title>
     <url>/loadbalance-layer-four-source-ip/</url>
     <content><![CDATA[<h1><span id="wang-guan-jian-she">网关建设</span><a href="#wang-guan-jian-she" class="header-anchor">#</a></h1><p>今天给大家介绍三种常见的四层负载均衡、网络转发方案，可用于四层的网关建设。</p>
@@ -99,6 +80,65 @@
       <tags>
         <tag>LB</tag>
       </tags>
+  </entry>
+  <entry>
+    <title>中间件是开箱即用的吗？为什么要开发中间件adapter？</title>
+    <url>/middleware-adapter-paradigm/</url>
+    <content><![CDATA[<h2><span id="zhong-jian-jian-zai-hen-duo-xi-tong-zhong-du-cun-zai">中间件在很多系统中都存在</span><a href="#zhong-jian-jian-zai-hen-duo-xi-tong-zhong-du-cun-zai" class="header-anchor">#</a></h2><p>在一个系统里面，或多或少地都会有中间件的存在，总会有数据库吧，其他的如消息队列，缓存，大数据组件。即使是基于公有云构筑的系统，公有云厂商只提供广泛使用的中间件，假如你的系统里面有很多组件没那么泛用，那么就只能自己维护，如<code>ZooKeeper</code>、<code>Etcd</code>、<code>Pulsar</code>、<code>Prometheus</code>、<code>Lvs</code>等</p>
+<h2><span id="shi-me-shi-zhong-jian-jian-adapter">什么是中间件adapter</span><a href="#shi-me-shi-zhong-jian-jian-adapter" class="header-anchor">#</a></h2><p>中间件<code>adapter</code>指的是和中间件运行在一起（同一个物理机或同一个容器），使得中间件和商用系统中已有的组件进行对接，最终使得该中间件达到在该系统商用的标准。像Prometheus的众多<code>exporter</code>，就是将中间件和已有的监控系统（Prometheus）进行对接的<code>adpater</code>。</p>
+<h2><span id="wei-shi-me-bu-xiu-gai-zhong-jian-jian-yuan-ma-zhi-jie-ji-cheng">为什么不修改中间件源码直接集成</span><a href="#wei-shi-me-bu-xiu-gai-zhong-jian-jian-yuan-ma-zhi-jie-ji-cheng" class="header-anchor">#</a></h2><p>原因可以有很多，这里我列出几点</p>
+<h3><span id="yuan-ma-xiu-gai-rong-yi-wei-hu-kun-nan">源码修改容易，维护困难</span><a href="#yuan-ma-xiu-gai-rong-yi-wei-hu-kun-nan" class="header-anchor">#</a></h3><p>很多时候不是社区通用需求，无法合并到社区主干。后续每次中间件版本升级，源码的修改就要重新进行一次。社区大版本代码重构，有的甚至不知道如何修改下去。并且对研发人员的技能要求高。</p>
+<h3><span id="yuan-ma-yu-tuan-dui-ji-zhu-zhan-bu-tong-xiu-gai-kun-nan">源码与团队技术栈不同，修改困难</span><a href="#yuan-ma-yu-tuan-dui-ji-zhu-zhan-bu-tong-xiu-gai-kun-nan" class="header-anchor">#</a></h3><p>这是最常见的，像<code>java</code>团队维护<code>erlang</code>写的<code>rabbitmq</code></p>
+<h3><span id="he-qi-ta-xi-tong-dui-jie-you-yu-yan-yao-qiu">和其他系统对接，有语言要求</span><a href="#he-qi-ta-xi-tong-dui-jie-you-yu-yan-yao-qiu" class="header-anchor">#</a></h3><p>XX监控系统，只能使用X语言接入，但中间件使用Y语言写的，怎么办？adapter的能力就体现出来了。</p>
+<h2><span id="wei-shi-me-zai-shang-yong-xi-tong-zhong-zhong-jian-jian-zuo-bu-dao-kai-xiang-ji-yong">为什么在商用系统中中间件做不到开箱即用</span><a href="#wei-shi-me-zai-shang-yong-xi-tong-zhong-zhong-jian-jian-zuo-bu-dao-kai-xiang-ji-yong" class="header-anchor">#</a></h2><p>在商用系统中，对一个新引入的中间件，往往有如下能力上的诉求，原生的中间件很难满足</p>
+<ul>
+<li>适配原有的监控系统</li>
+<li>适配原有的告警系统</li>
+<li>适配原有的证书系统</li>
+<li>适配原有的备份系统（如果该中间件有状态）</li>
+<li>适配原有的容灾系统（如果该中间件有状态）</li>
+<li>自动化能力（适配部署、账号创建、权限策略创建）</li>
+<li>对外暴露时封装一层接口</li>
+<li>应用程序和中间件的服务发现</li>
+</ul>
+<p>有时候，业务也会根据业务的需求对中间件做一些能力增强，这部分需求比较定制，这里无法展开讨论了。</p>
+<p>我们来逐一讨论上面列出的能力诉求，凡是<code>adapter</code>能实现的功能，对中间件做修改也能实现，只不过因为上一节列出的原因，选择不在中间件处侵入式修改。</p>
+<h2><span id="gua-pei-yuan-you-de-jian-kong-xi-tong">适配原有的监控系统</span><a href="#gua-pei-yuan-you-de-jian-kong-xi-tong" class="header-anchor">#</a></h2><p>监控系统获取数据，往往是推拉两种模式，如果该中间件原生不支持和该监控系统对接。我们就可以让<code>adapter</code>先从中间件处取得监控数据，再和监控系统对接</p>
+<h2><span id="gua-pei-yuan-you-de-gao-jing-xi-tong">适配原有的告警系统</span><a href="#gua-pei-yuan-you-de-gao-jing-xi-tong" class="header-anchor">#</a></h2><p>如果中间件发生了不可恢复的错误，如写事务文件失败，操作ZooKeeper元数据失败，可以通过<code>adapter</code>来识别中间件是否发生了上述不可恢复的错误，并和告警系统对接，发出告警。</p>
+<h2><span id="gua-pei-yuan-you-de-zheng-shu-xi-tong">适配原有的证书系统</span><a href="#gua-pei-yuan-you-de-zheng-shu-xi-tong" class="header-anchor">#</a></h2><p>这一点也很关键，开源的中间件，根据我的了解，几乎没有项目做了动态证书轮换的方案，证书基本都不支持变更。而出色的商用系统是一定要支持证书轮换的。不过很遗憾的是，这些涉及到TLS握手的关键流程，<code>adapter</code>无法干涉这个流程，只能对中间件进行侵入式修改。</p>
+<h2><span id="gua-pei-yuan-you-de-bei-fen-xi-tong">适配原有的备份系统</span><a href="#gua-pei-yuan-you-de-bei-fen-xi-tong" class="header-anchor">#</a></h2><p>通过<code>adapter</code>对中间件进行定期备份、按照配置中心的策略备份、备份文件自动上传到文件服务器等。</p>
+<h2><span id="gua-pei-yuan-you-de-rong-zai-xi-tong">适配原有的容灾系统</span><a href="#gua-pei-yuan-you-de-rong-zai-xi-tong" class="header-anchor">#</a></h2><p>这个视中间件而定，有些中间件如<code>Pulsar</code>原生支持跨地域容灾的话，我们可能做一做配置就好了。另外一些，像<code>mysql</code>和<code>mongo</code>这种，可能我们还需要通过<code>adapter</code>来进行数据同步。不过这个时候<code>adapter</code>负责的职责就大了，还包括了容灾能力。</p>
+<h2><span id="zi-dong-hua-neng-li">自动化能力</span><a href="#zi-dong-hua-neng-li" class="header-anchor">#</a></h2><h3><span id="zi-dong-hua-bu-shu">自动化部署</span><a href="#zi-dong-hua-bu-shu" class="header-anchor">#</a></h3><p>比如<code>ZooKeeper</code>、<code>Kafka</code>、<code>filebeat</code>在安装的时候，要求填写配置文件，我们就可以让<code>adapter</code>来自动化生成配置或更新配置</p>
+<h3><span id="zhang-hao-he-ce-lue-de-chuang-jian-geng-xin">账号和策略的创建更新</span><a href="#zhang-hao-he-ce-lue-de-chuang-jian-geng-xin" class="header-anchor">#</a></h3><p>像<code>kubernetes</code>、<code>mysql</code>、<code>mongo</code>，我们可以在安装的时候通过<code>adapter</code>来自动化创建或更新</p>
+<h2><span id="dui-wai-bao-lu-shi-feng-zhuang-yi-ceng-jie-kou">对外暴露时封装一层接口</span><a href="#dui-wai-bao-lu-shi-feng-zhuang-yi-ceng-jie-kou" class="header-anchor">#</a></h2><p>封装接口常用于中间件的提供者，出于种种原因，如中间件原本接口能力太大、中间件原本接口未做权限控制、中间件原本接口未适配期望的权限框架等。我们可以用<code>adapter</code>封装实现一层新的接口对外暴露。</p>
+<h2><span id="ying-yong-cheng-xu-he-zhong-jian-jian-de-fu-wu-fa-xian">应用程序和中间件的服务发现</span><a href="#ying-yong-cheng-xu-he-zhong-jian-jian-de-fu-wu-fa-xian" class="header-anchor">#</a></h2><h3><span id="ying-yong-cheng-xu-fa-xian-zhong-jian-jian">应用程序发现中间件</span><a href="#ying-yong-cheng-xu-fa-xian-zhong-jian-jian" class="header-anchor">#</a></h3><p>应用程序与中间件的连接，说的简单一点就是如何获取<code>Ip</code>，如果是基于kubernetes的部署，那么不推荐配置<code>Ip</code>，最好是配置域名，因为<code>Ip</code>会跟着容器的生命周期变化。首先，你的应用程序并不会因为中间件的一个容器重启了来重建客户端，往往是通过一个简单重连的方式连接到新的中间件容器继续工作。其次，我们的运维人员也不会每时每刻盯着容器Ip是否变化来进行配置吧。以下图为例，域名的配置要优于Ip的配置。</p>
+<p><img src="/middleware-adapter-paradigm/application-discover-middleware.png" alt="application-discover-middleware"></p>
+<p>截止到目前，我们只需要一个静态配置，使得应用程序可以连接到中间件。最好这个配置是可以修改的，这样我们还可以继承蓝绿、灰度发布的能力。</p>
+<h3><span id="zhong-jian-jian-dao-ye-wu-cheng-xu-de-fa-xian">中间件到业务程序的发现</span><a href="#zhong-jian-jian-dao-ye-wu-cheng-xu-de-fa-xian" class="header-anchor">#</a></h3><p>这个模式常用于负载均衡中间件如<code>Lvs</code>、<code>Nginx</code>自动维护后端列表，我们可以通过<code>adapter</code>来从注册中心获取后端服务的实例信息，并实时更新。</p>
+<h2><span id="zong-jie">总结</span><a href="#zong-jie" class="header-anchor">#</a></h2><p>在商用系统中，中间件并没有想象中的那么开箱即用，本文讲述了一些中间件集成到商用系统中需要具备的能力。在对中间件侵入式修改没有技术能力或不想对中间件进行侵入式修改的场景。选用团队常用的、占用资源少的语言来开发中间件<code>adapter</code>应该是更好的选择。</p>
+]]></content>
+      <tags>
+        <tag>middleware</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>jetty servlet的编码字符集选择</title>
+    <url>/java-servlet-encoding-charset/</url>
+    <content><![CDATA[<p>记一次中文指标乱码问题，问题也很简单，如下图所示：</p>
+<p><img src="/images/20230603/p1.png" alt="Untitled"></p>
+<p>从metricbeat开始找原因，发现其实只要是UTF-8的编码格式就都可以解析，最终发现是webServer返回的数据非UTF-8格式，修改方案也很简单。将servlet中的content-type里面的<strong>text&#x2F;plain</strong>修改成<strong>text&#x2F;plain; charset&#x3D;utf-8</strong>就可以了，如下面代码所示:</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">doGet</span><span class="params">(HttpServletRequest request, HttpServletResponse response)</span></span><br><span class="line">        <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">    response.setContentType(<span class="string">&quot;text/plain&quot;</span>);</span><br><span class="line">    response.setStatus(HttpServletResponse.SC_OK);</span><br><span class="line">    response.getWriter().write(<span class="string">&quot;&lt;h1&gt;哈哈&lt;/h1&gt;&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们可以轻易使用一个demo来复现这个问题，在maven中添加如下依赖</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.eclipse.jetty<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>jetty-server<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>9.4.35.v20201120<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.eclipse.jetty<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>jetty-servlet<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>9.4.35.v20201120<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> com.shoothzj.jetty;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.eclipse.jetty.server.Server;</span><br><span class="line"><span class="keyword">import</span> org.eclipse.jetty.servlet.ServletContextHandler;</span><br><span class="line"><span class="keyword">import</span> org.eclipse.jetty.servlet.ServletHolder;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServlet;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServletRequest;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServletResponse;</span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">SimpleJettyServer</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">Server</span> <span class="variable">server</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Server</span>(<span class="number">8080</span>);</span><br><span class="line"></span><br><span class="line">        <span class="type">ServletContextHandler</span> <span class="variable">context</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ServletContextHandler</span>(ServletContextHandler.SESSIONS);</span><br><span class="line">        context.setContextPath(<span class="string">&quot;/&quot;</span>);</span><br><span class="line">        server.setHandler(context);</span><br><span class="line"></span><br><span class="line">        context.addServlet(<span class="keyword">new</span> <span class="title class_">ServletHolder</span>(<span class="keyword">new</span> <span class="title class_">HelloDefaultServlet</span>()), <span class="string">&quot;/hello-default&quot;</span>);</span><br><span class="line">        context.addServlet(<span class="keyword">new</span> <span class="title class_">ServletHolder</span>(<span class="keyword">new</span> <span class="title class_">HelloUTF8Servlet</span>()), <span class="string">&quot;/hello-utf8&quot;</span>);</span><br><span class="line"></span><br><span class="line">        server.start();</span><br><span class="line">        server.join();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">HelloDefaultServlet</span> <span class="keyword">extends</span> <span class="title class_">HttpServlet</span> &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">doGet</span><span class="params">(HttpServletRequest request, HttpServletResponse response)</span></span><br><span class="line">                <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">            response.setContentType(<span class="string">&quot;text/plain&quot;</span>);</span><br><span class="line">            response.setStatus(HttpServletResponse.SC_OK);</span><br><span class="line">            response.getWriter().write(<span class="string">&quot;&lt;h1&gt;哈哈&lt;/h1&gt;&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">HelloUTF8Servlet</span> <span class="keyword">extends</span> <span class="title class_">HttpServlet</span> &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">doGet</span><span class="params">(HttpServletRequest request, HttpServletResponse response)</span></span><br><span class="line">                <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">            response.setContentType(<span class="string">&quot;text/plain; charset=UTF-8&quot;</span>);</span><br><span class="line">            response.setStatus(HttpServletResponse.SC_OK);</span><br><span class="line">            response.getWriter().write(<span class="string">&quot;&lt;h1&gt;哈哈&lt;/h1&gt;&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>通过curl命令来复现这个问题</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl localhost:8080/hello-default</span><br><span class="line">&lt;h1&gt;??&lt;/h1&gt;%</span><br><span class="line">curl localhost:8080/hello-utf8</span><br><span class="line">&lt;h1&gt;哈哈&lt;/h1&gt;%</span><br></pre></td></tr></table></figure>
+
+<p>那么servlet里面的数据如何编码，我们可以dive一下，首先servlet里面有一个函数叫**<code>response.setCharacterEncoding();</code>**这个函数可以指定编码格式。其次，servlet还会通过上面的setContentType函数来做一定的推断，比如content-type中携带了charset，就使用content-type中的charset。还有些特定的content-type，比如text&#x2F;json，在没有设置的情况下，servlet容器会假设它使用utf-8编码。在推断不出来，也没有手动设置的情况下，jetty默认的编码是iso-8859-1，这就解释了乱码的问题。</p>
+]]></content>
   </entry>
   <entry>
     <title>分页实践：前后端多种分页方式实现对比</title>
@@ -226,46 +266,6 @@
 <script type="module"> import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.esm.min.mjs';	mermaid.initialize({startOnLoad: true, flowchart: {curve: 'linear'}}); </script>]]></content>
       <tags>
         <tag>Pagination</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>中间件是开箱即用的吗？为什么要开发中间件adapter？</title>
-    <url>/middleware-adapter-paradigm/</url>
-    <content><![CDATA[<h2><span id="zhong-jian-jian-zai-hen-duo-xi-tong-zhong-du-cun-zai">中间件在很多系统中都存在</span><a href="#zhong-jian-jian-zai-hen-duo-xi-tong-zhong-du-cun-zai" class="header-anchor">#</a></h2><p>在一个系统里面，或多或少地都会有中间件的存在，总会有数据库吧，其他的如消息队列，缓存，大数据组件。即使是基于公有云构筑的系统，公有云厂商只提供广泛使用的中间件，假如你的系统里面有很多组件没那么泛用，那么就只能自己维护，如<code>ZooKeeper</code>、<code>Etcd</code>、<code>Pulsar</code>、<code>Prometheus</code>、<code>Lvs</code>等</p>
-<h2><span id="shi-me-shi-zhong-jian-jian-adapter">什么是中间件adapter</span><a href="#shi-me-shi-zhong-jian-jian-adapter" class="header-anchor">#</a></h2><p>中间件<code>adapter</code>指的是和中间件运行在一起（同一个物理机或同一个容器），使得中间件和商用系统中已有的组件进行对接，最终使得该中间件达到在该系统商用的标准。像Prometheus的众多<code>exporter</code>，就是将中间件和已有的监控系统（Prometheus）进行对接的<code>adpater</code>。</p>
-<h2><span id="wei-shi-me-bu-xiu-gai-zhong-jian-jian-yuan-ma-zhi-jie-ji-cheng">为什么不修改中间件源码直接集成</span><a href="#wei-shi-me-bu-xiu-gai-zhong-jian-jian-yuan-ma-zhi-jie-ji-cheng" class="header-anchor">#</a></h2><p>原因可以有很多，这里我列出几点</p>
-<h3><span id="yuan-ma-xiu-gai-rong-yi-wei-hu-kun-nan">源码修改容易，维护困难</span><a href="#yuan-ma-xiu-gai-rong-yi-wei-hu-kun-nan" class="header-anchor">#</a></h3><p>很多时候不是社区通用需求，无法合并到社区主干。后续每次中间件版本升级，源码的修改就要重新进行一次。社区大版本代码重构，有的甚至不知道如何修改下去。并且对研发人员的技能要求高。</p>
-<h3><span id="yuan-ma-yu-tuan-dui-ji-zhu-zhan-bu-tong-xiu-gai-kun-nan">源码与团队技术栈不同，修改困难</span><a href="#yuan-ma-yu-tuan-dui-ji-zhu-zhan-bu-tong-xiu-gai-kun-nan" class="header-anchor">#</a></h3><p>这是最常见的，像<code>java</code>团队维护<code>erlang</code>写的<code>rabbitmq</code></p>
-<h3><span id="he-qi-ta-xi-tong-dui-jie-you-yu-yan-yao-qiu">和其他系统对接，有语言要求</span><a href="#he-qi-ta-xi-tong-dui-jie-you-yu-yan-yao-qiu" class="header-anchor">#</a></h3><p>XX监控系统，只能使用X语言接入，但中间件使用Y语言写的，怎么办？adapter的能力就体现出来了。</p>
-<h2><span id="wei-shi-me-zai-shang-yong-xi-tong-zhong-zhong-jian-jian-zuo-bu-dao-kai-xiang-ji-yong">为什么在商用系统中中间件做不到开箱即用</span><a href="#wei-shi-me-zai-shang-yong-xi-tong-zhong-zhong-jian-jian-zuo-bu-dao-kai-xiang-ji-yong" class="header-anchor">#</a></h2><p>在商用系统中，对一个新引入的中间件，往往有如下能力上的诉求，原生的中间件很难满足</p>
-<ul>
-<li>适配原有的监控系统</li>
-<li>适配原有的告警系统</li>
-<li>适配原有的证书系统</li>
-<li>适配原有的备份系统（如果该中间件有状态）</li>
-<li>适配原有的容灾系统（如果该中间件有状态）</li>
-<li>自动化能力（适配部署、账号创建、权限策略创建）</li>
-<li>对外暴露时封装一层接口</li>
-<li>应用程序和中间件的服务发现</li>
-</ul>
-<p>有时候，业务也会根据业务的需求对中间件做一些能力增强，这部分需求比较定制，这里无法展开讨论了。</p>
-<p>我们来逐一讨论上面列出的能力诉求，凡是<code>adapter</code>能实现的功能，对中间件做修改也能实现，只不过因为上一节列出的原因，选择不在中间件处侵入式修改。</p>
-<h2><span id="gua-pei-yuan-you-de-jian-kong-xi-tong">适配原有的监控系统</span><a href="#gua-pei-yuan-you-de-jian-kong-xi-tong" class="header-anchor">#</a></h2><p>监控系统获取数据，往往是推拉两种模式，如果该中间件原生不支持和该监控系统对接。我们就可以让<code>adapter</code>先从中间件处取得监控数据，再和监控系统对接</p>
-<h2><span id="gua-pei-yuan-you-de-gao-jing-xi-tong">适配原有的告警系统</span><a href="#gua-pei-yuan-you-de-gao-jing-xi-tong" class="header-anchor">#</a></h2><p>如果中间件发生了不可恢复的错误，如写事务文件失败，操作ZooKeeper元数据失败，可以通过<code>adapter</code>来识别中间件是否发生了上述不可恢复的错误，并和告警系统对接，发出告警。</p>
-<h2><span id="gua-pei-yuan-you-de-zheng-shu-xi-tong">适配原有的证书系统</span><a href="#gua-pei-yuan-you-de-zheng-shu-xi-tong" class="header-anchor">#</a></h2><p>这一点也很关键，开源的中间件，根据我的了解，几乎没有项目做了动态证书轮换的方案，证书基本都不支持变更。而出色的商用系统是一定要支持证书轮换的。不过很遗憾的是，这些涉及到TLS握手的关键流程，<code>adapter</code>无法干涉这个流程，只能对中间件进行侵入式修改。</p>
-<h2><span id="gua-pei-yuan-you-de-bei-fen-xi-tong">适配原有的备份系统</span><a href="#gua-pei-yuan-you-de-bei-fen-xi-tong" class="header-anchor">#</a></h2><p>通过<code>adapter</code>对中间件进行定期备份、按照配置中心的策略备份、备份文件自动上传到文件服务器等。</p>
-<h2><span id="gua-pei-yuan-you-de-rong-zai-xi-tong">适配原有的容灾系统</span><a href="#gua-pei-yuan-you-de-rong-zai-xi-tong" class="header-anchor">#</a></h2><p>这个视中间件而定，有些中间件如<code>Pulsar</code>原生支持跨地域容灾的话，我们可能做一做配置就好了。另外一些，像<code>mysql</code>和<code>mongo</code>这种，可能我们还需要通过<code>adapter</code>来进行数据同步。不过这个时候<code>adapter</code>负责的职责就大了，还包括了容灾能力。</p>
-<h2><span id="zi-dong-hua-neng-li">自动化能力</span><a href="#zi-dong-hua-neng-li" class="header-anchor">#</a></h2><h3><span id="zi-dong-hua-bu-shu">自动化部署</span><a href="#zi-dong-hua-bu-shu" class="header-anchor">#</a></h3><p>比如<code>ZooKeeper</code>、<code>Kafka</code>、<code>filebeat</code>在安装的时候，要求填写配置文件，我们就可以让<code>adapter</code>来自动化生成配置或更新配置</p>
-<h3><span id="zhang-hao-he-ce-lue-de-chuang-jian-geng-xin">账号和策略的创建更新</span><a href="#zhang-hao-he-ce-lue-de-chuang-jian-geng-xin" class="header-anchor">#</a></h3><p>像<code>kubernetes</code>、<code>mysql</code>、<code>mongo</code>，我们可以在安装的时候通过<code>adapter</code>来自动化创建或更新</p>
-<h2><span id="dui-wai-bao-lu-shi-feng-zhuang-yi-ceng-jie-kou">对外暴露时封装一层接口</span><a href="#dui-wai-bao-lu-shi-feng-zhuang-yi-ceng-jie-kou" class="header-anchor">#</a></h2><p>封装接口常用于中间件的提供者，出于种种原因，如中间件原本接口能力太大、中间件原本接口未做权限控制、中间件原本接口未适配期望的权限框架等。我们可以用<code>adapter</code>封装实现一层新的接口对外暴露。</p>
-<h2><span id="ying-yong-cheng-xu-he-zhong-jian-jian-de-fu-wu-fa-xian">应用程序和中间件的服务发现</span><a href="#ying-yong-cheng-xu-he-zhong-jian-jian-de-fu-wu-fa-xian" class="header-anchor">#</a></h2><h3><span id="ying-yong-cheng-xu-fa-xian-zhong-jian-jian">应用程序发现中间件</span><a href="#ying-yong-cheng-xu-fa-xian-zhong-jian-jian" class="header-anchor">#</a></h3><p>应用程序与中间件的连接，说的简单一点就是如何获取<code>Ip</code>，如果是基于kubernetes的部署，那么不推荐配置<code>Ip</code>，最好是配置域名，因为<code>Ip</code>会跟着容器的生命周期变化。首先，你的应用程序并不会因为中间件的一个容器重启了来重建客户端，往往是通过一个简单重连的方式连接到新的中间件容器继续工作。其次，我们的运维人员也不会每时每刻盯着容器Ip是否变化来进行配置吧。以下图为例，域名的配置要优于Ip的配置。</p>
-<p><img src="/middleware-adapter-paradigm/application-discover-middleware.png" alt="application-discover-middleware"></p>
-<p>截止到目前，我们只需要一个静态配置，使得应用程序可以连接到中间件。最好这个配置是可以修改的，这样我们还可以继承蓝绿、灰度发布的能力。</p>
-<h3><span id="zhong-jian-jian-dao-ye-wu-cheng-xu-de-fa-xian">中间件到业务程序的发现</span><a href="#zhong-jian-jian-dao-ye-wu-cheng-xu-de-fa-xian" class="header-anchor">#</a></h3><p>这个模式常用于负载均衡中间件如<code>Lvs</code>、<code>Nginx</code>自动维护后端列表，我们可以通过<code>adapter</code>来从注册中心获取后端服务的实例信息，并实时更新。</p>
-<h2><span id="zong-jie">总结</span><a href="#zong-jie" class="header-anchor">#</a></h2><p>在商用系统中，中间件并没有想象中的那么开箱即用，本文讲述了一些中间件集成到商用系统中需要具备的能力。在对中间件侵入式修改没有技术能力或不想对中间件进行侵入式修改的场景。选用团队常用的、占用资源少的语言来开发中间件<code>adapter</code>应该是更好的选择。</p>
-]]></content>
-      <tags>
-        <tag>middleware</tag>
       </tags>
   </entry>
   <entry>
@@ -497,21 +497,6 @@
 ]]></content>
   </entry>
   <entry>
-    <title>网络通信超时之后该不该重启客户端</title>
-    <url>/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1%E8%B6%85%E6%97%B6%E4%B9%8B%E5%90%8E%E8%AF%A5%E4%B8%8D%E8%AF%A5%E9%87%8D%E5%90%AF%E5%AE%A2%E6%88%B7%E7%AB%AF/</url>
-    <content><![CDATA[<p>我写这篇文章来论证“超时之后要不要重启客户端”、“如何重启客户端”。简而言之，重启客户端还是为了让系统能够达到自愈，是比较高的可靠性要求。如果你的软件没有这么高的可靠性要求，像是人机交互程序等对可靠性要求较低的场景，可以选择不考虑这个功能。毕竟实现这个功能的时间至少够300倍你重新点击按钮&#x2F;重启的时间了。</p>
-<p>如果是一些串口协议，通过传输的间隙来判断报文的间隔，比如modbus协议，3.5个时间内不发送，就计算做一个协议报文的开始，那么故障时的报文毫无疑问会处理失败（因为存在CRC校验，奇偶校验等）。等待故障结束，又3.5个时间后，就会恢复正常。</p>
-<p>如果能确保网络通信报文不会遭到篡改、也没有宇宙射线&#x2F;太阳黑子修改你的比特位的场景下，笔者认为没有特别大的必要对客户端进行重启操作，因为不见得重启后就比之前更好，这种超时通常是由服务端处理时间长导致的。没做到建链限制的情况下，贸然重启，还可能会引起建链的波峰。</p>
-<p>但是，在实际复杂的网络环境下，如<strong>网络报文遭到篡改</strong>、<strong>部分字节丢失</strong>等的情况下，一切就大不一样了，不重启客户端就无法自愈。这其中的关键在于，切分报文是否正确。</p>
-<p>比如基于TCP的网络协议，这也是本文重点讨论的场景，假设应用协议采用最常见的LengthBasedFrame分包方式，这种协议，通常根据前0~4个字节来判断协议的总长度，比如前面的字节是<strong>00000014</strong>，那这个报文长度就是<code>1*16 + 4 = 20</code>长度。这种时候，一旦发生了报文篡改&#x2F;丢包，会导致通信端计算报文长度出错，一直在傻等，无法自愈。</p>
-<p>比如上面的例子一旦发生篡改，将4篡改5，那么就会导致客户端&#x2F;服务器一直在等待不存在的第21个字节，这种情况下，如果不做超时重建，那么这条链路就会一直处于等待状态，无法自愈。</p>
-<p>综上所述，实际复杂的网络环境下出现通信超时，这条链路可能会无法自愈。这种情况下，笔者推荐对针对tcp链路做超时重建，业内的一些例子像是：bookkeeper client没有做，kafka client做了。至于重建的触发条件，比如一次超时就重建、多次超时之后才重建、仅当心跳报文超时才重建，这些就交给读者自己把握了。如果区别不大，笔者倾向于一次超时就重建，逻辑简单清晰。</p>
-]]></content>
-      <tags>
-        <tag>Code</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>线程锁导致的kafka客户端超时问题</title>
     <url>/%E7%BA%BF%E7%A8%8B%E9%94%81%E5%AF%BC%E8%87%B4%E7%9A%84kafka%E5%AE%A2%E6%88%B7%E7%AB%AF%E8%B6%85%E6%97%B6%E9%97%AE%E9%A2%98/</url>
     <content><![CDATA[<h2><span id="wen-ti-bei-jing">问题背景</span><a href="#wen-ti-bei-jing" class="header-anchor">#</a></h2><p>有一个环境的kafka client发送数据有部分超时，拓扑图也非常简单</p>
@@ -552,6 +537,21 @@
 ]]></content>
       <tags>
         <tag>kafka</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>网络通信超时之后该不该重启客户端</title>
+    <url>/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1%E8%B6%85%E6%97%B6%E4%B9%8B%E5%90%8E%E8%AF%A5%E4%B8%8D%E8%AF%A5%E9%87%8D%E5%90%AF%E5%AE%A2%E6%88%B7%E7%AB%AF/</url>
+    <content><![CDATA[<p>我写这篇文章来论证“超时之后要不要重启客户端”、“如何重启客户端”。简而言之，重启客户端还是为了让系统能够达到自愈，是比较高的可靠性要求。如果你的软件没有这么高的可靠性要求，像是人机交互程序等对可靠性要求较低的场景，可以选择不考虑这个功能。毕竟实现这个功能的时间至少够300倍你重新点击按钮&#x2F;重启的时间了。</p>
+<p>如果是一些串口协议，通过传输的间隙来判断报文的间隔，比如modbus协议，3.5个时间内不发送，就计算做一个协议报文的开始，那么故障时的报文毫无疑问会处理失败（因为存在CRC校验，奇偶校验等）。等待故障结束，又3.5个时间后，就会恢复正常。</p>
+<p>如果能确保网络通信报文不会遭到篡改、也没有宇宙射线&#x2F;太阳黑子修改你的比特位的场景下，笔者认为没有特别大的必要对客户端进行重启操作，因为不见得重启后就比之前更好，这种超时通常是由服务端处理时间长导致的。没做到建链限制的情况下，贸然重启，还可能会引起建链的波峰。</p>
+<p>但是，在实际复杂的网络环境下，如<strong>网络报文遭到篡改</strong>、<strong>部分字节丢失</strong>等的情况下，一切就大不一样了，不重启客户端就无法自愈。这其中的关键在于，切分报文是否正确。</p>
+<p>比如基于TCP的网络协议，这也是本文重点讨论的场景，假设应用协议采用最常见的LengthBasedFrame分包方式，这种协议，通常根据前0~4个字节来判断协议的总长度，比如前面的字节是<strong>00000014</strong>，那这个报文长度就是<code>1*16 + 4 = 20</code>长度。这种时候，一旦发生了报文篡改&#x2F;丢包，会导致通信端计算报文长度出错，一直在傻等，无法自愈。</p>
+<p>比如上面的例子一旦发生篡改，将4篡改5，那么就会导致客户端&#x2F;服务器一直在等待不存在的第21个字节，这种情况下，如果不做超时重建，那么这条链路就会一直处于等待状态，无法自愈。</p>
+<p>综上所述，实际复杂的网络环境下出现通信超时，这条链路可能会无法自愈。这种情况下，笔者推荐对针对tcp链路做超时重建，业内的一些例子像是：bookkeeper client没有做，kafka client做了。至于重建的触发条件，比如一次超时就重建、多次超时之后才重建、仅当心跳报文超时才重建，这些就交给读者自己把握了。如果区别不大，笔者倾向于一次超时就重建，逻辑简单清晰。</p>
+]]></content>
+      <tags>
+        <tag>Code</tag>
       </tags>
   </entry>
   <entry>
@@ -657,25 +657,6 @@
       </tags>
   </entry>
   <entry>
-    <title>错误码国际化总结</title>
-    <url>/code/error-msg-i18n/</url>
-    <content><![CDATA[<h1><span id="cuo-wu-xin-xi-wu-mo-ban-bian-liang">错误信息无模板变量</span><a href="#cuo-wu-xin-xi-wu-mo-ban-bian-liang" class="header-anchor">#</a></h1><p>假设我们的错误信息返回如下</p>
-<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">HTTP/1.1 200 OK</span><br><span class="line">&#123;&quot;error_code&quot;: &quot;IEEE.754&quot;, &quot;error_msg&quot;: &quot;IEE 754 error&quot;&#125;</span><br></pre></td></tr></table></figure>
-
-<p>无模板变量的错误信息国际化，可以直接在前端对整体字符串根据错误码进行静态国际化。</p>
-<figure class="highlight typescript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// catch the error code first</span></span><br><span class="line"><span class="keyword">const</span> error_code = body.<span class="property">error_code</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> error_msg_map = &#123;</span><br><span class="line">    <span class="string">&quot;IEEE.754&quot;</span>: &#123;</span><br><span class="line">        <span class="string">&quot;en&quot;</span>: <span class="string">&quot;IEE 754 error&quot;</span>,</span><br><span class="line">        <span class="string">&quot;zh&quot;</span>: <span class="string">&quot;IEE 754 错误&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> error_msg = error_msg_map[error_code][lang]</span><br></pre></td></tr></table></figure>
-
-<h1><span id="cuo-wu-xin-xi-bao-han-mo-ban-bian-liang">错误信息包含模板变量</span><a href="#cuo-wu-xin-xi-bao-han-mo-ban-bian-liang" class="header-anchor">#</a></h1><p>假设我们的错误信息返回如下</p>
-<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">HTTP/1.1 200 OK</span><br><span class="line">&#123;&quot;error_code&quot;: &quot;IEEE.754&quot;, &quot;error_msg&quot;: &quot;IEE 754 NbN error, do you mean Nan?&quot;&#125;</span><br></pre></td></tr></table></figure>
-
-<p>包含模板变量的错误信息国际化，可以在前端通过正则表达式提取，并代入到中文字符串模板中实现。如示例代码</p>
-<figure class="highlight typescript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// catch the error code first</span></span><br><span class="line"><span class="keyword">const</span> error_code = body.<span class="property">code</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> error_msg_capture_map = &#123;</span><br><span class="line">    <span class="string">&quot;IEEE.754&quot;</span>: <span class="string">&quot;/IEE 754 (\w+) error, do you mean (\w+)?/&quot;</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> error_msg_template_map = &#123;</span><br><span class="line">    <span class="string">&quot;IEEE.754&quot;</span>: &#123;</span><br><span class="line">        <span class="string">&quot;en&quot;</span>: <span class="string">&quot;IEE 754 &#123;&#123;var1&#125;&#125; error, do you mean &#123;&#123;var2&#125;&#125;?&quot;</span>,</span><br><span class="line">        <span class="string">&quot;zh&quot;</span>: <span class="string">&quot;IEE 754 &#123;&#123;var1&#125;&#125; 错误，你是指 &#123;&#123;var2&#125;&#125; 吗？&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> matches = error_msg_capture_map[error_code].<span class="title function_">exec</span>(body.<span class="property">error_msg</span>);</span><br><span class="line"><span class="keyword">const</span> variables = matches.<span class="title function_">slice</span>(<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> error_msg = error_msg_template_map[error_code][lang];</span><br><span class="line">variables.<span class="title function_">forEach</span>(<span class="function">(<span class="params">value, index</span>) =&gt;</span> &#123;</span><br><span class="line">    error_msg = error_msg.<span class="title function_">replace</span>(<span class="string">`&#123;&#123;var<span class="subst">$&#123;index + <span class="number">1</span>&#125;</span>&#125;&#125;`</span>, value);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
-]]></content>
-      <tags>
-        <tag>Code</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>后端开发实体命名</title>
     <url>/code/backend-dev-entity-naming/</url>
     <content><![CDATA[<p>对于一个资源实体来说，在解决方案里，常见的操作场景有：</p>
@@ -748,6 +729,25 @@
 ]]></content>
       <tags>
         <tag>openapi</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>错误码国际化总结</title>
+    <url>/code/error-msg-i18n/</url>
+    <content><![CDATA[<h1><span id="cuo-wu-xin-xi-wu-mo-ban-bian-liang">错误信息无模板变量</span><a href="#cuo-wu-xin-xi-wu-mo-ban-bian-liang" class="header-anchor">#</a></h1><p>假设我们的错误信息返回如下</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">HTTP/1.1 200 OK</span><br><span class="line">&#123;&quot;error_code&quot;: &quot;IEEE.754&quot;, &quot;error_msg&quot;: &quot;IEE 754 error&quot;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>无模板变量的错误信息国际化，可以直接在前端对整体字符串根据错误码进行静态国际化。</p>
+<figure class="highlight typescript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// catch the error code first</span></span><br><span class="line"><span class="keyword">const</span> error_code = body.<span class="property">error_code</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> error_msg_map = &#123;</span><br><span class="line">    <span class="string">&quot;IEEE.754&quot;</span>: &#123;</span><br><span class="line">        <span class="string">&quot;en&quot;</span>: <span class="string">&quot;IEE 754 error&quot;</span>,</span><br><span class="line">        <span class="string">&quot;zh&quot;</span>: <span class="string">&quot;IEE 754 错误&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> error_msg = error_msg_map[error_code][lang]</span><br></pre></td></tr></table></figure>
+
+<h1><span id="cuo-wu-xin-xi-bao-han-mo-ban-bian-liang">错误信息包含模板变量</span><a href="#cuo-wu-xin-xi-bao-han-mo-ban-bian-liang" class="header-anchor">#</a></h1><p>假设我们的错误信息返回如下</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">HTTP/1.1 200 OK</span><br><span class="line">&#123;&quot;error_code&quot;: &quot;IEEE.754&quot;, &quot;error_msg&quot;: &quot;IEE 754 NbN error, do you mean Nan?&quot;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>包含模板变量的错误信息国际化，可以在前端通过正则表达式提取，并代入到中文字符串模板中实现。如示例代码</p>
+<figure class="highlight typescript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// catch the error code first</span></span><br><span class="line"><span class="keyword">const</span> error_code = body.<span class="property">code</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> error_msg_capture_map = &#123;</span><br><span class="line">    <span class="string">&quot;IEEE.754&quot;</span>: <span class="string">&quot;/IEE 754 (\w+) error, do you mean (\w+)?/&quot;</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> error_msg_template_map = &#123;</span><br><span class="line">    <span class="string">&quot;IEEE.754&quot;</span>: &#123;</span><br><span class="line">        <span class="string">&quot;en&quot;</span>: <span class="string">&quot;IEE 754 &#123;&#123;var1&#125;&#125; error, do you mean &#123;&#123;var2&#125;&#125;?&quot;</span>,</span><br><span class="line">        <span class="string">&quot;zh&quot;</span>: <span class="string">&quot;IEE 754 &#123;&#123;var1&#125;&#125; 错误，你是指 &#123;&#123;var2&#125;&#125; 吗？&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> matches = error_msg_capture_map[error_code].<span class="title function_">exec</span>(body.<span class="property">error_msg</span>);</span><br><span class="line"><span class="keyword">const</span> variables = matches.<span class="title function_">slice</span>(<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> error_msg = error_msg_template_map[error_code][lang];</span><br><span class="line">variables.<span class="title function_">forEach</span>(<span class="function">(<span class="params">value, index</span>) =&gt;</span> &#123;</span><br><span class="line">    error_msg = error_msg.<span class="title function_">replace</span>(<span class="string">`&#123;&#123;var<span class="subst">$&#123;index + <span class="number">1</span>&#125;</span>&#125;&#125;`</span>, value);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+]]></content>
+      <tags>
+        <tag>Code</tag>
       </tags>
   </entry>
   <entry>
@@ -900,6 +900,56 @@
       </tags>
   </entry>
   <entry>
+    <title>多语言编程 各大Http库配置指南</title>
+    <url>/code/multi-lang-http-client-config/</url>
+    <content><![CDATA[<div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#go">Go</a><ul>
+<li><a href="#go-biao-zhun-ku">Go标准库</a><ul>
+<li><a href="#timeout">timeout</a></li>
+<li><a href="#connection-timeout">connection timeout</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#java">Java</a><ul>
+<li><a href="#biao-zhun-ku-jdk17">标准库(jdk17+)</a><ul>
+<li><a href="#timeout-1">timeout</a></li>
+<li><a href="#connectiontimeout">connectionTimeout</a></li>
+</ul>
+</li>
+<li><a href="#reactor-netty">Reactor Netty</a><ul>
+<li><a href="#timeout-2">timeout</a></li>
+<li><a href="#connectiontimeout-1">connectionTimeout</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="go">Go</span><a href="#go" class="header-anchor">#</a></h1><h2><span id="go-biao-zhun-ku">Go标准库</span><a href="#go-biao-zhun-ku" class="header-anchor">#</a></h2><h3><span id="timeout">timeout</span><a href="#timeout" class="header-anchor">#</a></h3><figure class="highlight go"><table><tr><td class="code"><pre><span class="line">client := http.Client&#123;</span><br><span class="line">    Timeout: timeout,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3><span id="connection-timeout">connection timeout</span><a href="#connection-timeout" class="header-anchor">#</a></h3><figure class="highlight go"><table><tr><td class="code"><pre><span class="line">client := http.Client&#123;</span><br><span class="line">    Transport: &amp;http.Transport&#123;</span><br><span class="line">        Dial: (&amp;net.Dialer&#123;</span><br><span class="line">            Timeout: timeout,</span><br><span class="line">        &#125;).Dial,</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1><span id="java">Java</span><a href="#java" class="header-anchor">#</a></h1><h2><span id="biao-zhun-ku-jdk17">标准库(jdk17+)</span><a href="#biao-zhun-ku-jdk17" class="header-anchor">#</a></h2><h3><span id="timeout">timeout</span><a href="#timeout" class="header-anchor">#</a></h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="type">HttpRequest</span> <span class="variable">request</span> <span class="operator">=</span> HttpRequest.newBuilder()</span><br><span class="line">    .uri(URI.create(<span class="string">&quot;http://example.com&quot;</span>))</span><br><span class="line">    .timeout(Duration.ofSeconds(<span class="number">10</span>))</span><br><span class="line">    .build();</span><br></pre></td></tr></table></figure>
+
+<h3><span id="connectiontimeout">connectionTimeout</span><a href="#connectiontimeout" class="header-anchor">#</a></h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">HttpClient.<span class="type">Builder</span> <span class="variable">builder</span> <span class="operator">=</span> HttpClient.newBuilder()</span><br><span class="line">.connectTimeout(Duration.ofSeconds(<span class="number">10</span>))</span><br><span class="line">.version(HttpClient.Version.HTTP_1_1);</span><br></pre></td></tr></table></figure>
+
+<h2><span id="reactor-netty">Reactor Netty</span><a href="#reactor-netty" class="header-anchor">#</a></h2><h3><span id="timeout">timeout</span><a href="#timeout" class="header-anchor">#</a></h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="type">HttpClient</span> <span class="variable">client</span> <span class="operator">=</span> HttpClient.create().responseTimeout(Duration.ofSeconds(<span class="number">10</span>));</span><br></pre></td></tr></table></figure>
+
+<h3><span id="connectiontimeout">connectionTimeout</span><a href="#connectiontimeout" class="header-anchor">#</a></h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="type">HttpClient</span> <span class="variable">client</span> <span class="operator">=</span> HttpClient.create().option(ChannelOption.CONNECT_TIMEOUT_MILLIS, <span class="number">5000</span>);</span><br></pre></td></tr></table></figure>
+]]></content>
+      <tags>
+        <tag>Code</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>多语言编程 TLS配置参数设计</title>
     <url>/code/multi-lang-paradigm-tls-config-design/</url>
     <content><![CDATA[<div class="toc">
@@ -990,56 +1040,6 @@
       <tags>
         <tag>Code</tag>
         <tag>多语言编程</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>多语言编程 各大Http库配置指南</title>
-    <url>/code/multi-lang-http-client-config/</url>
-    <content><![CDATA[<div class="toc">
-
-<!-- toc -->
-
-<ul>
-<li><a href="#go">Go</a><ul>
-<li><a href="#go-biao-zhun-ku">Go标准库</a><ul>
-<li><a href="#timeout">timeout</a></li>
-<li><a href="#connection-timeout">connection timeout</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#java">Java</a><ul>
-<li><a href="#biao-zhun-ku-jdk17">标准库(jdk17+)</a><ul>
-<li><a href="#timeout-1">timeout</a></li>
-<li><a href="#connectiontimeout">connectionTimeout</a></li>
-</ul>
-</li>
-<li><a href="#reactor-netty">Reactor Netty</a><ul>
-<li><a href="#timeout-2">timeout</a></li>
-<li><a href="#connectiontimeout-1">connectionTimeout</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<!-- tocstop -->
-
-</div>
-
-<h1><span id="go">Go</span><a href="#go" class="header-anchor">#</a></h1><h2><span id="go-biao-zhun-ku">Go标准库</span><a href="#go-biao-zhun-ku" class="header-anchor">#</a></h2><h3><span id="timeout">timeout</span><a href="#timeout" class="header-anchor">#</a></h3><figure class="highlight go"><table><tr><td class="code"><pre><span class="line">client := http.Client&#123;</span><br><span class="line">    Timeout: timeout,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3><span id="connection-timeout">connection timeout</span><a href="#connection-timeout" class="header-anchor">#</a></h3><figure class="highlight go"><table><tr><td class="code"><pre><span class="line">client := http.Client&#123;</span><br><span class="line">    Transport: &amp;http.Transport&#123;</span><br><span class="line">        Dial: (&amp;net.Dialer&#123;</span><br><span class="line">            Timeout: timeout,</span><br><span class="line">        &#125;).Dial,</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h1><span id="java">Java</span><a href="#java" class="header-anchor">#</a></h1><h2><span id="biao-zhun-ku-jdk17">标准库(jdk17+)</span><a href="#biao-zhun-ku-jdk17" class="header-anchor">#</a></h2><h3><span id="timeout">timeout</span><a href="#timeout" class="header-anchor">#</a></h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="type">HttpRequest</span> <span class="variable">request</span> <span class="operator">=</span> HttpRequest.newBuilder()</span><br><span class="line">    .uri(URI.create(<span class="string">&quot;http://example.com&quot;</span>))</span><br><span class="line">    .timeout(Duration.ofSeconds(<span class="number">10</span>))</span><br><span class="line">    .build();</span><br></pre></td></tr></table></figure>
-
-<h3><span id="connectiontimeout">connectionTimeout</span><a href="#connectiontimeout" class="header-anchor">#</a></h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">HttpClient.<span class="type">Builder</span> <span class="variable">builder</span> <span class="operator">=</span> HttpClient.newBuilder()</span><br><span class="line">.connectTimeout(Duration.ofSeconds(<span class="number">10</span>))</span><br><span class="line">.version(HttpClient.Version.HTTP_1_1);</span><br></pre></td></tr></table></figure>
-
-<h2><span id="reactor-netty">Reactor Netty</span><a href="#reactor-netty" class="header-anchor">#</a></h2><h3><span id="timeout">timeout</span><a href="#timeout" class="header-anchor">#</a></h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="type">HttpClient</span> <span class="variable">client</span> <span class="operator">=</span> HttpClient.create().responseTimeout(Duration.ofSeconds(<span class="number">10</span>));</span><br></pre></td></tr></table></figure>
-
-<h3><span id="connectiontimeout">connectionTimeout</span><a href="#connectiontimeout" class="header-anchor">#</a></h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="type">HttpClient</span> <span class="variable">client</span> <span class="operator">=</span> HttpClient.create().option(ChannelOption.CONNECT_TIMEOUT_MILLIS, <span class="number">5000</span>);</span><br></pre></td></tr></table></figure>
-]]></content>
-      <tags>
-        <tag>Code</tag>
       </tags>
   </entry>
   <entry>
@@ -1230,7 +1230,7 @@
 <li>高代理（High-half surrogates）：范围是0xD800~0xDBFF，二进制范围为1101 1000 0000 ~ 1101 1111 1111，这也代表着高代理的前六位一定是110110。</li>
 <li>低代理（Low-half surrogates）：范围是0xDC00~0xDFFF，二进制范围为1101 1100 0000 ~ 1101 1111 1111，这也代表着低代理的前六位一定是110111。</li>
 </ul>
-<p>那么聪明的读者应该分析出来了，使用两个16位表示，由于存在代理对的固定部分，剩余的有效位还剩下20位。这20位恰好可以覆盖从U+010000到U+10FFFF的码点范围。由于U+0000<del>U+FFFF已经在场景①中覆盖，通过将码点减去0x10000，范围就变成了0x000000</del>0x0FFFFF，恰好是20位整数。</p>
+<p>那么聪明的读者应该分析出来了，使用两个16位表示，由于存在代理对的固定部分，剩余的有效位还剩下20位。这20位恰好可以覆盖从U+010000到U+10FFFF的码点范围。由于U+0000-U+FFFF已经在场景①中覆盖，通过将码点减去0x10000，范围就变成了0x000000~0x0FFFFF，恰好是20位整数。</p>
 <h1><span id="utf-8-8-bit-unicode-transformation-format">UTF-8（8-bit Unicode Transformation Format）</span><a href="#utf-8-8-bit-unicode-transformation-format" class="header-anchor">#</a></h1><p>UTF-8的编码规则</p>
 <ul>
 <li>① 对于码点小于等于U+007F的字符，直接使用8位表示，兼容ASCII。</li>
@@ -1552,6 +1552,24 @@
       </tags>
   </entry>
   <entry>
+    <title>修改运行中kubernetes集群中etcd的参数</title>
+    <url>/kubernetes/kubernetes-etcd-config-modify/</url>
+    <content><![CDATA[<p>在一些场景下，您的kubernetes集群已经搭建完成了，但是还需要修改一些核心组件的参数，如etcd、kube-apiserver、kube-scheduler、kube-controller-manager等。</p>
+<p>通过<code>kubectl get pod -owide -n kube-system</code> 可以查看到这些核心容器。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">NAME                               READY   STATUS    RESTARTS       AGE</span><br><span class="line">coredns-78fcd69978-rdmjm           1/1     Running   11 (23s ago)   281d</span><br><span class="line">etcd-<span class="variable">$NODE1</span>                        1/1     Running   13 (23s ago)   281d</span><br><span class="line">etcd-<span class="variable">$NODE2</span>                        1/1     Running   13 (23s ago)   281d</span><br><span class="line">etcd-<span class="variable">$NODE3</span>                        1/1     Running   13 (23s ago)   281d</span><br><span class="line">.....</span><br></pre></td></tr></table></figure>
+
+<p>以etcd为例，etcd的参数就在pod中的commands参数里。可以通过<code>kubectl describe pod etcd-$NODENAME -n kube-system</code>来查看(省略部分参数)</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">Name: etcd-<span class="variable">$NODENAME</span></span><br><span class="line">Namespace: kube-system</span><br><span class="line">Containers:</span><br><span class="line">etcd:</span><br><span class="line">Command:</span><br><span class="line">--client-cert-auth=<span class="literal">true</span></span><br><span class="line">--trusted-ca-file=/etc/kubernetes/pki/etcd/ca.crt</span><br></pre></td></tr></table></figure>
+
+<p>然而，如果您尝试编辑pod中的参数，会发现它们是不可修改的。</p>
+<p>不过，如果您需要修改参数，还有另一个办法，通过修改<code>/etc/kubernetes/manifests/</code>下的yaml文件来修改运行中kubernetes集群中”系统”Pod的参数。原理是，当您把yaml文件修改后，kubelet会自动监听yaml文件的变更，并重新拉起本机器上的pod。</p>
+<p>举个例子，如果您希望关闭etcd集群对客户端的认证，那么您可以修改<code>/etc/kubernetes/mainfiest/etcd.yaml</code>,将<strong>client-cert-auth</strong>设置为false，把<strong>trusted-ca-file</strong>去掉。注意：三台master机器节点都需要执行此操作</p>
+]]></content>
+      <tags>
+        <tag>Kubernetes</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>高可用无单点架构之kubernetes集群</title>
     <url>/kubernetes/kubernetes-ha/</url>
     <content><![CDATA[<h1><span id="k8s-gao-ke-yong-wu-dan-dian-gu-zhang-she-ji-na-xie-chang-jing">k8s高可用无单点故障涉及那些场景</span><a href="#k8s-gao-ke-yong-wu-dan-dian-gu-zhang-she-ji-na-xie-chang-jing" class="header-anchor">#</a></h1><h2><span id="k8s-jie-dian-tian-jia-pod-tian-jia-deng-zeng-shan-cha-gai-wu-dan-dian-gu-zhang">k8s 节点添加、pod添加等增删查改无单点故障</span><a href="#k8s-jie-dian-tian-jia-pod-tian-jia-deng-zeng-shan-cha-gai-wu-dan-dian-gu-zhang" class="header-anchor">#</a></h2><p>需要元数据的存储和处理能力高可用</p>
@@ -1567,24 +1585,6 @@
 <p><img src="/kubernetes/kubernetes-ha/kubernetes-ha-keepalived-nginx.png" alt="kubernetes-ha-keepalived-nginx"></p>
 <p>为了简化图像，只画出了master1上的Nginx向后转发的场景。</p>
 <p>至于Nginx和KeepAlived如何部署，推荐采用容器化的部署模式，方便进行监控和运维；但是镜像不从镜像仓库拉取，而是保存在<code>master</code>节点上，这样虽然升级复杂一点，但是这样子<code>kubernetes</code>的高可用就不依赖镜像仓库了，不会和镜像仓库形成循环依赖，更不会影响镜像仓库的高可用方案，大大简化了后续的技术方案。（因为镜像仓库可能会占据较大的存储空间，可能会和<code>master</code>节点分离部署，这时会作为<code>worker</code>节点连接<code>master</code>节点）。</p>
-]]></content>
-      <tags>
-        <tag>Kubernetes</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>修改运行中kubernetes集群中etcd的参数</title>
-    <url>/kubernetes/kubernetes-etcd-config-modify/</url>
-    <content><![CDATA[<p>在一些场景下，您的kubernetes集群已经搭建完成了，但是还需要修改一些核心组件的参数，如etcd、kube-apiserver、kube-scheduler、kube-controller-manager等。</p>
-<p>通过<code>kubectl get pod -owide -n kube-system</code> 可以查看到这些核心容器。</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">NAME                               READY   STATUS    RESTARTS       AGE</span><br><span class="line">coredns-78fcd69978-rdmjm           1/1     Running   11 (23s ago)   281d</span><br><span class="line">etcd-<span class="variable">$NODE1</span>                        1/1     Running   13 (23s ago)   281d</span><br><span class="line">etcd-<span class="variable">$NODE2</span>                        1/1     Running   13 (23s ago)   281d</span><br><span class="line">etcd-<span class="variable">$NODE3</span>                        1/1     Running   13 (23s ago)   281d</span><br><span class="line">.....</span><br></pre></td></tr></table></figure>
-
-<p>以etcd为例，etcd的参数就在pod中的commands参数里。可以通过<code>kubectl describe pod etcd-$NODENAME -n kube-system</code>来查看(省略部分参数)</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">Name: etcd-<span class="variable">$NODENAME</span></span><br><span class="line">Namespace: kube-system</span><br><span class="line">Containers:</span><br><span class="line">etcd:</span><br><span class="line">Command:</span><br><span class="line">--client-cert-auth=<span class="literal">true</span></span><br><span class="line">--trusted-ca-file=/etc/kubernetes/pki/etcd/ca.crt</span><br></pre></td></tr></table></figure>
-
-<p>然而，如果您尝试编辑pod中的参数，会发现它们是不可修改的。</p>
-<p>不过，如果您需要修改参数，还有另一个办法，通过修改<code>/etc/kubernetes/manifests/</code>下的yaml文件来修改运行中kubernetes集群中”系统”Pod的参数。原理是，当您把yaml文件修改后，kubelet会自动监听yaml文件的变更，并重新拉起本机器上的pod。</p>
-<p>举个例子，如果您希望关闭etcd集群对客户端的认证，那么您可以修改<code>/etc/kubernetes/mainfiest/etcd.yaml</code>,将<strong>client-cert-auth</strong>设置为false，把<strong>trusted-ca-file</strong>去掉。注意：三台master机器节点都需要执行此操作</p>
 ]]></content>
       <tags>
         <tag>Kubernetes</tag>
@@ -1908,6 +1908,37 @@
       </tags>
   </entry>
   <entry>
+    <title>Mysql是如何隐藏ps命令行中的密码的</title>
+    <url>/mysql/mysql-ps-password/</url>
+    <content><![CDATA[<h2><span id="can-kao">参考</span><a href="#can-kao" class="header-anchor">#</a></h2><ul>
+<li><a href="http://northernmost.org/blog/how-does-mysql-hide-the-command-line-password-in-ps/index.html">http://northernmost.org/blog/how-does-mysql-hide-the-command-line-password-in-ps/index.html</a></li>
+</ul>
+<p>之前就在环境上<code>ps -ef</code>看到过<code>xxxxxx</code>的密码，一直没搞明白怎么回事，今天整理了一下，核心内容均来自于上述连接，作了一些额外的测试和查阅资料。</p>
+<h2><span id="ce-shi">测试</span><a href="#ce-shi" class="header-anchor">#</a></h2><h3><span id="yun-xing-mysql-shi-li">运行Mysql实例</span><a href="#yun-xing-mysql-shi-li" class="header-anchor">#</a></h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 自己做的Mysql8的镜像</span></span><br><span class="line">docker run ttbb/mysql:stand-alone</span><br></pre></td></tr></table></figure>
+
+<h3><span id="shi-yong-mi-ma-lian-jie-mysql-fu-wu-qi">使用密码连接Mysql服务器</span><a href="#shi-yong-mi-ma-lian-jie-mysql-fu-wu-qi" class="header-anchor">#</a></h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">mysql -u hzj -p Mysql@123 -e <span class="string">&quot;select 1&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h3><span id="ps-ef-cha-kan">ps -ef查看</span><a href="#ps-ef-cha-kan" class="header-anchor">#</a></h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@91bcbd15a82e mysql]# ps -ef</span><br><span class="line">UID        PID  PPID  C STIME TTY          TIME CMD</span><br><span class="line">root         1     0  0 07:34 ?        00:00:00 /usr/local/bin/dumb-init bash -vx /opt/sh/mysql/hzj/scripts/start.sh</span><br><span class="line">root         8     1  0 07:34 ?        00:00:00 bash -vx /opt/sh/mysql/hzj/scripts/start.sh</span><br><span class="line">root        17     1  0 07:34 ?        00:00:00 mysqld --daemonize --user=root</span><br><span class="line">root        62     8  0 07:34 ?        00:00:00 tail -f /dev/null</span><br><span class="line">root        63     0  0 07:34 pts/0    00:00:00 bash</span><br><span class="line">root        98    63  0 07:37 pts/0    00:00:00 mysql -h 127.0.0.1 -u hzj -px xxxxxxx</span><br><span class="line">root        99     0  1 07:37 pts/1    00:00:00 bash</span><br><span class="line">root       122    99  0 07:37 pts/1    00:00:00 ps -ef</span><br></pre></td></tr></table></figure>
+
+<h2><span id="mysql-yin-cang-mi-ma-yuan-li">Mysql隐藏密码原理</span><a href="#mysql-yin-cang-mi-ma-yuan-li" class="header-anchor">#</a></h2><p>改写了<code>args</code>系统参数，demo如下</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// Created by 张俭 on 2021/4/26.</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> *argv[])</span> &#123;</span><br><span class="line">    <span class="type">int</span> i = <span class="number">0</span>;</span><br><span class="line">    <span class="type">pid_t</span> mypid = getpid();</span><br><span class="line">    <span class="keyword">if</span> (argc == <span class="number">1</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;argc = %d and arguments are:\n&quot;</span>, argc);</span><br><span class="line">    <span class="keyword">for</span> (i; i &lt; argc; i++) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;%d = %s\n&quot;</span>, i, argv[i]);</span><br><span class="line">    &#125;</span><br><span class="line">    fflush(<span class="built_in">stdout</span>);</span><br><span class="line">    sleep(<span class="number">30</span>);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Replacing first argument with x:es... Now open another terminal and run: ps p %d\n&quot;</span>, (<span class="type">int</span>)mypid);</span><br><span class="line">    <span class="built_in">memset</span>(argv[<span class="number">1</span>], <span class="string">&#x27;x&#x27;</span>, <span class="built_in">strlen</span>(argv[<span class="number">1</span>]));</span><br><span class="line">    getc(<span class="built_in">stdin</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>编译并运行</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">gcc password_hide.c</span><br><span class="line">[root@c77dc365cd1a sh]<span class="comment"># ./a.out abcd</span></span><br><span class="line">argc = 2 and arguments are:</span><br><span class="line">0 = ./a.out</span><br><span class="line">1 = abcd</span><br><span class="line">Replacing first argument with x:es... Now open another terminal and run: ps p 55</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>观测结果，开始看的确有明文密码</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@c77dc365cd1a sh]# ps -ef</span><br><span class="line">UID        PID  PPID  C STIME TTY          TIME CMD</span><br><span class="line">root         1     0  0 07:49 pts/0    00:00:00 bash</span><br><span class="line">root        32     0  0 07:51 pts/1    00:00:00 bash</span><br><span class="line">root        64     1  0 07:56 pts/0    00:00:00 ./a.out abcd</span><br><span class="line">root        66    32  0 07:56 pts/1    00:00:00 ps -ef</span><br></pre></td></tr></table></figure>
+<p>经过30秒后，已经被复写</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@c77dc365cd1a sh]# ps p 55</span><br><span class="line">  PID TTY      STAT   TIME COMMAND</span><br><span class="line">   55 pts/0    S+     0:00 ./a.out xxxx</span><br></pre></td></tr></table></figure>
+<h2><span id="mysql-yuan-ma-di-zhi">Mysql源码地址</span><a href="#mysql-yuan-ma-di-zhi" class="header-anchor">#</a></h2><p>mysql-server&#x2F;client&#x2F;mysql.cc line 2054</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">if (argument) &#123;</span><br><span class="line">  char *start = argument;</span><br><span class="line">  my_free(opt_password);</span><br><span class="line">  opt_password = my_strdup(PSI_NOT_INSTRUMENTED, argument, MYF(MY_FAE));</span><br><span class="line">  while (*argument) *argument++ = &#x27;x&#x27;;  // Destroy argument</span><br><span class="line">  if (*start) start[1] = 0;</span><br><span class="line">  tty_password = false;</span><br><span class="line">&#125; else</span><br><span class="line">  tty_password = true;</span><br></pre></td></tr></table></figure>
+
+<p>PS: 后面，我还在OSX上用go程序尝试修改参数，估摸go程序的args传入是值拷贝，修改完成之后args没有生效，看来这个黑科技只有c程序能使用呀。</p>
+]]></content>
+      <tags>
+        <tag>mysql</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>揭秘MySQL TLS：通过抓包了解真实的加密通信</title>
     <url>/mysql/mysql-default-tls/</url>
     <content><![CDATA[<p>你的mysql客户端和服务端之间开启tls了吗？你的回答可能是No，我没有申请证书，也没有开启mysql客户端，服务端的tls配置。</p>
@@ -1990,37 +2021,6 @@
 <li>VERIFY_CA：确保服务器证书由受信任的CA签发，但不验证证书的主机名或IP地址。</li>
 <li>VERIFY_IDENTITY：不仅验证证书的CA签发，还额外验证证书的主机名或IP地址与服务器的实际地址是否一致。</li>
 </ul>
-]]></content>
-      <tags>
-        <tag>mysql</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Mysql是如何隐藏ps命令行中的密码的</title>
-    <url>/mysql/mysql-ps-password/</url>
-    <content><![CDATA[<h2><span id="can-kao">参考</span><a href="#can-kao" class="header-anchor">#</a></h2><ul>
-<li><a href="http://northernmost.org/blog/how-does-mysql-hide-the-command-line-password-in-ps/index.html">http://northernmost.org/blog/how-does-mysql-hide-the-command-line-password-in-ps/index.html</a></li>
-</ul>
-<p>之前就在环境上<code>ps -ef</code>看到过<code>xxxxxx</code>的密码，一直没搞明白怎么回事，今天整理了一下，核心内容均来自于上述连接，作了一些额外的测试和查阅资料。</p>
-<h2><span id="ce-shi">测试</span><a href="#ce-shi" class="header-anchor">#</a></h2><h3><span id="yun-xing-mysql-shi-li">运行Mysql实例</span><a href="#yun-xing-mysql-shi-li" class="header-anchor">#</a></h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 自己做的Mysql8的镜像</span></span><br><span class="line">docker run ttbb/mysql:stand-alone</span><br></pre></td></tr></table></figure>
-
-<h3><span id="shi-yong-mi-ma-lian-jie-mysql-fu-wu-qi">使用密码连接Mysql服务器</span><a href="#shi-yong-mi-ma-lian-jie-mysql-fu-wu-qi" class="header-anchor">#</a></h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">mysql -u hzj -p Mysql@123 -e <span class="string">&quot;select 1&quot;</span></span><br></pre></td></tr></table></figure>
-
-<h3><span id="ps-ef-cha-kan">ps -ef查看</span><a href="#ps-ef-cha-kan" class="header-anchor">#</a></h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@91bcbd15a82e mysql]# ps -ef</span><br><span class="line">UID        PID  PPID  C STIME TTY          TIME CMD</span><br><span class="line">root         1     0  0 07:34 ?        00:00:00 /usr/local/bin/dumb-init bash -vx /opt/sh/mysql/hzj/scripts/start.sh</span><br><span class="line">root         8     1  0 07:34 ?        00:00:00 bash -vx /opt/sh/mysql/hzj/scripts/start.sh</span><br><span class="line">root        17     1  0 07:34 ?        00:00:00 mysqld --daemonize --user=root</span><br><span class="line">root        62     8  0 07:34 ?        00:00:00 tail -f /dev/null</span><br><span class="line">root        63     0  0 07:34 pts/0    00:00:00 bash</span><br><span class="line">root        98    63  0 07:37 pts/0    00:00:00 mysql -h 127.0.0.1 -u hzj -px xxxxxxx</span><br><span class="line">root        99     0  1 07:37 pts/1    00:00:00 bash</span><br><span class="line">root       122    99  0 07:37 pts/1    00:00:00 ps -ef</span><br></pre></td></tr></table></figure>
-
-<h2><span id="mysql-yin-cang-mi-ma-yuan-li">Mysql隐藏密码原理</span><a href="#mysql-yin-cang-mi-ma-yuan-li" class="header-anchor">#</a></h2><p>改写了<code>args</code>系统参数，demo如下</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// Created by 张俭 on 2021/4/26.</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> *argv[])</span> &#123;</span><br><span class="line">    <span class="type">int</span> i = <span class="number">0</span>;</span><br><span class="line">    <span class="type">pid_t</span> mypid = getpid();</span><br><span class="line">    <span class="keyword">if</span> (argc == <span class="number">1</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;argc = %d and arguments are:\n&quot;</span>, argc);</span><br><span class="line">    <span class="keyword">for</span> (i; i &lt; argc; i++) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;%d = %s\n&quot;</span>, i, argv[i]);</span><br><span class="line">    &#125;</span><br><span class="line">    fflush(<span class="built_in">stdout</span>);</span><br><span class="line">    sleep(<span class="number">30</span>);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Replacing first argument with x:es... Now open another terminal and run: ps p %d\n&quot;</span>, (<span class="type">int</span>)mypid);</span><br><span class="line">    <span class="built_in">memset</span>(argv[<span class="number">1</span>], <span class="string">&#x27;x&#x27;</span>, <span class="built_in">strlen</span>(argv[<span class="number">1</span>]));</span><br><span class="line">    getc(<span class="built_in">stdin</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>编译并运行</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">gcc password_hide.c</span><br><span class="line">[root@c77dc365cd1a sh]<span class="comment"># ./a.out abcd</span></span><br><span class="line">argc = 2 and arguments are:</span><br><span class="line">0 = ./a.out</span><br><span class="line">1 = abcd</span><br><span class="line">Replacing first argument with x:es... Now open another terminal and run: ps p 55</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>观测结果，开始看的确有明文密码</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@c77dc365cd1a sh]# ps -ef</span><br><span class="line">UID        PID  PPID  C STIME TTY          TIME CMD</span><br><span class="line">root         1     0  0 07:49 pts/0    00:00:00 bash</span><br><span class="line">root        32     0  0 07:51 pts/1    00:00:00 bash</span><br><span class="line">root        64     1  0 07:56 pts/0    00:00:00 ./a.out abcd</span><br><span class="line">root        66    32  0 07:56 pts/1    00:00:00 ps -ef</span><br></pre></td></tr></table></figure>
-<p>经过30秒后，已经被复写</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@c77dc365cd1a sh]# ps p 55</span><br><span class="line">  PID TTY      STAT   TIME COMMAND</span><br><span class="line">   55 pts/0    S+     0:00 ./a.out xxxx</span><br></pre></td></tr></table></figure>
-<h2><span id="mysql-yuan-ma-di-zhi">Mysql源码地址</span><a href="#mysql-yuan-ma-di-zhi" class="header-anchor">#</a></h2><p>mysql-server&#x2F;client&#x2F;mysql.cc line 2054</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">if (argument) &#123;</span><br><span class="line">  char *start = argument;</span><br><span class="line">  my_free(opt_password);</span><br><span class="line">  opt_password = my_strdup(PSI_NOT_INSTRUMENTED, argument, MYF(MY_FAE));</span><br><span class="line">  while (*argument) *argument++ = &#x27;x&#x27;;  // Destroy argument</span><br><span class="line">  if (*start) start[1] = 0;</span><br><span class="line">  tty_password = false;</span><br><span class="line">&#125; else</span><br><span class="line">  tty_password = true;</span><br></pre></td></tr></table></figure>
-
-<p>PS: 后面，我还在OSX上用go程序尝试修改参数，估摸go程序的args传入是值拷贝，修改完成之后args没有生效，看来这个黑科技只有c程序能使用呀。</p>
 ]]></content>
       <tags>
         <tag>mysql</tag>
@@ -2206,67 +2206,6 @@
       </tags>
   </entry>
   <entry>
-    <title>prometheus tsdb索引布局及查询流程</title>
-    <url>/prometheus/prometheus-tsdb-index/</url>
-    <content><![CDATA[<h1><span id="prometheus-ci-pan-bu-ju">prometheus 磁盘布局</span><a href="#prometheus-ci-pan-bu-ju" class="header-anchor">#</a></h1><p>采集到的数据每两个小时形成一个block。每个block由一个目录组成，并存放在data路径下。该目录包含一个包含该时间窗口的所有时间序列样本的块子目录、一个元数据文件和一个索引文件（将metric_name和label索引到目录下的时间序列）。 chunks 目录中的样本默认组合成一个或多个段文件，每个段文件最大为 512MB。 当通过 API 删除系列时，删除记录存储在单独的 tombstone 文件中（而不是立即从块段中删除数据）。</p>
-<p>当前正在写入的块保存在内存中，没有完全持久化。通过WAL日志来防止崩溃丢失数据。预写日志分为数节(segments)保存在wal文件夹中。这些文件包含尚未压缩的原始数据； 因此它们比常规块文件大得多。 Prometheus 将至少保留三个预写日志文件。在高流量下，会保留三个以上的 WAL 文件，以便保留至少两个小时的原始数据。</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./data</span><br><span class="line">├── 01BKGV7JBM69T2G1BGBGM6KB12</span><br><span class="line">│   └── meta.json</span><br><span class="line">├── 01BKGTZQ1SYQJTR4PB43C8PD98</span><br><span class="line">│   ├── chunks</span><br><span class="line">│   │   └── 000001</span><br><span class="line">│   ├── tombstones</span><br><span class="line">│   ├── index</span><br><span class="line">│   └── meta.json</span><br><span class="line">├── 01BKGTZQ1HHWHV8FBJXW1Y3W0K</span><br><span class="line">│   └── meta.json</span><br><span class="line">├── 01BKGV7JC0RY8A6MACW02A2PJD</span><br><span class="line">│   ├── chunks</span><br><span class="line">│   │   └── 000001</span><br><span class="line">│   ├── tombstones</span><br><span class="line">│   ├── index</span><br><span class="line">│   └── meta.json</span><br><span class="line">├── chunks_head</span><br><span class="line">│   └── 000001</span><br><span class="line">└── wal</span><br><span class="line">    ├── 000000002</span><br><span class="line">    └── checkpoint.00000001</span><br><span class="line">        └── 00000000</span><br></pre></td></tr></table></figure>
-
-<h2><span id="prometheus-gai-nian">prometheus概念</span><a href="#prometheus-gai-nian" class="header-anchor">#</a></h2><ul>
-<li>Label: 标签，string格式的kv组合</li>
-<li>series: 时间序列，label的组合</li>
-<li>chunk: 时间，value的数据</li>
-</ul>
-<h2><span id="prometheus-suo-yin-ge-shi">prometheus索引格式</span><a href="#prometheus-suo-yin-ge-shi" class="header-anchor">#</a></h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">┌────────────────────────────┬─────────────────────┐</span><br><span class="line">│ magic(0xBAAAD700) &lt;4b&gt;     │ version(1) &lt;1 byte&gt; │</span><br><span class="line">├────────────────────────────┴─────────────────────┤</span><br><span class="line">│ ┌──────────────────────────────────────────────┐ │</span><br><span class="line">│ │                 Symbol Table                 │ │</span><br><span class="line">│ ├──────────────────────────────────────────────┤ │</span><br><span class="line">│ │                    Series                    │ │</span><br><span class="line">│ ├──────────────────────────────────────────────┤ │</span><br><span class="line">│ │                   Postings 1                 │ │</span><br><span class="line">│ ├──────────────────────────────────────────────┤ │</span><br><span class="line">│ │                      ...                     │ │</span><br><span class="line">│ ├──────────────────────────────────────────────┤ │</span><br><span class="line">│ │                   Postings N                 │ │</span><br><span class="line">│ ├──────────────────────────────────────────────┤ │</span><br><span class="line">│ │             Postings Offset Table            │ │</span><br><span class="line">│ ├──────────────────────────────────────────────┤ │</span><br><span class="line">│ │                      TOC                     │ │</span><br><span class="line">│ └──────────────────────────────────────────────┘ │</span><br><span class="line">└──────────────────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
-
-<p>写入索引时，可以在上面列出的主要部分之间添加任意数量的0字节作为填充。顺序扫描文件时，必须跳过部分间的任意0字节。</p>
-<p>下面描述的大部分部分都以 len 字段开头。 它总是指定就在尾随 CRC32 校验和之前的字节数。 校验和就计算这些字节的校验和（不包含len字段）</p>
-<h3><span id="fu-hao-biao">符号表</span><a href="#fu-hao-biao" class="header-anchor">#</a></h3><p>符号表包含已存储序列的标签对中出现的重复数据删除字符串的排序列表。 它们可以从后续部分中引用，并显着减少总索引大小。</p>
-<p>该部分包含一系列字符串entry，每个entry都以字符串的原始字节长度为前缀。 所有字符串均采用 utf-8 编码。 字符串由顺序索引引用。 字符串按字典顺序升序排序。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">┌────────────────────┬─────────────────────┐</span><br><span class="line">│ len &lt;4b&gt;           │ #symbols &lt;4b&gt;       │</span><br><span class="line">├────────────────────┴─────────────────────┤</span><br><span class="line">│ ┌──────────────────────┬───────────────┐ │</span><br><span class="line">│ │ len(str_1) &lt;uvarint&gt; │ str_1 &lt;bytes&gt; │ │</span><br><span class="line">│ ├──────────────────────┴───────────────┤ │</span><br><span class="line">│ │                . . .                 │ │</span><br><span class="line">│ ├──────────────────────┬───────────────┤ │</span><br><span class="line">│ │ len(str_n) &lt;uvarint&gt; │ str_n &lt;bytes&gt; │ │</span><br><span class="line">│ └──────────────────────┴───────────────┘ │</span><br><span class="line">├──────────────────────────────────────────┤</span><br><span class="line">│ CRC32 &lt;4b&gt;                               │</span><br><span class="line">└──────────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
-<h3><span id="xu-lie-series">序列 series</span><a href="#xu-lie-series" class="header-anchor">#</a></h3><p>保存一个具体的时间序列，其中包含系列的label集合和block中的chunks。</p>
-<p>每个series都是16字节对齐。series的id为偏移量除以16。series ID 的排序列表也就是series label的字典排序列表。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">┌───────────────────────────────────────┐</span><br><span class="line">│ ┌───────────────────────────────────┐ │</span><br><span class="line">│ │   series_1                        │ │</span><br><span class="line">│ ├───────────────────────────────────┤ │</span><br><span class="line">│ │                 . . .             │ │</span><br><span class="line">│ ├───────────────────────────────────┤ │</span><br><span class="line">│ │   series_n                        │ │</span><br><span class="line">│ └───────────────────────────────────┘ │</span><br><span class="line">└───────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
-
-<p>每一个series先保存label的数量，然后是包含label键值对的引用。 标签对按字典顺序排序。然后是series涉及的索引块的个数，然后是一系列元数据条目，其中包含块的最小 (mint) 和最大 (maxt) 时间戳以及对其在块文件中位置的引用。<code>mint</code> 是第一个样本的时间，<code>maxt</code> 是块中最后一个样本的时间。 在索引中保存时间范围数据, 允许按照时间范围删除数据时，如果时间范围匹配，不需要直接访问时间数据。</p>
-<p>空间大小优化: 第一个块的 <code>mint</code> 被存储，它的 <code>maxt</code> 被存储为一个增量，并且 <code>mint</code> 和 <code>maxt</code> 被编码为后续块的前一个时间的增量。 类似的，第一个chunk的引用被存储，下一个引用被存储为前一个chunk的增量。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">┌──────────────────────────────────────────────────────────────────────────┐</span><br><span class="line">│ len &lt;uvarint&gt;                                                            │</span><br><span class="line">├──────────────────────────────────────────────────────────────────────────┤</span><br><span class="line">│ ┌──────────────────────────────────────────────────────────────────────┐ │</span><br><span class="line">│ │                     labels count &lt;uvarint64&gt;                         │ │</span><br><span class="line">│ ├──────────────────────────────────────────────────────────────────────┤ │</span><br><span class="line">│ │              ┌────────────────────────────────────────────┐          │ │</span><br><span class="line">│ │              │ ref(l_i.name) &lt;uvarint32&gt;                  │          │ │</span><br><span class="line">│ │              ├────────────────────────────────────────────┤          │ │</span><br><span class="line">│ │              │ ref(l_i.value) &lt;uvarint32&gt;                 │          │ │</span><br><span class="line">│ │              └────────────────────────────────────────────┘          │ │</span><br><span class="line">│ │                             ...                                      │ │</span><br><span class="line">│ ├──────────────────────────────────────────────────────────────────────┤ │</span><br><span class="line">│ │                     chunks count &lt;uvarint64&gt;                         │ │</span><br><span class="line">│ ├──────────────────────────────────────────────────────────────────────┤ │</span><br><span class="line">│ │              ┌────────────────────────────────────────────┐          │ │</span><br><span class="line">│ │              │ c_0.mint &lt;varint64&gt;                        │          │ │</span><br><span class="line">│ │              ├────────────────────────────────────────────┤          │ │</span><br><span class="line">│ │              │ c_0.maxt - c_0.mint &lt;uvarint64&gt;            │          │ │</span><br><span class="line">│ │              ├────────────────────────────────────────────┤          │ │</span><br><span class="line">│ │              │ ref(c_0.data) &lt;uvarint64&gt;                  │          │ │</span><br><span class="line">│ │              └────────────────────────────────────────────┘          │ │</span><br><span class="line">│ │              ┌────────────────────────────────────────────┐          │ │</span><br><span class="line">│ │              │ c_i.mint - c_i-1.maxt &lt;uvarint64&gt;          │          │ │</span><br><span class="line">│ │              ├────────────────────────────────────────────┤          │ │</span><br><span class="line">│ │              │ c_i.maxt - c_i.mint &lt;uvarint64&gt;            │          │ │</span><br><span class="line">│ │              ├────────────────────────────────────────────┤          │ │</span><br><span class="line">│ │              │ ref(c_i.data) - ref(c_i-1.data) &lt;varint64&gt; │          │ │</span><br><span class="line">│ │              └────────────────────────────────────────────┘          │ │</span><br><span class="line">│ │                             ...                                      │ │</span><br><span class="line">│ └──────────────────────────────────────────────────────────────────────┘ │</span><br><span class="line">├──────────────────────────────────────────────────────────────────────────┤</span><br><span class="line">│ CRC32 &lt;4b&gt;                                                               │</span><br><span class="line">└──────────────────────────────────────────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
-
-<h3><span id="posting">Posting</span><a href="#posting" class="header-anchor">#</a></h3><p>Posting这一节存放着关于series引用的单调递增列表，简单来说就是存放id和时间序列的对应关系</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">┌────────────────────┬────────────────────┐</span><br><span class="line">│ len &lt;4b&gt;           │ #entries &lt;4b&gt;      │</span><br><span class="line">├────────────────────┴────────────────────┤</span><br><span class="line">│ ┌─────────────────────────────────────┐ │</span><br><span class="line">│ │ ref(series_1) &lt;4b&gt;                  │ │</span><br><span class="line">│ ├─────────────────────────────────────┤ │</span><br><span class="line">│ │ ...                                 │ │</span><br><span class="line">│ ├─────────────────────────────────────┤ │</span><br><span class="line">│ │ ref(series_n) &lt;4b&gt;                  │ │</span><br><span class="line">│ └─────────────────────────────────────┘ │</span><br><span class="line">├─────────────────────────────────────────┤</span><br><span class="line">│ CRC32 &lt;4b&gt;                              │</span><br><span class="line">└─────────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
-
-<p>Posting sections的顺序由<code>postings offset table</code>决定。</p>
-<h3><span id="posting-offset-table">Posting Offset Table</span><a href="#posting-offset-table" class="header-anchor">#</a></h3><p><code>postings offset table</code>包含着一系列<code>posting offset entry</code>，根据label的名称和值排序。每一个<code>posting offset entry</code>存放着label的键值对以及在<code>posting sections</code>中其series列表的偏移量。用来跟踪<code>posting sections</code>。当index文件加载时，它们将部分加载到内存中。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">┌─────────────────────┬──────────────────────┐</span><br><span class="line">│ len &lt;4b&gt;            │ #entries &lt;4b&gt;        │</span><br><span class="line">├─────────────────────┴──────────────────────┤</span><br><span class="line">│ ┌────────────────────────────────────────┐ │</span><br><span class="line">│ │  n = 2 &lt;1b&gt;                            │ │</span><br><span class="line">│ ├──────────────────────┬─────────────────┤ │</span><br><span class="line">│ │ len(name) &lt;uvarint&gt;  │ name &lt;bytes&gt;    │ │</span><br><span class="line">│ ├──────────────────────┼─────────────────┤ │</span><br><span class="line">│ │ len(value) &lt;uvarint&gt; │ value &lt;bytes&gt;   │ │</span><br><span class="line">│ ├──────────────────────┴─────────────────┤ │</span><br><span class="line">│ │  offset &lt;uvarint64&gt;                    │ │</span><br><span class="line">│ └────────────────────────────────────────┘ │</span><br><span class="line">│                    . . .                   │</span><br><span class="line">├────────────────────────────────────────────┤</span><br><span class="line">│  CRC32 &lt;4b&gt;                                │</span><br><span class="line">└────────────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
-
-<h3><span id="toc">TOC</span><a href="#toc" class="header-anchor">#</a></h3><p><code>table of contents</code>是整个索引的入口点，并指向文件中的各个部分。 如果引用为零，则表示相应的部分不存在，查找时应返回空结果。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">┌─────────────────────────────────────────┐</span><br><span class="line">│ ref(symbols) &lt;8b&gt;                       │</span><br><span class="line">├─────────────────────────────────────────┤</span><br><span class="line">│ ref(series) &lt;8b&gt;                        │</span><br><span class="line">├─────────────────────────────────────────┤</span><br><span class="line">│ ref(label indices start) &lt;8b&gt;           │</span><br><span class="line">├─────────────────────────────────────────┤</span><br><span class="line">│ ref(label offset table) &lt;8b&gt;            │</span><br><span class="line">├─────────────────────────────────────────┤</span><br><span class="line">│ ref(postings start) &lt;8b&gt;                │</span><br><span class="line">├─────────────────────────────────────────┤</span><br><span class="line">│ ref(postings offset table) &lt;8b&gt;         │</span><br><span class="line">├─────────────────────────────────────────┤</span><br><span class="line">│ CRC32 &lt;4b&gt;                              │</span><br><span class="line">└─────────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
-
-<h2><span id="chunks-ci-pan-ge-shi">chunks 磁盘格式</span><a href="#chunks-ci-pan-ge-shi" class="header-anchor">#</a></h2><p>chunks文件创建在<strong>block</strong>中的<code>chunks/</code>目录中。 每个段文件的最大大小为 512MB。<br>文件中的chunk由uint64的索引组织，索引低四位为文件内偏移，高四位为段序列号。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">┌──────────────────────────────┐</span><br><span class="line">│  magic(0x85BD40DD) &lt;4 byte&gt;  │</span><br><span class="line">├──────────────────────────────┤</span><br><span class="line">│    version(1) &lt;1 byte&gt;       │</span><br><span class="line">├──────────────────────────────┤</span><br><span class="line">│    padding(0) &lt;3 byte&gt;       │</span><br><span class="line">├──────────────────────────────┤</span><br><span class="line">│ ┌──────────────────────────┐ │</span><br><span class="line">│ │         Chunk 1          │ │</span><br><span class="line">│ ├──────────────────────────┤ │</span><br><span class="line">│ │          ...             │ │</span><br><span class="line">│ ├──────────────────────────┤ │</span><br><span class="line">│ │         Chunk N          │ │</span><br><span class="line">│ └──────────────────────────┘ │</span><br><span class="line">└──────────────────────────────┘</span><br></pre></td></tr></table></figure>
-
-<h2><span id="chunks-zhong-de-chunk-ge-shi">chunks中的Chunk格式</span><a href="#chunks-zhong-de-chunk-ge-shi" class="header-anchor">#</a></h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">┌───────────────┬───────────────────┬──────────────┬────────────────┐</span><br><span class="line">│ len &lt;uvarint&gt; │ encoding &lt;1 byte&gt; │ data &lt;bytes&gt; │ CRC32 &lt;4 byte&gt; │</span><br><span class="line">└───────────────┴───────────────────┴──────────────┴────────────────┘</span><br></pre></td></tr></table></figure>
-
-<h1><span id="cha-xun-shu-ju">查询数据</span><a href="#cha-xun-shu-ju" class="header-anchor">#</a></h1><h2><span id="code">code</span><a href="#code" class="header-anchor">#</a></h2><p>查询的prometheus方法签名</p>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line">Select(sortSeries <span class="type">bool</span>, hints *SelectHints, matchers ...*labels.Matcher) SeriesSet</span><br></pre></td></tr></table></figure>
-
-<p>支持从block中，remote等各种地方查询获取数据</p>
-<p>prometheus会在内存中维护一个数据结构</p>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// Map of LabelName to a list of some LabelValues&#x27;s position in the offset table.</span></span><br><span class="line"><span class="comment">// The first and last values for each name are always present.</span></span><br><span class="line">postings <span class="keyword">map</span>[<span class="type">string</span>][]postingOffset</span><br></pre></td></tr></table></figure>
-
-<p>在内存中，保留每个label name，并且每n个保存label值，降低内存的占用。但是第一个和最后一个值总是保存在内存中。</p>
-<h2><span id="cha-xun-shu-ju-liu-cheng">查询数据流程</span><a href="#cha-xun-shu-ju-liu-cheng" class="header-anchor">#</a></h2><p><img src="/prometheus/prometheus-tsdb-index/prometheus-tsdb-index.png" alt="prometheus-tsdb-index"></p>
-<h1><span id="can-kao-zi-liao">参考资料</span><a href="#can-kao-zi-liao" class="header-anchor">#</a></h1><ul>
-<li><a href="https://prometheus.io/docs/prometheus/latest/storage/">https://prometheus.io/docs/prometheus/latest/storage/</a></li>
-<li><a href="https://github.com/prometheus/prometheus/blob/release-2.37/tsdb/docs/format/README.md">https://github.com/prometheus/prometheus/blob/release-2.37/tsdb/docs/format/README.md</a></li>
-<li><a href="https://github.com/prometheus/prometheus/blob/release-2.37/tsdb/docs/format/index.md">https://github.com/prometheus/prometheus/blob/release-2.37/tsdb/docs/format/index.md</a></li>
-</ul>
-]]></content>
-      <tags>
-        <tag>prometheus</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Pulsar消息积压topic级别策略老化的两种方案</title>
     <url>/pulsar/pulsar-msg-topic-level-policy-aging/</url>
     <content><![CDATA[<p><code>Pulsar</code>像大多数消息中间件一样,支持按时间和大小对消息积压进行老化。但是默认的策略只能在namespace级别配置。本文将介绍如何在topic级别实现老化策略的两种方案。</p>
@@ -2334,6 +2273,67 @@
 ]]></content>
       <tags>
         <tag>pulsar</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>prometheus tsdb索引布局及查询流程</title>
+    <url>/prometheus/prometheus-tsdb-index/</url>
+    <content><![CDATA[<h1><span id="prometheus-ci-pan-bu-ju">prometheus 磁盘布局</span><a href="#prometheus-ci-pan-bu-ju" class="header-anchor">#</a></h1><p>采集到的数据每两个小时形成一个block。每个block由一个目录组成，并存放在data路径下。该目录包含一个包含该时间窗口的所有时间序列样本的块子目录、一个元数据文件和一个索引文件（将metric_name和label索引到目录下的时间序列）。 chunks 目录中的样本默认组合成一个或多个段文件，每个段文件最大为 512MB。 当通过 API 删除系列时，删除记录存储在单独的 tombstone 文件中（而不是立即从块段中删除数据）。</p>
+<p>当前正在写入的块保存在内存中，没有完全持久化。通过WAL日志来防止崩溃丢失数据。预写日志分为数节(segments)保存在wal文件夹中。这些文件包含尚未压缩的原始数据； 因此它们比常规块文件大得多。 Prometheus 将至少保留三个预写日志文件。在高流量下，会保留三个以上的 WAL 文件，以便保留至少两个小时的原始数据。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./data</span><br><span class="line">├── 01BKGV7JBM69T2G1BGBGM6KB12</span><br><span class="line">│   └── meta.json</span><br><span class="line">├── 01BKGTZQ1SYQJTR4PB43C8PD98</span><br><span class="line">│   ├── chunks</span><br><span class="line">│   │   └── 000001</span><br><span class="line">│   ├── tombstones</span><br><span class="line">│   ├── index</span><br><span class="line">│   └── meta.json</span><br><span class="line">├── 01BKGTZQ1HHWHV8FBJXW1Y3W0K</span><br><span class="line">│   └── meta.json</span><br><span class="line">├── 01BKGV7JC0RY8A6MACW02A2PJD</span><br><span class="line">│   ├── chunks</span><br><span class="line">│   │   └── 000001</span><br><span class="line">│   ├── tombstones</span><br><span class="line">│   ├── index</span><br><span class="line">│   └── meta.json</span><br><span class="line">├── chunks_head</span><br><span class="line">│   └── 000001</span><br><span class="line">└── wal</span><br><span class="line">    ├── 000000002</span><br><span class="line">    └── checkpoint.00000001</span><br><span class="line">        └── 00000000</span><br></pre></td></tr></table></figure>
+
+<h2><span id="prometheus-gai-nian">prometheus概念</span><a href="#prometheus-gai-nian" class="header-anchor">#</a></h2><ul>
+<li>Label: 标签，string格式的kv组合</li>
+<li>series: 时间序列，label的组合</li>
+<li>chunk: 时间，value的数据</li>
+</ul>
+<h2><span id="prometheus-suo-yin-ge-shi">prometheus索引格式</span><a href="#prometheus-suo-yin-ge-shi" class="header-anchor">#</a></h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">┌────────────────────────────┬─────────────────────┐</span><br><span class="line">│ magic(0xBAAAD700) &lt;4b&gt;     │ version(1) &lt;1 byte&gt; │</span><br><span class="line">├────────────────────────────┴─────────────────────┤</span><br><span class="line">│ ┌──────────────────────────────────────────────┐ │</span><br><span class="line">│ │                 Symbol Table                 │ │</span><br><span class="line">│ ├──────────────────────────────────────────────┤ │</span><br><span class="line">│ │                    Series                    │ │</span><br><span class="line">│ ├──────────────────────────────────────────────┤ │</span><br><span class="line">│ │                   Postings 1                 │ │</span><br><span class="line">│ ├──────────────────────────────────────────────┤ │</span><br><span class="line">│ │                      ...                     │ │</span><br><span class="line">│ ├──────────────────────────────────────────────┤ │</span><br><span class="line">│ │                   Postings N                 │ │</span><br><span class="line">│ ├──────────────────────────────────────────────┤ │</span><br><span class="line">│ │             Postings Offset Table            │ │</span><br><span class="line">│ ├──────────────────────────────────────────────┤ │</span><br><span class="line">│ │                      TOC                     │ │</span><br><span class="line">│ └──────────────────────────────────────────────┘ │</span><br><span class="line">└──────────────────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
+
+<p>写入索引时，可以在上面列出的主要部分之间添加任意数量的0字节作为填充。顺序扫描文件时，必须跳过部分间的任意0字节。</p>
+<p>下面描述的大部分部分都以 len 字段开头。 它总是指定就在尾随 CRC32 校验和之前的字节数。 校验和就计算这些字节的校验和（不包含len字段）</p>
+<h3><span id="fu-hao-biao">符号表</span><a href="#fu-hao-biao" class="header-anchor">#</a></h3><p>符号表包含已存储序列的标签对中出现的重复数据删除字符串的排序列表。 它们可以从后续部分中引用，并显着减少总索引大小。</p>
+<p>该部分包含一系列字符串entry，每个entry都以字符串的原始字节长度为前缀。 所有字符串均采用 utf-8 编码。 字符串由顺序索引引用。 字符串按字典顺序升序排序。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">┌────────────────────┬─────────────────────┐</span><br><span class="line">│ len &lt;4b&gt;           │ #symbols &lt;4b&gt;       │</span><br><span class="line">├────────────────────┴─────────────────────┤</span><br><span class="line">│ ┌──────────────────────┬───────────────┐ │</span><br><span class="line">│ │ len(str_1) &lt;uvarint&gt; │ str_1 &lt;bytes&gt; │ │</span><br><span class="line">│ ├──────────────────────┴───────────────┤ │</span><br><span class="line">│ │                . . .                 │ │</span><br><span class="line">│ ├──────────────────────┬───────────────┤ │</span><br><span class="line">│ │ len(str_n) &lt;uvarint&gt; │ str_n &lt;bytes&gt; │ │</span><br><span class="line">│ └──────────────────────┴───────────────┘ │</span><br><span class="line">├──────────────────────────────────────────┤</span><br><span class="line">│ CRC32 &lt;4b&gt;                               │</span><br><span class="line">└──────────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
+<h3><span id="xu-lie-series">序列 series</span><a href="#xu-lie-series" class="header-anchor">#</a></h3><p>保存一个具体的时间序列，其中包含系列的label集合和block中的chunks。</p>
+<p>每个series都是16字节对齐。series的id为偏移量除以16。series ID 的排序列表也就是series label的字典排序列表。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">┌───────────────────────────────────────┐</span><br><span class="line">│ ┌───────────────────────────────────┐ │</span><br><span class="line">│ │   series_1                        │ │</span><br><span class="line">│ ├───────────────────────────────────┤ │</span><br><span class="line">│ │                 . . .             │ │</span><br><span class="line">│ ├───────────────────────────────────┤ │</span><br><span class="line">│ │   series_n                        │ │</span><br><span class="line">│ └───────────────────────────────────┘ │</span><br><span class="line">└───────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
+
+<p>每一个series先保存label的数量，然后是包含label键值对的引用。 标签对按字典顺序排序。然后是series涉及的索引块的个数，然后是一系列元数据条目，其中包含块的最小 (mint) 和最大 (maxt) 时间戳以及对其在块文件中位置的引用。<code>mint</code> 是第一个样本的时间，<code>maxt</code> 是块中最后一个样本的时间。 在索引中保存时间范围数据, 允许按照时间范围删除数据时，如果时间范围匹配，不需要直接访问时间数据。</p>
+<p>空间大小优化: 第一个块的 <code>mint</code> 被存储，它的 <code>maxt</code> 被存储为一个增量，并且 <code>mint</code> 和 <code>maxt</code> 被编码为后续块的前一个时间的增量。 类似的，第一个chunk的引用被存储，下一个引用被存储为前一个chunk的增量。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">┌──────────────────────────────────────────────────────────────────────────┐</span><br><span class="line">│ len &lt;uvarint&gt;                                                            │</span><br><span class="line">├──────────────────────────────────────────────────────────────────────────┤</span><br><span class="line">│ ┌──────────────────────────────────────────────────────────────────────┐ │</span><br><span class="line">│ │                     labels count &lt;uvarint64&gt;                         │ │</span><br><span class="line">│ ├──────────────────────────────────────────────────────────────────────┤ │</span><br><span class="line">│ │              ┌────────────────────────────────────────────┐          │ │</span><br><span class="line">│ │              │ ref(l_i.name) &lt;uvarint32&gt;                  │          │ │</span><br><span class="line">│ │              ├────────────────────────────────────────────┤          │ │</span><br><span class="line">│ │              │ ref(l_i.value) &lt;uvarint32&gt;                 │          │ │</span><br><span class="line">│ │              └────────────────────────────────────────────┘          │ │</span><br><span class="line">│ │                             ...                                      │ │</span><br><span class="line">│ ├──────────────────────────────────────────────────────────────────────┤ │</span><br><span class="line">│ │                     chunks count &lt;uvarint64&gt;                         │ │</span><br><span class="line">│ ├──────────────────────────────────────────────────────────────────────┤ │</span><br><span class="line">│ │              ┌────────────────────────────────────────────┐          │ │</span><br><span class="line">│ │              │ c_0.mint &lt;varint64&gt;                        │          │ │</span><br><span class="line">│ │              ├────────────────────────────────────────────┤          │ │</span><br><span class="line">│ │              │ c_0.maxt - c_0.mint &lt;uvarint64&gt;            │          │ │</span><br><span class="line">│ │              ├────────────────────────────────────────────┤          │ │</span><br><span class="line">│ │              │ ref(c_0.data) &lt;uvarint64&gt;                  │          │ │</span><br><span class="line">│ │              └────────────────────────────────────────────┘          │ │</span><br><span class="line">│ │              ┌────────────────────────────────────────────┐          │ │</span><br><span class="line">│ │              │ c_i.mint - c_i-1.maxt &lt;uvarint64&gt;          │          │ │</span><br><span class="line">│ │              ├────────────────────────────────────────────┤          │ │</span><br><span class="line">│ │              │ c_i.maxt - c_i.mint &lt;uvarint64&gt;            │          │ │</span><br><span class="line">│ │              ├────────────────────────────────────────────┤          │ │</span><br><span class="line">│ │              │ ref(c_i.data) - ref(c_i-1.data) &lt;varint64&gt; │          │ │</span><br><span class="line">│ │              └────────────────────────────────────────────┘          │ │</span><br><span class="line">│ │                             ...                                      │ │</span><br><span class="line">│ └──────────────────────────────────────────────────────────────────────┘ │</span><br><span class="line">├──────────────────────────────────────────────────────────────────────────┤</span><br><span class="line">│ CRC32 &lt;4b&gt;                                                               │</span><br><span class="line">└──────────────────────────────────────────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
+
+<h3><span id="posting">Posting</span><a href="#posting" class="header-anchor">#</a></h3><p>Posting这一节存放着关于series引用的单调递增列表，简单来说就是存放id和时间序列的对应关系</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">┌────────────────────┬────────────────────┐</span><br><span class="line">│ len &lt;4b&gt;           │ #entries &lt;4b&gt;      │</span><br><span class="line">├────────────────────┴────────────────────┤</span><br><span class="line">│ ┌─────────────────────────────────────┐ │</span><br><span class="line">│ │ ref(series_1) &lt;4b&gt;                  │ │</span><br><span class="line">│ ├─────────────────────────────────────┤ │</span><br><span class="line">│ │ ...                                 │ │</span><br><span class="line">│ ├─────────────────────────────────────┤ │</span><br><span class="line">│ │ ref(series_n) &lt;4b&gt;                  │ │</span><br><span class="line">│ └─────────────────────────────────────┘ │</span><br><span class="line">├─────────────────────────────────────────┤</span><br><span class="line">│ CRC32 &lt;4b&gt;                              │</span><br><span class="line">└─────────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
+
+<p>Posting sections的顺序由<code>postings offset table</code>决定。</p>
+<h3><span id="posting-offset-table">Posting Offset Table</span><a href="#posting-offset-table" class="header-anchor">#</a></h3><p><code>postings offset table</code>包含着一系列<code>posting offset entry</code>，根据label的名称和值排序。每一个<code>posting offset entry</code>存放着label的键值对以及在<code>posting sections</code>中其series列表的偏移量。用来跟踪<code>posting sections</code>。当index文件加载时，它们将部分加载到内存中。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">┌─────────────────────┬──────────────────────┐</span><br><span class="line">│ len &lt;4b&gt;            │ #entries &lt;4b&gt;        │</span><br><span class="line">├─────────────────────┴──────────────────────┤</span><br><span class="line">│ ┌────────────────────────────────────────┐ │</span><br><span class="line">│ │  n = 2 &lt;1b&gt;                            │ │</span><br><span class="line">│ ├──────────────────────┬─────────────────┤ │</span><br><span class="line">│ │ len(name) &lt;uvarint&gt;  │ name &lt;bytes&gt;    │ │</span><br><span class="line">│ ├──────────────────────┼─────────────────┤ │</span><br><span class="line">│ │ len(value) &lt;uvarint&gt; │ value &lt;bytes&gt;   │ │</span><br><span class="line">│ ├──────────────────────┴─────────────────┤ │</span><br><span class="line">│ │  offset &lt;uvarint64&gt;                    │ │</span><br><span class="line">│ └────────────────────────────────────────┘ │</span><br><span class="line">│                    . . .                   │</span><br><span class="line">├────────────────────────────────────────────┤</span><br><span class="line">│  CRC32 &lt;4b&gt;                                │</span><br><span class="line">└────────────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
+
+<h3><span id="toc">TOC</span><a href="#toc" class="header-anchor">#</a></h3><p><code>table of contents</code>是整个索引的入口点，并指向文件中的各个部分。 如果引用为零，则表示相应的部分不存在，查找时应返回空结果。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">┌─────────────────────────────────────────┐</span><br><span class="line">│ ref(symbols) &lt;8b&gt;                       │</span><br><span class="line">├─────────────────────────────────────────┤</span><br><span class="line">│ ref(series) &lt;8b&gt;                        │</span><br><span class="line">├─────────────────────────────────────────┤</span><br><span class="line">│ ref(label indices start) &lt;8b&gt;           │</span><br><span class="line">├─────────────────────────────────────────┤</span><br><span class="line">│ ref(label offset table) &lt;8b&gt;            │</span><br><span class="line">├─────────────────────────────────────────┤</span><br><span class="line">│ ref(postings start) &lt;8b&gt;                │</span><br><span class="line">├─────────────────────────────────────────┤</span><br><span class="line">│ ref(postings offset table) &lt;8b&gt;         │</span><br><span class="line">├─────────────────────────────────────────┤</span><br><span class="line">│ CRC32 &lt;4b&gt;                              │</span><br><span class="line">└─────────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
+
+<h2><span id="chunks-ci-pan-ge-shi">chunks 磁盘格式</span><a href="#chunks-ci-pan-ge-shi" class="header-anchor">#</a></h2><p>chunks文件创建在<strong>block</strong>中的<code>chunks/</code>目录中。 每个段文件的最大大小为 512MB。<br>文件中的chunk由uint64的索引组织，索引低四位为文件内偏移，高四位为段序列号。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">┌──────────────────────────────┐</span><br><span class="line">│  magic(0x85BD40DD) &lt;4 byte&gt;  │</span><br><span class="line">├──────────────────────────────┤</span><br><span class="line">│    version(1) &lt;1 byte&gt;       │</span><br><span class="line">├──────────────────────────────┤</span><br><span class="line">│    padding(0) &lt;3 byte&gt;       │</span><br><span class="line">├──────────────────────────────┤</span><br><span class="line">│ ┌──────────────────────────┐ │</span><br><span class="line">│ │         Chunk 1          │ │</span><br><span class="line">│ ├──────────────────────────┤ │</span><br><span class="line">│ │          ...             │ │</span><br><span class="line">│ ├──────────────────────────┤ │</span><br><span class="line">│ │         Chunk N          │ │</span><br><span class="line">│ └──────────────────────────┘ │</span><br><span class="line">└──────────────────────────────┘</span><br></pre></td></tr></table></figure>
+
+<h2><span id="chunks-zhong-de-chunk-ge-shi">chunks中的Chunk格式</span><a href="#chunks-zhong-de-chunk-ge-shi" class="header-anchor">#</a></h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">┌───────────────┬───────────────────┬──────────────┬────────────────┐</span><br><span class="line">│ len &lt;uvarint&gt; │ encoding &lt;1 byte&gt; │ data &lt;bytes&gt; │ CRC32 &lt;4 byte&gt; │</span><br><span class="line">└───────────────┴───────────────────┴──────────────┴────────────────┘</span><br></pre></td></tr></table></figure>
+
+<h1><span id="cha-xun-shu-ju">查询数据</span><a href="#cha-xun-shu-ju" class="header-anchor">#</a></h1><h2><span id="code">code</span><a href="#code" class="header-anchor">#</a></h2><p>查询的prometheus方法签名</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line">Select(sortSeries <span class="type">bool</span>, hints *SelectHints, matchers ...*labels.Matcher) SeriesSet</span><br></pre></td></tr></table></figure>
+
+<p>支持从block中，remote等各种地方查询获取数据</p>
+<p>prometheus会在内存中维护一个数据结构</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// Map of LabelName to a list of some LabelValues&#x27;s position in the offset table.</span></span><br><span class="line"><span class="comment">// The first and last values for each name are always present.</span></span><br><span class="line">postings <span class="keyword">map</span>[<span class="type">string</span>][]postingOffset</span><br></pre></td></tr></table></figure>
+
+<p>在内存中，保留每个label name，并且每n个保存label值，降低内存的占用。但是第一个和最后一个值总是保存在内存中。</p>
+<h2><span id="cha-xun-shu-ju-liu-cheng">查询数据流程</span><a href="#cha-xun-shu-ju-liu-cheng" class="header-anchor">#</a></h2><p><img src="/prometheus/prometheus-tsdb-index/prometheus-tsdb-index.png" alt="prometheus-tsdb-index"></p>
+<h1><span id="can-kao-zi-liao">参考资料</span><a href="#can-kao-zi-liao" class="header-anchor">#</a></h1><ul>
+<li><a href="https://prometheus.io/docs/prometheus/latest/storage/">https://prometheus.io/docs/prometheus/latest/storage/</a></li>
+<li><a href="https://github.com/prometheus/prometheus/blob/release-2.37/tsdb/docs/format/README.md">https://github.com/prometheus/prometheus/blob/release-2.37/tsdb/docs/format/README.md</a></li>
+<li><a href="https://github.com/prometheus/prometheus/blob/release-2.37/tsdb/docs/format/index.md">https://github.com/prometheus/prometheus/blob/release-2.37/tsdb/docs/format/index.md</a></li>
+</ul>
+]]></content>
+      <tags>
+        <tag>prometheus</tag>
       </tags>
   </entry>
   <entry>
@@ -2980,12 +2980,6 @@ springIgnite --> util</pre>
       </tags>
   </entry>
   <entry>
-    <title>Java时间相关类转换</title>
-    <url>/code/java/java-time-convert/</url>
-    <content><![CDATA[<p><img src="/code/java/java-time-convert/java-time-convert.png" alt="java-time-convert"></p>
-]]></content>
-  </entry>
-  <entry>
     <title>Java依赖不同版本冲突解决方案之shade包</title>
     <url>/code/java/java-shade-package/</url>
     <content><![CDATA[<p>我们在很多场景下会碰到java包冲突的问题：</p>
@@ -3007,6 +3001,12 @@ springIgnite --> util</pre>
       <tags>
         <tag>Java</tag>
       </tags>
+  </entry>
+  <entry>
+    <title>Java时间相关类转换</title>
+    <url>/code/java/java-time-convert/</url>
+    <content><![CDATA[<p><img src="/code/java/java-time-convert/java-time-convert.png" alt="java-time-convert"></p>
+]]></content>
   </entry>
   <entry>
     <title>WebFlux最佳实践</title>

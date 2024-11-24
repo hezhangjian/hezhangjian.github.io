@@ -27,7 +27,7 @@
 <meta property="og:description" content="Unicode起源 ASCII ASCII不够用了   Unicode介绍 UTF-32（32-bit Unicode Transformation Format） UTF-16（16-bit Unicode Transformation Format） UTF-8（8-bit Unicode Transformation Format） 扩展知识 JDK17中英文字符集内存占用量降低了">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2024-11-24T16:59:57.000Z">
-<meta property="article:modified_time" content="2024-11-24T11:33:05.651Z">
+<meta property="article:modified_time" content="2024-11-24T12:19:20.369Z">
 <meta property="article:author" content="shoothzj">
 <meta property="article:tag" content="Unicode">
 <meta name="twitter:card" content="summary">
@@ -223,7 +223,7 @@
       <span class="post-meta-item-text">发表于</span>
       
 
-      <time title="创建时间：2024-11-24 16:59:57 / 修改时间：11:33:05" itemprop="dateCreated datePublished" datetime="2024-11-24T16:59:57+00:00">2024-11-24</time>
+      <time title="创建时间：2024-11-24 16:59:57 / 修改时间：12:19:20" itemprop="dateCreated datePublished" datetime="2024-11-24T16:59:57+00:00">2024-11-24</time>
     </span>
 
   
@@ -350,7 +350,7 @@
 <li>高代理（High-half surrogates）：范围是0xD800~0xDBFF，二进制范围为1101 1000 0000 ~ 1101 1111 1111，这也代表着高代理的前六位一定是110110。</li>
 <li>低代理（Low-half surrogates）：范围是0xDC00~0xDFFF，二进制范围为1101 1100 0000 ~ 1101 1111 1111，这也代表着低代理的前六位一定是110111。</li>
 </ul>
-<p>那么聪明的读者应该分析出来了，使用两个16位表示，由于存在代理对的固定部分，剩余的有效位还剩下20位。这20位恰好可以覆盖从U+010000到U+10FFFF的码点范围。由于U+0000<del>U+FFFF已经在场景①中覆盖，通过将码点减去0x10000，范围就变成了0x000000</del>0x0FFFFF，恰好是20位整数。</p>
+<p>那么聪明的读者应该分析出来了，使用两个16位表示，由于存在代理对的固定部分，剩余的有效位还剩下20位。这20位恰好可以覆盖从U+010000到U+10FFFF的码点范围。由于U+0000-U+FFFF已经在场景①中覆盖，通过将码点减去0x10000，范围就变成了0x000000~0x0FFFFF，恰好是20位整数。</p>
 <h1><span id="utf-8-8-bit-unicode-transformation-format">UTF-8（8-bit Unicode Transformation Format）</span><a href="#utf-8-8-bit-unicode-transformation-format" class="header-anchor">#</a></h1><p>UTF-8的编码规则</p>
 <ul>
 <li>① 对于码点小于等于U+007F的字符，直接使用8位表示，兼容ASCII。</li>

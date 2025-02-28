@@ -152,17 +152,17 @@
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">44</span>
+        <span class="site-state-item-count">43</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
 </div>
   <div class="links-of-author animated">
       <span class="links-of-author-item">
-        <a href="https://github.com/shoothzj" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;shoothzj" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+        <a href="https://github.com/hezhangjian" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;hezhangjian" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
       </span>
       <span class="links-of-author-item">
-        <a href="https://twitter.com/shoothzj" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;shoothzj" rel="noopener me" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+        <a href="https://x.com/hezhangjian" title="Twitter → https:&#x2F;&#x2F;x.com&#x2F;hezhangjian" rel="noopener me" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
       </span>
   </div>
 
@@ -214,9 +214,15 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2024-12-26 10:40:37 / 修改时间：03:42:23" itemprop="dateCreated datePublished" datetime="2024-12-26T10:40:37+00:00">2024-12-26</time>
+      <time title="创建时间：2024-12-26 10:40:37" itemprop="dateCreated datePublished" datetime="2024-12-26T10:40:37+00:00">2024-12-26</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2025-02-28 00:46:17" itemprop="dateModified" datetime="2025-02-28T00:46:17+00:00">2025-02-28</time>
     </span>
 
   
@@ -334,7 +340,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-12-26 03:42:23" itemprop="dateModified" datetime="2024-12-26T03:42:23+00:00">2024-12-26</time>
+      <time title="修改时间：2025-02-28 00:46:17" itemprop="dateModified" datetime="2025-02-28T00:46:17+00:00">2025-02-28</time>
     </span>
 
   
@@ -423,7 +429,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-12-26 03:42:23" itemprop="dateModified" datetime="2024-12-26T03:42:23+00:00">2024-12-26</time>
+      <time title="修改时间：2025-02-28 00:46:17" itemprop="dateModified" datetime="2025-02-28T00:46:17+00:00">2025-02-28</time>
     </span>
 
   
@@ -545,6 +551,9 @@
 <li>① 对于码点小于等于U+FFFF的字符，直接使用16位表示，兼容UCS-2</li>
 <li>② 对于码点小于等于U+10FFFF的字符，使用两个16位表示</li>
 </ul>
+<blockquote>
+<p>这个补丁机制也常被人称作是surrogate。</p>
+</blockquote>
 <p>对于变长编码来说，对于文件中的任意一个字符，怎么能判断出来这是场景①的字符，还是场景②的第一个字符？抑或是场景②的第二个字符？</p>
 <p>Unicode给出的答案是，通过在BMP中舍弃U+D800到U+DFFF的码点，这个区间被称为代理对（surrogate pair），这个区间的码点不会被分配给字符，这样就可以通过这个区间来判断是场景①还是场景②。如果读取的时候，发现前两个字节是D8到DB，那么就是场景②的第一个字符；如果是DC到DF，那么就是场景②的第二个字符；否则就是场景①的字符。</p>
 <ul>
@@ -626,7 +635,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-12-26 03:42:23" itemprop="dateModified" datetime="2024-12-26T03:42:23+00:00">2024-12-26</time>
+      <time title="修改时间：2025-02-28 00:46:17" itemprop="dateModified" datetime="2025-02-28T00:46:17+00:00">2025-02-28</time>
     </span>
 
   
@@ -710,7 +719,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-12-26 03:42:23" itemprop="dateModified" datetime="2024-12-26T03:42:23+00:00">2024-12-26</time>
+      <time title="修改时间：2025-02-28 00:46:17" itemprop="dateModified" datetime="2025-02-28T00:46:17+00:00">2025-02-28</time>
     </span>
 
   
@@ -820,7 +829,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-12-26 03:42:23" itemprop="dateModified" datetime="2024-12-26T03:42:23+00:00">2024-12-26</time>
+      <time title="修改时间：2025-02-28 00:46:17" itemprop="dateModified" datetime="2025-02-28T00:46:17+00:00">2025-02-28</time>
     </span>
 
   
@@ -927,7 +936,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-12-26 03:42:23" itemprop="dateModified" datetime="2024-12-26T03:42:23+00:00">2024-12-26</time>
+      <time title="修改时间：2025-02-28 00:46:17" itemprop="dateModified" datetime="2025-02-28T00:46:17+00:00">2025-02-28</time>
     </span>
 
   
@@ -1008,7 +1017,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-12-26 03:42:23" itemprop="dateModified" datetime="2024-12-26T03:42:23+00:00">2024-12-26</time>
+      <time title="修改时间：2025-02-28 00:46:17" itemprop="dateModified" datetime="2025-02-28T00:46:17+00:00">2025-02-28</time>
     </span>
 
   
@@ -1125,7 +1134,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-12-26 03:42:23" itemprop="dateModified" datetime="2024-12-26T03:42:23+00:00">2024-12-26</time>
+      <time title="修改时间：2025-02-28 00:46:17" itemprop="dateModified" datetime="2025-02-28T00:46:17+00:00">2025-02-28</time>
     </span>
 
   
@@ -1215,7 +1224,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-12-26 03:42:23" itemprop="dateModified" datetime="2024-12-26T03:42:23+00:00">2024-12-26</time>
+      <time title="修改时间：2025-02-28 00:46:17" itemprop="dateModified" datetime="2025-02-28T00:46:17+00:00">2025-02-28</time>
     </span>
 
   
@@ -1259,7 +1268,7 @@
 
   <div class="copyright">
     &copy; 
-    <span itemprop="copyrightYear">2024</span>
+    <span itemprop="copyrightYear">2025</span>
     <span class="with-love">
       <i class="fa fa-heart"></i>
     </span>

@@ -2,7 +2,7 @@
 title: java指标统计方案及代码
 date: 2021-08-10 21:30:18
 tags:
-  - java
+  - Java
 ---
 
 # java 根据线程统计CPU

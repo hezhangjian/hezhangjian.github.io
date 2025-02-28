@@ -2,7 +2,7 @@
 title: java日志打印心得
 date: 2024-04-09 14:33:33
 tags:
-  - java
+  - Java
   - log
 ---
 

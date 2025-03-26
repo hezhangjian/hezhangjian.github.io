@@ -7,13 +7,13 @@ title: 张俭的博客
 subtitle: ''
 description: ''
 keywords:
-author: shoothzj
+author: Zhangjian He
 language: zh-CN
 timezone: ''
 
 # URL
 ## Set your site url here. For example, if you use GitHub Page, set url as 'https://username.github.io/project'
-url: https://shoothzj.github.io
+url: https://hezhangjian.github.io
 permalink: :title/ # default is :year/:month/:day/:title/
 permalink_defaults:
 pretty_urls:
@@ -121,7 +121,7 @@ toc:
 ## Giscus: https://giscus.app/
 giscus:
   enable: true
-  repo: shoothzj/shoothzj.github.io
+  repo: hezhangjian/hezhangjian.github.io
   repo_id: R_kgDOIuCX3w
   category: Announcements
   category_id: DIC_kwDOIuCX384Ca5FJ
